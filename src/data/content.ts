@@ -53,15 +53,6 @@ export interface SampleReport {
   tag?: string;
 }
 
-export interface PricingTier {
-  name: string;
-  price: string;
-  unit: string;
-  highlight: boolean;
-  cta: string;
-  features: string[];
-}
-
 export interface FAQItem {
   q: string;
   a: string;
@@ -409,51 +400,11 @@ export const SAMPLE_REPORTS: SampleReport[] = [
   },
 ];
 
-export const PRICING: PricingTier[] = [
-  {
-    name: 'Free',
-    price: '0',
-    unit: 'forever',
-    highlight: false,
-    cta: 'Start free',
-    features: [
-      '5 audits per day',
-      'Real engagement + fake-follower math',
-      'AI verdict & red flags',
-      'All platforms & categories',
-    ],
-  },
-  {
-    name: 'Pro',
-    price: '29',
-    unit: 'per month',
-    highlight: true,
-    cta: 'Go Pro',
-    features: [
-      'Unlimited audits',
-      'Live YouTube auto-fetch',
-      'Profile comparison & hashtag tools',
-      'Saved report history',
-      'Priority AI model',
-    ],
-  },
-  {
-    name: 'Agency',
-    price: '99',
-    unit: 'per month',
-    highlight: false,
-    cta: 'Contact sales',
-    features: [
-      'Everything in Pro',
-      'Bulk & CSV audits',
-      'API access',
-      'White-label reports',
-      'Team seats & live support',
-    ],
-  },
-];
-
 export const FAQS: FAQItem[] = [
+  {
+    q: 'Is isshereal.com free to use?',
+    a: 'Yes, 100% free! There are no paid subscriptions, hidden fees, paywalls, or credit card requirements. Anyone can audit social, dating, and seller profiles with zero login needed.',
+  },
   {
     q: 'Is the analysis real or made up?',
     a: 'Real. Every score comes from transparent, industry-standard formulas (engagement rate, comment-to-like ratio, view-to-subscriber ratio, growth plausibility and more). YouTube pulls live public data via the official API. Nothing is randomised.',

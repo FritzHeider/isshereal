@@ -3,7 +3,6 @@ import { Features } from '@/components/Features';
 import { ToolsSection } from '@/components/ToolsSection';
 import { HowItWorks } from '@/components/HowItWorks';
 import { SampleReports } from '@/components/SampleReports';
-import { Pricing } from '@/components/Pricing';
 import { FAQ } from '@/components/FAQ';
 
 export default function Home() {
@@ -14,7 +13,6 @@ export default function Home() {
       <ToolsSection />
       <HowItWorks />
       <SampleReports />
-      <Pricing />
       <FAQ />
     </>
   );

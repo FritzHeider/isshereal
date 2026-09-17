@@ -75,14 +75,13 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">4. Pro Subscriptions & Billing</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">4. Free Public Tool & Availability</h2>
             <p>
-              Certain advanced tools (such as bulk audits and agency PDF export features) may require a paid subscription.
+              isshereal.com is currently provided as a free public analytical forensic tool. No payment, credit card, or recurring subscription is required to access our core audit algorithms.
             </p>
             <ul className="list-disc pl-6 space-y-1 text-slate-600 text-sm">
-              <li>Subscriptions renew automatically at the end of each billing cycle unless cancelled prior to renewal.</li>
-              <li>You may cancel your subscription at any time with immediate effect for subsequent billing intervals.</li>
-              <li>Refund requests submitted within 14 days of an initial subscription purchase are honored in full.</li>
+              <li>We reserve the right to modify, adjust, or optimize service features or rate limits at our discretion.</li>
+              <li>Fair use policies apply to prevent abusive automated traffic, scraping attacks, or intentional system degradation.</li>
             </ul>
           </section>
 
