@@ -1,4 +1,5 @@
 name = "isshereal"
+account_id = "fd2ff8c29a6d58c479032efea6c9ea62"
 compatibility_date = "2026-04-01"
 compatibility_flags = ["nodejs_compat"]
 main = ".open-next/worker.js"
