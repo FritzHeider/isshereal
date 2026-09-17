@@ -80,24 +80,24 @@ export function Footer() {
             </h4>
             <ul className="space-y-2.5 text-sm text-slate-400">
               <li>
-                <span className="hover:text-emerald-400 transition-colors cursor-default">
+                <Link href="/use-cases/influencer-vetting" className="hover:text-emerald-400 transition-colors">
                   Influencer vetting
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="hover:text-emerald-400 transition-colors cursor-default">
+                <Link href="/use-cases/dating-safety" className="hover:text-emerald-400 transition-colors">
                   Dating safety
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="hover:text-emerald-400 transition-colors cursor-default">
+                <Link href="/use-cases/marketplace-buyers" className="hover:text-emerald-400 transition-colors">
                   Marketplace buyers
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="hover:text-emerald-400 transition-colors cursor-default">
+                <Link href="/use-cases/hiring-freelancers" className="hover:text-emerald-400 transition-colors">
                   Hiring freelancers
-                </span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -109,24 +109,24 @@ export function Footer() {
             </h4>
             <ul className="space-y-2.5 text-sm text-slate-400">
               <li>
-                <span className="hover:text-emerald-400 transition-colors cursor-default">
+                <Link href="/about" className="hover:text-emerald-400 transition-colors">
                   About
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="hover:text-emerald-400 transition-colors cursor-default">
+                <Link href="/privacy" className="hover:text-emerald-400 transition-colors">
                   Privacy
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="hover:text-emerald-400 transition-colors cursor-default">
+                <Link href="/terms" className="hover:text-emerald-400 transition-colors">
                   Terms
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="hover:text-emerald-400 transition-colors cursor-default">
+                <Link href="/contact" className="hover:text-emerald-400 transition-colors">
                   Contact
-                </span>
+                </Link>
               </li>
             </ul>
           </div>

@@ -15,6 +15,7 @@ import {
   AlertCircle,
   Zap,
   Check,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CATEGORIES, PLATFORMS, SAMPLE_REPORTS } from '@/data/content';
@@ -35,9 +36,39 @@ function AnalyzeContent() {
   const [platform, setPlatform] = useState('instagram');
   const [handle, setHandle] = useState(initialHandle);
   const [followers, setFollowers] = useState('48000');
+  const [following, setFollowing] = useState('820');
+  const [posts, setPosts] = useState('140');
   const [likes, setLikes] = useState('1200');
   const [comments, setComments] = useState('45');
   const [loading, setLoading] = useState(false);
+  const [fetchingLive, setFetchingLive] = useState(false);
+  const [liveSuccessMsg, setLiveSuccessMsg] = useState<string | null>(null);
+
+  // Auto-fetch live numbers from Instagram/platform
+  const handleAutoFetch = async () => {
+    if (!handle.trim()) return;
+    setFetchingLive(true);
+    setLiveSuccessMsg(null);
+
+    const clean = handle.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim();
+
+    try {
+      const res = await fetch(`/api/audit?handle=${encodeURIComponent(clean)}&platform=${platform}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.report) {
+          if (data.report.followersCount) setFollowers(data.report.followersCount.toString());
+          if (data.report.followingCount) setFollowing(data.report.followingCount.toString());
+          if (data.report.postsCount) setPosts(data.report.postsCount.toString());
+          setLiveSuccessMsg(`Pulled live data for ${data.report.name}: ${data.report.followers}`);
+        }
+      }
+    } catch (e) {
+      console.error('Auto-fetch failed:', e);
+    } finally {
+      setFetchingLive(false);
+    }
+  };
 
   // Quick preset loader
   const loadPreset = (reportId: string) => {
@@ -47,35 +78,69 @@ function AnalyzeContent() {
       if (rep.id === 'mrbeast') {
         setPlatform('youtube');
         setFollowers('342000000');
+        setFollowing('240');
+        setPosts('820');
         setLikes('4500000');
         setComments('120000');
       } else if (rep.id === 'lucamodels') {
         setPlatform('instagram');
         setFollowers('480000');
+        setFollowing('3400');
+        setPosts('65');
         setLikes('1800');
         setComments('35');
       } else if (rep.id === 'maya') {
         setPlatform('tiktok');
         setFollowers('1200000');
+        setFollowing('410');
+        setPosts('340');
         setLikes('85000');
         setComments('2400');
       }
     }
   };
 
-  const handleRunAudit = (e: React.FormEvent) => {
+  const handleRunAudit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!handle.trim()) return;
 
     setLoading(true);
-    setTimeout(() => {
+    const cleanHandle = handle.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim();
+
+    try {
+      const res = await fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          platform,
+          handle: cleanHandle,
+          followers: parseFloat(followers.replace(/,/g, '')) || 0,
+          following: parseFloat(following.replace(/,/g, '')) || 0,
+          posts: parseFloat(posts.replace(/,/g, '')) || 0,
+          likes: parseFloat(likes.replace(/,/g, '')) || 0,
+          comments: parseFloat(comments.replace(/,/g, '')) || 0,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.report) {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(`audit_${data.report.id}`, JSON.stringify(data.report));
+            localStorage.setItem('isshereal_last_report', JSON.stringify(data.report));
+          }
+          router.push(`/report/${data.report.id}`);
+          return;
+        }
+      }
+    } catch (err) {
+      console.error('Audit submit error:', err);
+    } finally {
       setLoading(false);
-      // Determine appropriate sample or custom report
-      const clean = handle.replace(/^@/, '').toLowerCase();
-      const matched = SAMPLE_REPORTS.find((r) => r.handle.toLowerCase().includes(clean));
-      const targetId = matched ? matched.id : 'lucamodels';
-      router.push(`/report/${targetId}?handle=${encodeURIComponent(handle)}`);
-    }, 1100);
+    }
+
+    // Fallback navigation
+    router.push(`/report/ig_${cleanHandle}`);
   };
 
   // Real-time live engagement rate estimation
@@ -95,7 +160,7 @@ function AnalyzeContent() {
           Audit Any Profile
         </h1>
         <p className="text-slate-600 mt-2 text-sm sm:text-base">
-          Choose a platform and enter what you can see. Real math + AI verdict in seconds.
+          Choose a platform and enter an @handle or URL. Live math + AI forensic verdict in seconds.
         </p>
       </div>
 
@@ -179,9 +244,29 @@ function AnalyzeContent() {
         {/* Audit Form */}
         <form onSubmit={handleRunAudit} className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-slate-900 mb-1.5">
-              Profile Handle or URL
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-semibold text-slate-900">
+                Profile Handle or URL
+              </label>
+              <button
+                type="button"
+                onClick={handleAutoFetch}
+                disabled={fetchingLive || !handle.trim()}
+                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer disabled:opacity-50"
+              >
+                {fetchingLive ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin" />
+                    <span>Scraping public data...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw size={12} />
+                    <span>Auto-Fetch Public Numbers</span>
+                  </>
+                )}
+              </button>
+            </div>
             <div className="relative">
               <input
                 type="text"
@@ -192,6 +277,12 @@ function AnalyzeContent() {
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm text-slate-900"
               />
             </div>
+            {liveSuccessMsg && (
+              <div className="mt-2 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-2 flex items-center gap-1.5">
+                <Check size={14} className="text-emerald-600 shrink-0" />
+                <span>{liveSuccessMsg}</span>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -204,31 +295,58 @@ function AnalyzeContent() {
                 value={followers}
                 onChange={(e) => setFollowers(e.target.value)}
                 placeholder="48,000"
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-mono"
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Avg. Likes / Reactions
+                Following Count
+              </label>
+              <input
+                type="text"
+                value={following}
+                onChange={(e) => setFollowing(e.target.value)}
+                placeholder="820"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Total Posts / Videos
+              </label>
+              <input
+                type="text"
+                value={posts}
+                onChange={(e) => setPosts(e.target.value)}
+                placeholder="140"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Avg. Likes / Reactions per post
               </label>
               <input
                 type="text"
                 value={likes}
                 onChange={(e) => setLikes(e.target.value)}
                 placeholder="1,200"
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-mono"
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Avg. Comments
+                Avg. Comments per post
               </label>
               <input
                 type="text"
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
                 placeholder="45"
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-mono"
               />
             </div>
           </div>
@@ -238,7 +356,7 @@ function AnalyzeContent() {
             <div className="flex items-center gap-2">
               <Zap size={16} className="text-emerald-600" />
               <span className="text-xs font-semibold text-slate-700">
-                Calculated Live Engagement Rate:
+                Live Computed Engagement Rate:
               </span>
             </div>
             <div className="font-extrabold text-sm sm:text-base text-slate-900">
@@ -249,7 +367,7 @@ function AnalyzeContent() {
           <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
             <div className="text-xs text-slate-500 flex items-center gap-1.5">
               <Sparkles size={14} className="text-emerald-600" />
-              <span>Free instant calculation · No login needed</span>
+              <span>Live forensic calculation · Zero logins or passwords</span>
             </div>
             <Button
               type="submit"
@@ -262,7 +380,7 @@ function AnalyzeContent() {
                   Auditing Profile...
                 </>
               ) : (
-                'Run Full Audit'
+                'Run Full Live Audit'
               )}
             </Button>
           </div>

@@ -72,40 +72,76 @@ const HERO_PROFILES = {
 export function Hero() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState('Auditing profile...');
   const [error, setError] = useState<string | null>(null);
   const [activePlatform, setActivePlatform] = useState<'instagram' | 'tiktok' | 'youtube'>('instagram');
   const router = useRouter();
 
   const currentProfile = HERO_PROFILES[activePlatform];
 
+  // Smart auto-detect platform from query
+  const getQueryPlatform = () => {
+    const q = query.toLowerCase();
+    if (q.includes('youtube.com') || q.includes('youtu.be')) return 'youtube';
+    if (q.includes('tiktok.com')) return 'tiktok';
+    if (q.includes('tinder') || q.includes('hinge') || q.includes('bumble')) return 'dating';
+    return 'instagram';
+  };
+
+  const detectedPlatform = getQueryPlatform();
+
   const handleAudit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!query.trim()) {
-      setError('Please enter a profile handle or channel URL');
+      setError('Please enter an Instagram handle, YouTube channel, or profile link');
       return;
     }
 
     setError(null);
     setLoading(true);
+    setLoadingStep(`Connecting to ${detectedPlatform === 'instagram' ? 'Instagram' : detectedPlatform}...`);
 
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const cleanHandle = query.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim();
+
+      const stepTimer = setTimeout(() => {
+        setLoadingStep(`Analyzing ${cleanHandle}'s audience metrics...`);
+      }, 500);
+
+      const res = await fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          platform: detectedPlatform,
+          handle: cleanHandle,
+        }),
+      });
+
+      clearTimeout(stepTimer);
+
+      if (!res.ok) {
+        throw new Error('Failed to audit profile');
+      }
+
+      const data = await res.json();
+      if (data.report) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`audit_${data.report.id}`, JSON.stringify(data.report));
+          localStorage.setItem('isshereal_last_report', JSON.stringify(data.report));
+        }
+        router.push(`/report/${data.report.id}`);
+      } else {
+        router.push(`/analyze?handle=${encodeURIComponent(cleanHandle)}`);
+      }
+    } catch (err: any) {
+      console.error('Audit failed:', err);
+      // Fallback to analyze page with handle pre-populated
       const cleanHandle = query.replace(/^@/, '').trim();
       router.push(`/analyze?handle=${encodeURIComponent(cleanHandle)}`);
-    }, 850);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  // Smart auto-detect platform from query
-  const getQueryPlatformBadge = () => {
-    const q = query.toLowerCase();
-    if (q.includes('youtube.com') || q.includes('youtu.be')) return 'YouTube';
-    if (q.includes('tiktok.com')) return 'TikTok';
-    if (q.includes('instagram.com')) return 'Instagram';
-    if (q.includes('tinder') || q.includes('hinge') || q.includes('bumble')) return 'Dating';
-    return null;
-  };
-
-  const detectedPlatform = getQueryPlatformBadge();
 
   return (
     <section className="relative pt-32 sm:pt-36 pb-24 overflow-hidden">
@@ -126,7 +162,7 @@ export function Hero() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
               </span>
               <ShieldCheck size={15} className="text-emerald-600 stroke-[2.5]" />
-              <span>Real metrics · no login or password needed</span>
+              <span>Real live metrics · no login or password needed</span>
             </div>
 
             {/* H1 Headline */}
@@ -148,7 +184,15 @@ export function Hero() {
             >
               <div className="flex items-center flex-1 px-3">
                 <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mr-2.5 shrink-0">
-                  <Search size={18} />
+                  {detectedPlatform === 'instagram' ? (
+                    <Instagram size={18} className="text-[#E1306C]" />
+                  ) : detectedPlatform === 'youtube' ? (
+                    <Youtube size={18} className="text-red-600" />
+                  ) : detectedPlatform === 'tiktok' ? (
+                    <Music2 size={18} className="text-slate-900" />
+                  ) : (
+                    <Search size={18} />
+                  )}
                 </div>
                 <input
                   type="text"
@@ -157,15 +201,13 @@ export function Hero() {
                     setQuery(e.target.value);
                     if (error) setError(null);
                   }}
-                  placeholder="Paste a YouTube channel or @handle..."
+                  placeholder="Paste an Instagram @handle, YouTube, or link..."
                   className="w-full bg-transparent text-sm sm:text-base text-slate-900 placeholder:text-slate-400 outline-none"
                   disabled={loading}
                 />
-                {detectedPlatform && (
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md shrink-0">
-                    {detectedPlatform}
-                  </span>
-                )}
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md shrink-0">
+                  {detectedPlatform}
+                </span>
               </div>
               <Button
                 type="submit"
@@ -175,7 +217,7 @@ export function Hero() {
                 {loading ? (
                   <>
                     <Loader2 size={18} className="animate-spin mr-2" />
-                    Analyzing...
+                    <span>{loadingStep}</span>
                   </>
                 ) : (
                   <>
@@ -329,7 +371,7 @@ export function Hero() {
                   </div>
                 </div>
 
-                {/* Interactive Platform Tabs (User can click to test live!) */}
+                {/* Interactive Platform Tabs */}
                 <div className="pt-3 border-t border-slate-100">
                   <div className="flex items-center justify-between mb-2.5">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">

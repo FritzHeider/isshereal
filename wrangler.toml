@@ -1,0 +1,24 @@
+name = "isshereal"
+compatibility_date = "2026-04-01"
+compatibility_flags = ["nodejs_compat"]
+main = ".open-next/worker.js"
+workers_dev = true
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+[[routes]]
+pattern = "isshereal.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.isshereal.com"
+custom_domain = true
+
+[vars]
+PLATFORM_NAME = "isshereal.com"
+SUPPORT_EMAIL = "support@isshereal.com"
+
+[observability]
+enabled = true
