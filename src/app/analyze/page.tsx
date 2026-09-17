@@ -189,9 +189,15 @@ function AnalyzeContent() {
   return (
     <div className="pt-28 pb-20 container-x max-w-4xl">
       <div className="text-center max-w-2xl mx-auto mb-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-3 border border-emerald-200">
-          <ShieldCheck size={14} />
-          <span>Profile Authenticity Auditor</span>
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+            <ShieldCheck size={14} />
+            <span>Profile Authenticity Auditor</span>
+          </div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-xs">
+            <span className="text-emerald-400">⚡</span>
+            <span>Web-Use Browser Forensics Active</span>
+          </div>
         </div>
         <h1 className="font-extrabold text-3xl sm:text-4xl text-slate-900 tracking-tight">
           Audit Any Profile
@@ -320,6 +326,37 @@ function AnalyzeContent() {
                 <span>{liveSuccessMsg}</span>
               </div>
             )}
+
+            {/* Quick Presets */}
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs">
+              <span className="text-slate-400 font-medium">Try verified:</span>
+              {[
+                { label: '@nike', handle: 'nike', plat: 'instagram' },
+                { label: '@natgeo', handle: 'natgeo', plat: 'instagram' },
+                { label: '@mrbeast', handle: 'mrbeast', plat: 'youtube' },
+                { label: '@figma', handle: 'figma', plat: 'instagram' },
+                { label: '@cristiano', handle: 'cristiano', plat: 'instagram' },
+              ].map((c) => (
+                <button
+                  key={c.handle}
+                  type="button"
+                  onClick={() => {
+                    setHandle(c.label);
+                    setPlatform(c.plat);
+                    const v = getVerifiedCreator(c.handle);
+                    if (v) {
+                      setFollowers(v.followers.toString());
+                      setFollowing(v.following.toString());
+                      setPosts(v.posts.toString());
+                      setLiveSuccessMsg(`Loaded verified metrics for ${v.name}: ${v.followers.toLocaleString()} followers`);
+                    }
+                  }}
+                  className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-600 transition-colors font-mono cursor-pointer"
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

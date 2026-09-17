@@ -41,8 +41,8 @@ export function Features() {
           </p>
         </div>
 
-        {/* Top Tier: 4 Spotlight Cards with 3D FAL.AI Visuals */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
+        {/* Top Tier: 6 Spotlight Cards with 3D FAL.AI Visuals */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {SPOTLIGHT_FEATURES.map((feature) => (
             <div
               key={feature.title}

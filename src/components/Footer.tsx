@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -31,14 +32,19 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-10 pb-16 border-b border-slate-800">
           {/* Brand Col */}
           <div className="col-span-2 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <span className="w-8 h-8 rounded-lg bg-emerald-500 text-slate-950 flex items-center justify-center font-bold">
-                <ShieldCheck size={18} />
-              </span>
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-emerald-500/30 shadow-md shadow-emerald-500/10 group-hover:scale-105 transition-transform duration-300">
+                <Image
+                  src="/images/logo.png"
+                  alt="isshereal logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
               <span className="font-extrabold text-lg text-white">
                 isshereal<span className="text-emerald-400">.com</span>
               </span>
-            </div>
+            </Link>
             <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
               Know who is real. Detect fake followers, bots, catfish and scam profiles across every platform.
             </p>

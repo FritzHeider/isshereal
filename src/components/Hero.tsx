@@ -155,14 +155,21 @@ export function Hero() {
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* Left Column (Copy & Search) */}
           <div className="lg:col-span-7 flex flex-col items-start text-left animate-fade-up">
-            {/* Trust Badge with Pulse */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold shadow-xs mb-5">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
-              </span>
-              <ShieldCheck size={15} className="text-emerald-600 stroke-[2.5]" />
-              <span>Real live metrics · no login or password needed</span>
+            {/* Trust Badges Row with Web-Use Engine */}
+            <div className="flex flex-wrap items-center gap-2.5 mb-5">
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold shadow-xs">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+                </span>
+                <ShieldCheck size={15} className="text-emerald-600 stroke-[2.5]" />
+                <span>Real live metrics · no login or password needed</span>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold shadow-xs">
+                <span className="text-emerald-400">⚡</span>
+                <span>Web-Use Real Browser Forensics</span>
+              </div>
             </div>
 
             {/* H1 Headline */}
@@ -236,10 +243,37 @@ export function Hero() {
               </div>
             )}
 
+            {/* Quick Suggestions Chips */}
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs w-full max-w-xl">
+              <span className="text-slate-400 font-medium">Quick audit:</span>
+              {[
+                { handle: 'nike', label: '@nike', tag: '291M' },
+                { handle: 'natgeo', label: '@natgeo', tag: '269M' },
+                { handle: 'mrbeast', label: '@mrbeast', tag: '342M' },
+                { handle: 'figma', label: '@figma', tag: '959K' },
+                { handle: 'cristiano', label: '@cristiano', tag: '642M' },
+              ].map((creator) => (
+                <button
+                  key={creator.handle}
+                  type="button"
+                  onClick={() => {
+                    setQuery(creator.label);
+                    router.push(`/analyze?handle=${creator.handle}&platform=instagram`);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200/90 text-slate-700 hover:border-emerald-500 hover:text-emerald-700 hover:bg-emerald-50/50 shadow-2xs transition-all cursor-pointer font-mono font-medium"
+                >
+                  <span>{creator.label}</span>
+                  <span className="text-[10px] text-emerald-600 bg-emerald-100/70 px-1 py-0.2 rounded font-sans font-bold">
+                    {creator.tag}
+                  </span>
+                </button>
+              ))}
+            </div>
+
             {/* Subtext link below search input */}
             <button
               onClick={() => router.push('/analyze')}
-              className="mt-3.5 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-800 group transition-colors cursor-pointer"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-800 group transition-colors cursor-pointer"
             >
               <span>or audit an Instagram, TikTok, dating or seller profile</span>
               <ArrowRight
@@ -385,39 +419,60 @@ export function Hero() {
                     <button
                       type="button"
                       onClick={() => setActivePlatform('instagram')}
-                      className={`rounded-xl border p-2.5 flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                      className={`rounded-xl border p-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${
                         activePlatform === 'instagram'
                           ? 'border-emerald-500 bg-emerald-50/60 text-slate-900 shadow-xs ring-1 ring-emerald-500/20'
                           : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 text-slate-600'
                       }`}
                     >
-                      <Instagram size={16} className="text-[#E1306C]" />
+                      <div className="relative w-5 h-5 shrink-0">
+                        <Image
+                          src="/images/platforms/instagram-3d.png"
+                          alt="Instagram 3D"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
                       <span className="text-xs font-semibold">Instagram</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setActivePlatform('tiktok')}
-                      className={`rounded-xl border p-2.5 flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                      className={`rounded-xl border p-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${
                         activePlatform === 'tiktok'
                           ? 'border-emerald-500 bg-emerald-50/60 text-slate-900 shadow-xs ring-1 ring-emerald-500/20'
                           : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 text-slate-600'
                       }`}
                     >
-                      <Music2 size={16} className="text-slate-900" />
+                      <div className="relative w-5 h-5 shrink-0">
+                        <Image
+                          src="/images/platforms/tiktok-3d.png"
+                          alt="TikTok 3D"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
                       <span className="text-xs font-semibold">TikTok</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setActivePlatform('youtube')}
-                      className={`rounded-xl border p-2.5 flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                      className={`rounded-xl border p-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${
                         activePlatform === 'youtube'
                           ? 'border-emerald-500 bg-emerald-50/60 text-slate-900 shadow-xs ring-1 ring-emerald-500/20'
                           : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 text-slate-600'
                       }`}
                     >
-                      <Youtube size={16} className="text-[#FF0000]" />
+                      <div className="relative w-5 h-5 shrink-0">
+                        <Image
+                          src="/images/platforms/youtube-3d.png"
+                          alt="YouTube 3D"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
                       <span className="text-xs font-semibold">YouTube</span>
                     </button>
                   </div>

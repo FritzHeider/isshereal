@@ -101,6 +101,20 @@ export const CATEGORIES: Category[] = [
 
 export const SPOTLIGHT_FEATURES: Feature[] = [
   {
+    icon: 'Cpu',
+    title: 'Web-Use Real Browser Forensics',
+    badge: 'Live Headless Engine',
+    text: 'Our automated Playwright Chrome engine renders client-side DOM trees to bypass login barriers and capture authentic real-time metrics.',
+    image: '/images/features/web-use-inspection.png',
+  },
+  {
+    icon: 'TrendingUp',
+    title: 'Velocity & Follower Spike Modeling',
+    badge: 'Growth Forensics',
+    text: 'Detect abnormal 24-hour follower bursts and bot injection clusters that distinguish purchased audiences from organic viral growth.',
+    image: '/images/features/spike-analysis.png',
+  },
+  {
     icon: 'UserX',
     title: 'Fake Follower & Bot Detection',
     badge: 'Core Engine',
