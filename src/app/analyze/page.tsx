@@ -27,6 +27,8 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   Briefcase: <Briefcase size={18} />,
 };
 
+import { getVerifiedCreator } from '@/data/verified-creators';
+
 function AnalyzeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -35,14 +37,31 @@ function AnalyzeContent() {
   const [category, setCategory] = useState('social');
   const [platform, setPlatform] = useState('instagram');
   const [handle, setHandle] = useState(initialHandle);
-  const [followers, setFollowers] = useState('48000');
-  const [following, setFollowing] = useState('820');
-  const [posts, setPosts] = useState('140');
-  const [likes, setLikes] = useState('1200');
-  const [comments, setComments] = useState('45');
+  const [followers, setFollowers] = useState('25000');
+  const [following, setFollowing] = useState('450');
+  const [posts, setPosts] = useState('85');
+  const [likes, setLikes] = useState('650');
+  const [comments, setComments] = useState('28');
   const [loading, setLoading] = useState(false);
   const [fetchingLive, setFetchingLive] = useState(false);
   const [liveSuccessMsg, setLiveSuccessMsg] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (initialHandle) {
+      const clean = initialHandle.replace(/^@/, '').toLowerCase().trim();
+      const v = getVerifiedCreator(clean);
+      if (v) {
+        setHandle(v.handle);
+        setPlatform(v.platform.toLowerCase());
+        setFollowers(v.followers.toString());
+        setFollowing(v.following.toString());
+        setPosts(v.posts.toString());
+        setLiveSuccessMsg(`Loaded verified public metrics for ${v.name}: ${v.followers.toLocaleString()} followers`);
+      } else {
+        handleAutoFetch();
+      }
+    }
+  }, [initialHandle]);
 
   // Auto-fetch live numbers from Instagram/platform
   const handleAutoFetch = async () => {
@@ -50,17 +69,30 @@ function AnalyzeContent() {
     setFetchingLive(true);
     setLiveSuccessMsg(null);
 
-    const clean = handle.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim();
+    const clean = handle.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim().toLowerCase();
+
+    // Check verified dataset first
+    const v = getVerifiedCreator(clean);
+    if (v) {
+      setFollowers(v.followers.toString());
+      setFollowing(v.following.toString());
+      setPosts(v.posts.toString());
+      setLiveSuccessMsg(`Verified public telemetry for ${v.name}: ${v.followers.toLocaleString()} followers`);
+      setFetchingLive(false);
+      return;
+    }
 
     try {
       const res = await fetch(`/api/audit?handle=${encodeURIComponent(clean)}&platform=${platform}`);
       if (res.ok) {
         const data = await res.json();
-        if (data.report) {
-          if (data.report.followersCount) setFollowers(data.report.followersCount.toString());
+        if (data.report && data.report.followersCount > 0) {
+          setFollowers(data.report.followersCount.toString());
           if (data.report.followingCount) setFollowing(data.report.followingCount.toString());
           if (data.report.postsCount) setPosts(data.report.postsCount.toString());
           setLiveSuccessMsg(`Pulled live data for ${data.report.name}: ${data.report.followers}`);
+        } else {
+          setLiveSuccessMsg(`Enter public follower count for @${clean} to compute authenticity score`);
         }
       }
     } catch (e) {
@@ -71,8 +103,19 @@ function AnalyzeContent() {
   };
 
   // Quick preset loader
-  const loadPreset = (reportId: string) => {
-    const rep = SAMPLE_REPORTS.find((r) => r.id === reportId);
+  const loadPreset = (presetKey: string) => {
+    const v = getVerifiedCreator(presetKey);
+    if (v) {
+      setHandle(v.handle);
+      setPlatform(v.platform.toLowerCase());
+      setFollowers(v.followers.toString());
+      setFollowing(v.following.toString());
+      setPosts(v.posts.toString());
+      setLiveSuccessMsg(`Loaded verified profile: ${v.name} (${v.followers.toLocaleString()} followers)`);
+      return;
+    }
+
+    const rep = SAMPLE_REPORTS.find((r) => r.id === presetKey);
     if (rep) {
       setHandle(rep.handle);
       if (rep.id === 'mrbeast') {
@@ -80,22 +123,16 @@ function AnalyzeContent() {
         setFollowers('342000000');
         setFollowing('240');
         setPosts('820');
-        setLikes('4500000');
-        setComments('120000');
       } else if (rep.id === 'lucamodels') {
         setPlatform('instagram');
         setFollowers('480000');
         setFollowing('3400');
         setPosts('65');
-        setLikes('1800');
-        setComments('35');
       } else if (rep.id === 'maya') {
         setPlatform('tiktok');
         setFollowers('1200000');
         setFollowing('410');
         setPosts('340');
-        setLikes('85000');
-        setComments('2400');
       }
     }
   };

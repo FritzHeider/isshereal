@@ -11,16 +11,18 @@ import {
   CheckCircle2,
   TrendingUp,
   Sparkles,
-  Share2,
   Download,
   Copy,
   Check,
   Loader2,
-  ExternalLink,
   Users,
   Grid3X3,
+  Edit3,
+  RefreshCw,
 } from 'lucide-react';
-import { SAMPLE_REPORTS, SampleReport } from '@/data/content';
+import { SAMPLE_REPORTS } from '@/data/content';
+import { getVerifiedCreator } from '@/data/verified-creators';
+import { calculateProfileScore } from '@/lib/audit-engine';
 import { ScoreGauge } from '@/components/ScoreGauge';
 import { ProgressBar } from '@/components/ProgressBar';
 import { RiskBadge } from '@/components/RiskBadge';
@@ -29,27 +31,46 @@ import { Button } from '@/components/ui/button';
 export default function ReportPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const rawId = (params.id as string) || 'lucamodels';
+  const rawId = (params.id as string) || 'nike';
   const customHandle = searchParams.get('handle');
 
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [report, setReport] = useState<any>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  // Edit form state
+  const [editFollowers, setEditFollowers] = useState('');
+  const [editFollowing, setEditFollowing] = useState('');
+  const [editPosts, setEditPosts] = useState('');
+
+  const cleanHandle = (customHandle || rawId)
+    .replace(/^(ig_|instagram_|youtube_|tiktok_)/i, '')
+    .replace(/^@/, '')
+    .toLowerCase()
+    .trim();
 
   useEffect(() => {
     async function loadReport() {
       setLoading(true);
 
-      const targetHandle = customHandle || rawId;
-      const cleanHandle = targetHandle.replace(/^(ig_|instagram_)/i, '').replace(/^@/, '').toLowerCase();
-
-      // 1. Check if it's one of the preset sample reports
-      const sample = SAMPLE_REPORTS.find(
-        (r) => r.id.toLowerCase() === cleanHandle || r.handle.toLowerCase().includes(cleanHandle)
-      );
-
-      if (sample && !customHandle) {
-        setReport(sample);
+      // 1. Check verified creators first (Nike, NASA, MrBeast, Cristiano, Messi, etc.)
+      const verified = getVerifiedCreator(cleanHandle);
+      if (verified) {
+        const audit = calculateProfileScore({
+          platform: verified.platform as any,
+          handle: verified.handle,
+          name: verified.name,
+          followers: verified.followers,
+          following: verified.following,
+          posts: verified.posts,
+          avatarUrl: verified.avatarUrl,
+          isVerified: true,
+        });
+        setReport(audit);
+        setEditFollowers(verified.followers.toString());
+        setEditFollowing(verified.following.toString());
+        setEditPosts(verified.posts.toString());
         setLoading(false);
         return;
       }
@@ -61,6 +82,9 @@ export default function ReportPage() {
           try {
             const parsed = JSON.parse(cached);
             setReport(parsed);
+            if (parsed.followersCount) setEditFollowers(parsed.followersCount.toString());
+            if (parsed.followingCount) setEditFollowing(parsed.followingCount.toString());
+            if (parsed.postsCount) setEditPosts(parsed.postsCount.toString());
             setLoading(false);
             return;
           } catch (e) {
@@ -74,8 +98,11 @@ export default function ReportPage() {
         const res = await fetch(`/api/audit?handle=${encodeURIComponent(cleanHandle)}&platform=instagram`);
         if (res.ok) {
           const data = await res.json();
-          if (data.report) {
+          if (data.report && data.report.followersCount > 0) {
             setReport(data.report);
+            setEditFollowers(data.report.followersCount.toString());
+            setEditFollowing(data.report.followingCount.toString());
+            setEditPosts(data.report.postsCount.toString());
             if (typeof window !== 'undefined') {
               localStorage.setItem(`audit_${data.report.id}`, JSON.stringify(data.report));
             }
@@ -87,17 +114,58 @@ export default function ReportPage() {
         console.error('Failed to fetch live audit:', err);
       }
 
-      // 4. Fallback to sample or construct fallback
+      // 4. If preset in SAMPLE_REPORTS
+      const sample = SAMPLE_REPORTS.find((r) => r.id.toLowerCase() === cleanHandle);
       if (sample) {
         setReport(sample);
-      } else {
-        setReport(SAMPLE_REPORTS[1]); // Luca fallback
+        setLoading(false);
+        return;
       }
+
+      // 5. If unindexed profile without numbers, prompt user to confirm metrics
+      const fallbackAudit = calculateProfileScore({
+        platform: 'Instagram',
+        handle: `@${cleanHandle}`,
+        name: cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
+        followers: 12000,
+        following: 450,
+        posts: 65,
+        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=059669&color=ffffff&bold=true`,
+      });
+      setReport(fallbackAudit);
+      setEditFollowers('12000');
+      setEditFollowing('450');
+      setEditPosts('65');
+      setShowEditModal(true);
       setLoading(false);
     }
 
     loadReport();
-  }, [rawId, customHandle]);
+  }, [rawId, cleanHandle]);
+
+  const handleApplyCustomNumbers = (e: React.FormEvent) => {
+    e.preventDefault();
+    const numFollowers = Math.max(1, parseFloat(editFollowers.replace(/,/g, '')) || 1000);
+    const numFollowing = Math.max(0, parseFloat(editFollowing.replace(/,/g, '')) || 100);
+    const numPosts = Math.max(0, parseFloat(editPosts.replace(/,/g, '')) || 10);
+
+    const updated = calculateProfileScore({
+      platform: report?.platform || 'Instagram',
+      handle: report?.handle || `@${cleanHandle}`,
+      name: report?.name || cleanHandle,
+      followers: numFollowers,
+      following: numFollowing,
+      posts: numPosts,
+      avatarUrl: report?.avatarImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=059669&color=ffffff&bold=true`,
+    });
+
+    setReport(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`audit_${updated.id}`, JSON.stringify(updated));
+      localStorage.setItem(`audit_${cleanHandle}`, JSON.stringify(updated));
+    }
+    setShowEditModal(false);
+  };
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
@@ -149,8 +217,8 @@ export default function ReportPage() {
     );
   }
 
-  const displayName = report.name || `@${rawId}`;
-  const displayHandle = report.handle || `@${rawId}`;
+  const displayName = report.name || `@${cleanHandle}`;
+  const displayHandle = report.handle || `@${cleanHandle}`;
 
   return (
     <div className="pt-28 pb-24 container-x max-w-5xl animate-fade-up">
@@ -164,6 +232,15 @@ export default function ReportPage() {
           Back to Overview
         </Link>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowEditModal(true)}
+            className="rounded-full text-xs gap-1.5 cursor-pointer bg-white text-slate-700 hover:bg-slate-50 border-slate-300"
+          >
+            <Edit3 size={13} className="text-emerald-600" />
+            <span>Adjust Metrics</span>
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -184,6 +261,82 @@ export default function ReportPage() {
           </Button>
         </div>
       </div>
+
+      {/* Adjust Metrics Modal / Drawer */}
+      {showEditModal && (
+        <div className="mb-6 p-6 rounded-3xl bg-slate-900 text-white border border-emerald-500/30 shadow-2xl animate-fade-up">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <Edit3 size={14} />
+                Live Profile Metric Adjustment
+              </div>
+              <h3 className="text-lg font-bold text-white mt-1">
+                Confirm Public Numbers for {displayHandle}
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Update follower, following, or post counts to recalculate mathematical authenticity and bot probability.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="text-slate-400 hover:text-white text-xs font-bold px-2 py-1"
+            >
+              ✕ Close
+            </button>
+          </div>
+
+          <form onSubmit={handleApplyCustomNumbers} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1.5">
+                Followers Count
+              </label>
+              <input
+                type="text"
+                required
+                value={editFollowers}
+                onChange={(e) => setEditFollowers(e.target.value)}
+                placeholder="e.g. 291000000 or 45000"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1.5">
+                Following Count
+              </label>
+              <input
+                type="text"
+                value={editFollowing}
+                onChange={(e) => setEditFollowing(e.target.value)}
+                placeholder="e.g. 268"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1.5">
+                Posts Count
+              </label>
+              <input
+                type="text"
+                value={editPosts}
+                onChange={(e) => setEditPosts(e.target.value)}
+                placeholder="e.g. 1665"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-xl text-xs gap-1.5"
+            >
+              <RefreshCw size={14} />
+              Recalculate Score
+            </Button>
+          </form>
+        </div>
+      )}
 
       {/* Main Report Container */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden">
@@ -215,7 +368,7 @@ export default function ReportPage() {
                 </span>
                 {report.isLive && (
                   <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-400 border border-emerald-800/80 px-2 py-0.5 rounded-full">
-                    Live Verified
+                    Verified Signals
                   </span>
                 )}
               </div>
@@ -230,27 +383,32 @@ export default function ReportPage() {
           </div>
         </div>
 
-        {/* Live Public Stats Bar if available */}
+        {/* Live Public Stats Bar */}
         {(report.followingCount !== undefined || report.postsCount !== undefined) && (
-          <div className="px-6 sm:px-8 py-3 bg-slate-800/50 border-b border-slate-800 flex flex-wrap items-center gap-6 text-xs text-slate-300 font-medium">
-            <div className="flex items-center gap-1.5">
-              <Users size={14} className="text-emerald-400" />
-              <span>Audience: <strong>{report.followers}</strong></span>
-            </div>
-            {report.followingCount !== undefined && (
+          <div className="px-6 sm:px-8 py-3 bg-slate-800/50 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-300 font-medium">
+            <div className="flex items-center gap-6">
               <div className="flex items-center gap-1.5">
-                <span>Following: <strong>{report.followingCount.toLocaleString()}</strong></span>
+                <Users size={14} className="text-emerald-400" />
+                <span>Audience: <strong>{report.followers}</strong></span>
               </div>
-            )}
-            {report.postsCount !== undefined && (
-              <div className="flex items-center gap-1.5">
-                <Grid3X3 size={14} className="text-slate-400" />
-                <span>Posts: <strong>{report.postsCount.toLocaleString()}</strong></span>
-              </div>
-            )}
-            <div className="ml-auto text-[11px] text-slate-400">
-              Scraped live from public registry
+              {report.followingCount !== undefined && (
+                <div className="flex items-center gap-1.5">
+                  <span>Following: <strong>{report.followingCount.toLocaleString()}</strong></span>
+                </div>
+              )}
+              {report.postsCount !== undefined && (
+                <div className="flex items-center gap-1.5">
+                  <Grid3X3 size={14} className="text-slate-400" />
+                  <span>Posts: <strong>{report.postsCount.toLocaleString()}</strong></span>
+                </div>
+              )}
             </div>
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="text-emerald-400 hover:text-emerald-300 text-[11px] font-semibold underline cursor-pointer"
+            >
+              Edit numbers
+            </button>
           </div>
         )}
 

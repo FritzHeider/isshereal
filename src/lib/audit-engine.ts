@@ -1,3 +1,5 @@
+import { getVerifiedCreator, VERIFIED_CREATORS } from '@/data/verified-creators';
+
 function decodeEntities(str: string): string {
   return str
     .replace(/&amp;/g, '&')
@@ -26,25 +28,30 @@ export interface AuditResult {
   riskSignals: string[];
   verifiedSignals: string[];
   isLive: boolean;
+  needsVerification?: boolean;
   timestamp: string;
 }
 
 export function parseCount(str: string): number {
   if (!str) return 0;
   const clean = str.trim().toUpperCase();
-  if (clean.endsWith('M')) {
-    return Math.round(parseFloat(clean.slice(0, -1)) * 1_000_000);
+  if (clean.endsWith('M') || clean.includes('MILLION')) {
+    const num = parseFloat(clean.replace(/[^\d.]/g, ''));
+    return Math.round(num * 1_000_000);
   }
-  if (clean.endsWith('K')) {
-    return Math.round(parseFloat(clean.slice(0, -1)) * 1_000);
+  if (clean.endsWith('K') || clean.includes('THOUSAND')) {
+    const num = parseFloat(clean.replace(/[^\d.]/g, ''));
+    return Math.round(num * 1_000);
   }
-  if (clean.endsWith('B')) {
-    return Math.round(parseFloat(clean.slice(0, -1)) * 1_000_000_000);
+  if (clean.endsWith('B') || clean.includes('BILLION')) {
+    const num = parseFloat(clean.replace(/[^\d.]/g, ''));
+    return Math.round(num * 1_000_000_000);
   }
   return Math.round(parseFloat(clean.replace(/,/g, '')) || 0);
 }
 
 export function formatCompactNumber(num: number): string {
+  if (!num || isNaN(num)) return '0';
   if (num >= 1_000_000_000) {
     return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
   }
@@ -68,8 +75,25 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
   posts: number;
   avatarUrl: string;
   exists: boolean;
+  isVerifiedReal: boolean;
 }> {
   const cleanHandle = handle.replace(/^@/, '').trim().toLowerCase();
+
+  // 1. Check verified real database first
+  const verified = getVerifiedCreator(cleanHandle);
+  if (verified && verified.platform === 'Instagram') {
+    return {
+      name: verified.name,
+      handle: verified.handle,
+      followers: verified.followers,
+      following: verified.following,
+      posts: verified.posts,
+      avatarUrl: verified.avatarUrl,
+      exists: true,
+      isVerifiedReal: true,
+    };
+  }
+
   const url = `https://www.instagram.com/${cleanHandle}/`;
 
   try {
@@ -78,70 +102,77 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
         'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
         'Accept-Language': 'en-US,en;q=0.9',
       },
-      next: { revalidate: 300 },
     });
 
-    if (!res.ok) {
-      return fallbackProfile(cleanHandle, 'Instagram');
-    }
+    if (res.ok) {
+      const htmlContent = await res.text();
+      const descMatch = htmlContent.match(
+        /<meta (?:property|name)=\"(?:og:description|description)\" content=\"([^\"]+)\"/i
+      );
+      const titleMatch = htmlContent.match(
+        /<meta (?:property|name)=\"(?:og:title|title)\" content=\"([^\"]+)\"/i
+      );
+      const imgMatch = htmlContent.match(
+        /<meta (?:property|name)=\"(?:og:image)\" content=\"([^\"]+)\"/i
+      );
 
-    const htmlContent = await res.text();
-    const descMatch = htmlContent.match(
-      /<meta (?:property|name)=\"(?:og:description|description)\" content=\"([^\"]+)\"/i
-    );
-    const titleMatch = htmlContent.match(
-      /<meta (?:property|name)=\"(?:og:title|title)\" content=\"([^\"]+)\"/i
-    );
-    const imgMatch = htmlContent.match(
-      /<meta (?:property|name)=\"(?:og:image)\" content=\"([^\"]+)\"/i
-    );
+      if (descMatch) {
+        const rawDesc = descMatch[1];
+        const statsMatch = rawDesc.match(
+          /([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following,\s*([0-9.,KMBkmb]+)\s+Posts/i
+        );
 
-    if (!descMatch) {
-      return fallbackProfile(cleanHandle, 'Instagram');
-    }
+        let followers = 0;
+        let following = 0;
+        let posts = 0;
 
-    const rawDesc = descMatch[1];
-    const statsMatch = rawDesc.match(
-      /([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following,\s*([0-9.,KMBkmb]+)\s+Posts/i
-    );
+        if (statsMatch) {
+          followers = parseCount(statsMatch[1]);
+          following = parseCount(statsMatch[2]);
+          posts = parseCount(statsMatch[3]);
+        }
 
-    let followers = 0;
-    let following = 0;
-    let posts = 0;
+        let name = cleanHandle;
+        if (titleMatch) {
+          const rawTitle = titleMatch[1];
+          const nameMatch = rawTitle.match(/^([^(•]+)/);
+          if (nameMatch) {
+            name = decodeEntities(nameMatch[1].trim());
+          }
+        }
 
-    if (statsMatch) {
-      followers = parseCount(statsMatch[1]);
-      following = parseCount(statsMatch[2]);
-      posts = parseCount(statsMatch[3]);
-    }
+        let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`;
+        if (imgMatch) {
+          avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
+        }
 
-    let name = cleanHandle;
-    if (titleMatch) {
-      const rawTitle = titleMatch[1];
-      const nameMatch = rawTitle.match(/^([^(•]+)/);
-      if (nameMatch) {
-        name = decodeEntities(nameMatch[1].trim());
+        return {
+          name,
+          handle: `@${cleanHandle}`,
+          followers,
+          following,
+          posts,
+          avatarUrl,
+          exists: true,
+          isVerifiedReal: true,
+        };
       }
     }
-
-    let avatarUrl = '/images/avatars/luca.jpg';
-    if (imgMatch) {
-      avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
-    }
-
-    return {
-      name,
-      handle: `@${cleanHandle}`,
-      followers,
-      following,
-      posts,
-      avatarUrl,
-      exists: true,
-    };
-  } catch (err) {
-    console.error('Error scraping Instagram profile:', err);
-    return fallbackProfile(cleanHandle, 'Instagram');
+  } catch (err: any) {
+    console.warn('Instagram live scrape network attempt:', err?.message);
   }
+
+  // Clean fallback when unindexed or blocked by Meta IP firewall
+  return {
+    name: cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
+    handle: `@${cleanHandle}`,
+    followers: 0,
+    following: 0,
+    posts: 0,
+    avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=059669&color=ffffff&bold=true`,
+    exists: false,
+    isVerifiedReal: false,
+  };
 }
 
 /**
@@ -155,8 +186,24 @@ export async function scrapeTikTokProfile(handle: string): Promise<{
   posts: number;
   avatarUrl: string;
   exists: boolean;
+  isVerifiedReal: boolean;
 }> {
   const cleanHandle = handle.replace(/^@/, '').trim().toLowerCase();
+
+  const verified = getVerifiedCreator(cleanHandle);
+  if (verified && verified.platform === 'TikTok') {
+    return {
+      name: verified.name,
+      handle: verified.handle,
+      followers: verified.followers,
+      following: verified.following,
+      posts: verified.posts,
+      avatarUrl: verified.avatarUrl,
+      exists: true,
+      isVerifiedReal: true,
+    };
+  }
+
   const url = `https://www.tiktok.com/@${cleanHandle}`;
 
   try {
@@ -165,52 +212,61 @@ export async function scrapeTikTokProfile(handle: string): Promise<{
         'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
         'Accept-Language': 'en-US,en;q=0.9',
       },
-      next: { revalidate: 300 },
     });
 
-    if (!res.ok) return fallbackProfile(cleanHandle, 'TikTok');
+    if (res.ok) {
+      const html = await res.text();
+      const descMatch = html.match(/<meta (?:property|name)=\"(?:og:description|description)\" content=\"([^\"]+)\"/i);
+      const titleMatch = html.match(/<meta (?:property|name)=\"(?:og:title|title)\" content=\"([^\"]+)\"/i);
+      const imgMatch = html.match(/<meta (?:property|name)=\"(?:og:image)\" content=\"([^\"]+)\"/i);
 
-    const html = await res.text();
-    const descMatch = html.match(/<meta (?:property|name)=\"(?:og:description|description)\" content=\"([^\"]+)\"/i);
-    const titleMatch = html.match(/<meta (?:property|name)=\"(?:og:title|title)\" content=\"([^\"]+)\"/i);
-    const imgMatch = html.match(/<meta (?:property|name)=\"(?:og:image)\" content=\"([^\"]+)\"/i);
+      let followers = 0;
+      let following = 0;
 
-    let followers = 0;
-    let following = 0;
-    let likes = 0;
-
-    if (descMatch) {
-      const desc = descMatch[1];
-      const m = desc.match(/([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following,\s*([0-9.,KMBkmb]+)\s+Likes/i);
-      if (m) {
-        followers = parseCount(m[1]);
-        following = parseCount(m[2]);
-        likes = parseCount(m[3]);
+      if (descMatch) {
+        const desc = descMatch[1];
+        const m = desc.match(/([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following/i);
+        if (m) {
+          followers = parseCount(m[1]);
+          following = parseCount(m[2]);
+        }
       }
-    }
 
-    let name = cleanHandle;
-    if (titleMatch) {
-      name = titleMatch[1].replace(/\s+on TikTok$/i, '').trim();
-    }
+      let name = cleanHandle;
+      if (titleMatch) {
+        name = titleMatch[1].replace(/\s+on TikTok$/i, '').trim();
+      }
 
-    let avatarUrl = '/images/avatars/maya.jpg';
-    if (imgMatch) {
-      avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
-    }
+      let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=111827&color=ffffff&bold=true`;
+      if (imgMatch) {
+        avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
+      }
 
-    return {
-      name,
-      handle: `@${cleanHandle}`,
-      followers: followers || 15000,
-      following: following || 200,
-      posts: 80,
-      avatarUrl,
-      exists: true,
-    };
+      return {
+        name,
+        handle: `@${cleanHandle}`,
+        followers,
+        following,
+        posts: 0,
+        avatarUrl,
+        exists: true,
+        isVerifiedReal: true,
+      };
+    }
   } catch (e) {
-    return fallbackProfile(cleanHandle, 'TikTok');
+    // ignore
   }
+
+  return {
+    name: cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
+    handle: `@${cleanHandle}`,
+    followers: 0,
+    following: 0,
+    posts: 0,
+    avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=111827&color=ffffff&bold=true`,
+    exists: false,
+    isVerifiedReal: false,
+  };
 }
 
 /**
@@ -224,111 +280,76 @@ export async function scrapeYouTubeProfile(handle: string): Promise<{
   posts: number;
   avatarUrl: string;
   exists: boolean;
+  isVerifiedReal: boolean;
 }> {
-  const cleanHandle = handle.replace(/^@/, '').trim();
+  const cleanHandle = handle.replace(/^@/, '').trim().toLowerCase();
+
+  const verified = getVerifiedCreator(cleanHandle);
+  if (verified && verified.platform === 'YouTube') {
+    return {
+      name: verified.name,
+      handle: verified.handle,
+      followers: verified.followers,
+      following: verified.following,
+      posts: verified.posts,
+      avatarUrl: verified.avatarUrl,
+      exists: true,
+      isVerifiedReal: true,
+    };
+  }
+
   const url = `https://www.youtube.com/@${cleanHandle}`;
 
   try {
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9',
       },
-      next: { revalidate: 300 },
     });
 
-    if (!res.ok) return fallbackProfile(cleanHandle, 'YouTube');
+    if (res.ok) {
+      const html = await res.text();
+      const titleMatch = html.match(/<meta (?:property|name)=\"(?:og:title|title)\" content=\"([^\"]+)\"/i);
+      const imgMatch = html.match(/<meta (?:property|name)=\"(?:og:image)\" content=\"([^\"]+)\"/i);
 
-    const html = await res.text();
-    const titleMatch = html.match(/<meta (?:property|name)=\"(?:og:title|title)\" content=\"([^\"]+)\"/i);
-    const imgMatch = html.match(/<meta (?:property|name)=\"(?:og:image)\" content=\"([^\"]+)\"/i);
+      let name = cleanHandle;
+      if (titleMatch) name = titleMatch[1].trim();
 
-    let name = cleanHandle;
-    if (titleMatch) name = titleMatch[1].trim();
+      let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=EF4444&color=ffffff&bold=true`;
+      if (imgMatch) avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
 
-    let avatarUrl = '/images/avatars/mrbeast.jpg';
-    if (imgMatch) avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
+      // Parse subscribers from YouTube HTML
+      const subMatch = html.match(/([0-9.,KMBkmb]+(?:\s*million|\s*billion)?\s+subscribers?)/i);
+      let subscribers = 0;
+      if (subMatch) {
+        subscribers = parseCount(subMatch[1]);
+      }
 
-    return {
-      name,
-      handle: `@${cleanHandle}`,
-      followers: 85000,
-      following: 120,
-      posts: 240,
-      avatarUrl,
-      exists: true,
-    };
+      return {
+        name,
+        handle: `@${cleanHandle}`,
+        followers: subscribers,
+        following: 0,
+        posts: 0,
+        avatarUrl,
+        exists: true,
+        isVerifiedReal: subscribers > 0,
+      };
+    }
   } catch (e) {
-    return fallbackProfile(cleanHandle, 'YouTube');
+    // ignore
   }
-}
-
-/**
- * Live Scrape Reddit User
- */
-export async function scrapeRedditProfile(handle: string): Promise<{
-  name: string;
-  handle: string;
-  followers: number;
-  following: number;
-  posts: number;
-  avatarUrl: string;
-  exists: boolean;
-}> {
-  const clean = handle.replace(/^u\//i, '').replace(/^@/, '').trim();
-  const url = `https://www.reddit.com/user/${clean}/`;
-
-  try {
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
-      next: { revalidate: 300 },
-    });
-
-    if (!res.ok) return fallbackProfile(clean, 'Reddit');
-
-    const html = await res.text();
-    const titleMatch = html.match(/<meta (?:property|name)=\"(?:og:title|title)\" content=\"([^\"]+)\"/i);
-    const imgMatch = html.match(/<meta (?:property|name)=\"(?:og:image)\" content=\"([^\"]+)\"/i);
-
-    let avatarUrl = '/images/logo.png';
-    if (imgMatch) avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
-
-    return {
-      name: `u/${clean}`,
-      handle: `u/${clean}`,
-      followers: 4500,
-      following: 50,
-      posts: 350,
-      avatarUrl,
-      exists: true,
-    };
-  } catch (e) {
-    return fallbackProfile(clean, 'Reddit');
-  }
-}
-
-function fallbackProfile(cleanHandle: string, platformName: string) {
-  let hash = 0;
-  for (let i = 0; i < cleanHandle.length; i++) {
-    hash = (hash << 5) - hash + cleanHandle.charCodeAt(i);
-    hash |= 0;
-  }
-  const absHash = Math.abs(hash);
-  const followers = 1200 + (absHash % 48000);
-  const following = 150 + ((absHash >> 3) % 1800);
-  const posts = 12 + ((absHash >> 5) % 240);
 
   return {
     name: cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
     handle: `@${cleanHandle}`,
-    followers,
-    following,
-    posts,
-    avatarUrl: '/images/avatars/luca.jpg',
+    followers: 0,
+    following: 0,
+    posts: 0,
+    avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=EF4444&color=ffffff&bold=true`,
     exists: false,
+    isVerifiedReal: false,
   };
 }
 
@@ -345,10 +366,38 @@ export function calculateProfileScore(params: {
   likes?: number;
   comments?: number;
   avatarUrl: string;
+  isVerified?: boolean;
 }): AuditResult {
-  const { platform, handle, name, followers, following, posts, likes, comments, avatarUrl } = params;
+  const { platform, handle, name, followers, following, posts, likes, comments, avatarUrl, isVerified } = params;
 
-  let baseScore = 70;
+  // Check verified creators first
+  const clean = handle.replace(/^@/, '').toLowerCase().trim();
+  const v = getVerifiedCreator(clean);
+  if (v && (!followers || followers === v.followers)) {
+    return {
+      id: `${platform.toLowerCase()}_${clean}`,
+      name: v.name,
+      handle: v.handle,
+      platform: v.platform as any,
+      score: v.score,
+      followers: `${formatCompactNumber(v.followers)} followers`,
+      followersCount: v.followers,
+      followingCount: v.following,
+      postsCount: v.posts,
+      verdict: v.verdict,
+      fakePct: v.fakePct,
+      realPct: v.realPct,
+      avatarImage: v.avatarUrl,
+      engagementRate: v.engagementRate,
+      suspiciousSpike: v.suspiciousSpike,
+      riskSignals: v.riskSignals,
+      verifiedSignals: v.verifiedSignals,
+      isLive: true,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  let baseScore = 72;
   const riskSignals: string[] = [];
   const verifiedSignals: string[] = [];
 
@@ -366,67 +415,51 @@ export function calculateProfileScore(params: {
     verifiedSignals.push('Healthy asymmetric follower-to-following ratio typical of genuine creator traction');
   }
 
-  // 2. Post Density & Activity Index
-  if (followers > 20000 && posts < 5) {
+  // 2. Post Volume & Activity Consistency
+  if (posts > 0 && posts < 6 && followers > 20000) {
     baseScore -= 28;
-    riskSignals.push('Extremely low post count (<5) relative to follower volume indicates sudden follower injection or purchased account');
-  } else if (posts > 50) {
+    riskSignals.push('Abnormally high follower count on account with fewer than 6 public posts (purchased account footprint)');
+  } else if (posts > 60) {
     baseScore += 8;
     verifiedSignals.push(`Consistent historical content presence with ${posts.toLocaleString()} published posts`);
   }
 
-  // 3. Expected Engagement Modeling
-  let expectedER = 2.5;
-  if (followers < 10000) expectedER = 4.8;
-  else if (followers < 100000) expectedER = 2.8;
-  else if (followers < 1000000) expectedER = 1.6;
-  else expectedER = 1.0;
+  // 3. Expected Engagement Benchmarks by Audience Tier
+  let expectedER = 2.5; // percent
+  if (followers > 10000000) expectedER = 1.0;
+  else if (followers > 1000000) expectedER = 1.4;
+  else if (followers > 100000) expectedER = 2.0;
+  else if (followers > 10000) expectedER = 3.2;
 
   let calculatedER = expectedER;
-  if (likes !== undefined && followers > 0) {
-    const totalEngagement = likes + (comments || 0);
-    calculatedER = parseFloat(((totalEngagement / followers) * 100).toFixed(2));
-
-    const ratioToExpected = calculatedER / expectedER;
-    if (ratioToExpected < 0.2) {
+  if (likes && followers > 0) {
+    calculatedER = Number((((likes + (comments || 0)) / followers) * 100).toFixed(2));
+    if (calculatedER < expectedER * 0.25) {
       baseScore -= 25;
-      riskSignals.push(`Engagement rate (${calculatedER}%) is more than 80% below the expected benchmark (${expectedER}%) for this account tier`);
-    } else if (ratioToExpected > 4.0 && followers > 50000) {
+      riskSignals.push(`Engagement rate (${calculatedER}%) is more than 75% below baseline for this audience tier`);
+    } else if (calculatedER > expectedER * 3.5) {
       baseScore -= 15;
-      riskSignals.push(`Abnormally inflated engagement rate (${calculatedER}%) points toward engagement pod clustering`);
+      riskSignals.push(`Engagement rate (${calculatedER}%) shows unnatural clustering spike above platform organic distributions`);
     } else {
       baseScore += 10;
-      verifiedSignals.push(`Engagement rate (${calculatedER}%) aligns with healthy organic distribution benchmarks`);
-    }
-  } else {
-    if (baseScore > 65) {
-      calculatedER = parseFloat((expectedER * (0.85 + Math.sin(followers) * 0.25)).toFixed(2));
-    } else {
-      calculatedER = parseFloat((expectedER * 0.3).toFixed(2));
+      verifiedSignals.push(`Engagement rate (${calculatedER}%) aligns with authentic human interaction curves`);
     }
   }
 
-  if (followers > 5000000 && following < 2000 && posts > 100) {
-    baseScore = Math.max(baseScore, 88);
-    verifiedSignals.push('Global tier footprint: verified public presence across international indexes');
-  }
-
-  const score = Math.min(98, Math.max(14, Math.round(baseScore)));
-  const fakePct = Math.min(88, Math.max(3, 100 - score + Math.round((100 - score) * 0.05)));
+  const score = Math.max(12, Math.min(98, baseScore));
+  const fakePct = Math.round(Math.max(4, Math.min(88, 100 - score + 5)));
   const realPct = 100 - fakePct;
 
   let verdict = 'Likely authentic';
-  if (score < 40) {
-    verdict = 'High risk — likely fake';
-  } else if (score < 70) {
-    verdict = 'Mostly genuine, minor flags';
-  }
+  if (score < 40) verdict = 'High risk — likely fake';
+  else if (score < 65) verdict = 'Moderate risk — inconsistent engagement';
+  else if (score > 85) verdict = 'Highly authentic profile';
 
   let suspiciousSpike = 'Sustained organic velocity consistent with platform baselines';
   if (score < 50) {
     suspiciousSpike = 'Velocity anomaly: concentrated follower burst detected in previous cycles';
   } else if (score < 75) {
-    suspiciousSpike = 'Minor follower inflow fluctuation detected 3 months ago';
+    suspiciousSpike = 'Minor follower inflow fluctuation detected';
   }
 
   if (riskSignals.length === 0) {
@@ -437,9 +470,9 @@ export function calculateProfileScore(params: {
   }
 
   return {
-    id: `${platform.toLowerCase()}_${handle.replace(/[^a-zA-Z0-9_]/g, '')}`,
-    name,
-    handle,
+    id: `${platform.toLowerCase()}_${clean.replace(/[^a-zA-Z0-9_]/g, '')}`,
+    name: name || clean,
+    handle: `@${clean}`,
     platform,
     score,
     followers: `${formatCompactNumber(followers)} followers`,

@@ -124,7 +124,7 @@ export function Hero() {
       }
 
       const data = await res.json();
-      if (data.report) {
+      if (data.report && data.report.followersCount > 0) {
         if (typeof window !== 'undefined') {
           localStorage.setItem(`audit_${data.report.id}`, JSON.stringify(data.report));
           localStorage.setItem('isshereal_last_report', JSON.stringify(data.report));
