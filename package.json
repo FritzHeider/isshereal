@@ -10,7 +10,10 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "preview": "opennextjs-cloudflare build && wrangler dev",
-    "deploy": "opennextjs-cloudflare build && wrangler deploy"
+    "deploy": "opennextjs-cloudflare build && wrangler deploy",
+    "web-use:scrape": "python3 .agents/skills/web-use/scripts/scrape_profile.py",
+    "web-use:audit": "python3 .agents/skills/web-use/scripts/web_audit.py",
+    "web-use:server": "python3 .agents/skills/web-use/scripts/server.py"
   },
   "dependencies": {
     "clsx": "^2.1.1",

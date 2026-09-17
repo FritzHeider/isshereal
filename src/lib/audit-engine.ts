@@ -94,6 +94,31 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
     };
   }
 
+  // 2. Check Web-Use headless browser service (local bridge or external service)
+  const webUseUrl = (typeof process !== 'undefined' && process.env?.WEB_USE_SERVICE_URL) || 'http://127.0.0.1:8088';
+  try {
+    const bridgeRes = await fetch(`${webUseUrl}/scrape?platform=instagram&handle=${encodeURIComponent(cleanHandle)}`, {
+      signal: AbortSignal.timeout(6000),
+    });
+    if (bridgeRes.ok) {
+      const data = (await bridgeRes.json()) as any;
+      if (data && data.success && data.followers > 0) {
+        return {
+          name: data.name || cleanHandle,
+          handle: `@${cleanHandle}`,
+          followers: data.followers,
+          following: data.following || 0,
+          posts: data.posts || 0,
+          avatarUrl: data.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`,
+          exists: true,
+          isVerifiedReal: !!data.isVerified,
+        };
+      }
+    }
+  } catch (_bridgeErr) {
+    // Web-Use bridge not reachable on edge/isolate, proceed to direct fetch
+  }
+
   const url = `https://www.instagram.com/${cleanHandle}/`;
 
   try {
@@ -203,6 +228,29 @@ export async function scrapeTikTokProfile(handle: string): Promise<{
       isVerifiedReal: true,
     };
   }
+
+  // Check Web-Use headless browser service
+  const webUseUrl = (typeof process !== 'undefined' && process.env?.WEB_USE_SERVICE_URL) || 'http://127.0.0.1:8088';
+  try {
+    const bridgeRes = await fetch(`${webUseUrl}/scrape?platform=tiktok&handle=${encodeURIComponent(cleanHandle)}`, {
+      signal: AbortSignal.timeout(6000),
+    });
+    if (bridgeRes.ok) {
+      const data = (await bridgeRes.json()) as any;
+      if (data && data.success && data.followers > 0) {
+        return {
+          name: data.name || cleanHandle,
+          handle: `@${cleanHandle}`,
+          followers: data.followers,
+          following: data.following || 0,
+          posts: data.posts || 45,
+          avatarUrl: data.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`,
+          exists: true,
+          isVerifiedReal: !!data.isVerified,
+        };
+      }
+    }
+  } catch (_bridgeErr) {}
 
   const url = `https://www.tiktok.com/@${cleanHandle}`;
 
