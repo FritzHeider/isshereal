@@ -19,6 +19,7 @@ import {
   Grid3X3,
   Edit3,
   RefreshCw,
+  AlertCircle,
 } from 'lucide-react';
 import { SAMPLE_REPORTS } from '@/data/content';
 import { getVerifiedCreator } from '@/data/verified-creators';
@@ -38,6 +39,8 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(true);
   const [report, setReport] = useState<any>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [needsInput, setNeedsInput] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Edit form state
   const [editFollowers, setEditFollowers] = useState('');
@@ -122,21 +125,10 @@ export default function ReportPage() {
         return;
       }
 
-      // 5. If unindexed profile without numbers, prompt user to confirm metrics
-      const fallbackAudit = calculateProfileScore({
-        platform: 'Instagram',
-        handle: `@${cleanHandle}`,
-        name: cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
-        followers: 12000,
-        following: 450,
-        posts: 65,
-        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=059669&color=ffffff&bold=true`,
-      });
-      setReport(fallbackAudit);
-      setEditFollowers('12000');
-      setEditFollowing('450');
-      setEditPosts('65');
-      setShowEditModal(true);
+      // 5. Unindexed or firewalled profile - NEVER inject fake 12,000 metrics!
+      // Require genuine user confirmation
+      setReport(null);
+      setNeedsInput(true);
       setLoading(false);
     }
 
@@ -145,14 +137,37 @@ export default function ReportPage() {
 
   const handleApplyCustomNumbers = (e: React.FormEvent) => {
     e.preventDefault();
-    const numFollowers = Math.max(1, parseFloat(editFollowers.replace(/,/g, '')) || 1000);
-    const numFollowing = Math.max(0, parseFloat(editFollowing.replace(/,/g, '')) || 100);
-    const numPosts = Math.max(0, parseFloat(editPosts.replace(/,/g, '')) || 10);
+    const cleanNum = (val: string) => {
+      const clean = (val || '').trim().toUpperCase();
+      if (/(\d+(?:\.\d+)?)\s*(?:B\b|BILLION)/i.test(clean)) {
+        const m = clean.match(/(\d+(?:\.\d+)?)\s*(?:B\b|BILLION)/i);
+        return Math.round(parseFloat(m![1]) * 1_000_000_000);
+      }
+      if (/(\d+(?:\.\d+)?)\s*(?:M\b|MILLION)/i.test(clean)) {
+        const m = clean.match(/(\d+(?:\.\d+)?)\s*(?:M\b|MILLION)/i);
+        return Math.round(parseFloat(m![1]) * 1_000_000);
+      }
+      if (/(\d+(?:\.\d+)?)\s*(?:K\b|THOUSAND)/i.test(clean)) {
+        const m = clean.match(/(\d+(?:\.\d+)?)\s*(?:K\b|THOUSAND)/i);
+        return Math.round(parseFloat(m![1]) * 1_000);
+      }
+      const cleaned = clean.replace(/,/g, '').match(/\d+(?:\.\d+)?/);
+      return cleaned ? Math.round(parseFloat(cleaned[0])) : 0;
+    };
+
+    const numFollowers = cleanNum(editFollowers);
+    if (!numFollowers || numFollowers <= 0) {
+      setErrorMessage('Please enter a valid follower count greater than 0.');
+      return;
+    }
+    setErrorMessage(null);
+    const numFollowing = cleanNum(editFollowing);
+    const numPosts = cleanNum(editPosts);
 
     const updated = calculateProfileScore({
       platform: report?.platform || 'Instagram',
       handle: report?.handle || `@${cleanHandle}`,
-      name: report?.name || cleanHandle,
+      name: report?.name || cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
       followers: numFollowers,
       following: numFollowing,
       posts: numPosts,
@@ -160,11 +175,12 @@ export default function ReportPage() {
     });
 
     setReport(updated);
+    setNeedsInput(false);
+    setShowEditModal(false);
     if (typeof window !== 'undefined') {
       localStorage.setItem(`audit_${updated.id}`, JSON.stringify(updated));
       localStorage.setItem(`audit_${cleanHandle}`, JSON.stringify(updated));
     }
-    setShowEditModal(false);
   };
 
   const handleCopyLink = () => {
@@ -208,11 +224,96 @@ export default function ReportPage() {
 
   if (!report) {
     return (
-      <div className="pt-36 pb-32 container-x text-center">
-        <p className="text-slate-500">Report could not be generated. Please try again.</p>
-        <Link href="/" className="mt-4 inline-block text-emerald-600 font-semibold text-sm">
-          Return to Search
+      <div className="pt-32 pb-28 container-x max-w-xl animate-fade-up">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 mb-6 transition-colors"
+        >
+          <ArrowLeft size={14} />
+          Back to Overview
         </Link>
+
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl p-6 sm:p-8">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+              <img
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=059669&color=ffffff&bold=true`}
+                alt={cleanHandle}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="font-extrabold text-xl text-slate-900">@{cleanHandle}</h1>
+                <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                  Confirmation Required
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">Live platform firewall restricted automated crawl</p>
+            </div>
+          </div>
+
+          <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 mb-6 text-xs text-amber-900 flex items-start gap-2.5">
+            <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+            <p className="leading-relaxed">
+              To guarantee <strong>100% genuine forensic results</strong> with no simulated or estimated numbers, please confirm the public metrics shown on <strong>@{cleanHandle}</strong>’s profile.
+            </p>
+          </div>
+
+          <form onSubmit={handleApplyCustomNumbers} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Follower Count <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 14,200 or 1.2M"
+                value={editFollowers}
+                onChange={(e) => setEditFollowers(e.target.value)}
+                required
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-medium"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Following Count
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 350"
+                  value={editFollowing}
+                  onChange={(e) => setEditFollowing(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-medium"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Total Posts
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 84"
+                  value={editPosts}
+                  onChange={(e) => setEditPosts(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-medium"
+                />
+              </div>
+            </div>
+
+            {errorMessage && (
+              <p className="text-xs text-rose-600 font-medium">{errorMessage}</p>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-full py-2.5 text-sm font-semibold shadow-md shadow-emerald-600/15"
+            >
+              Generate Verified Forensic Audit
+            </Button>
+          </form>
+        </div>
       </div>
     );
   }

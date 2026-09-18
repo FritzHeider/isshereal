@@ -35,19 +35,20 @@ export interface AuditResult {
 export function parseCount(str: string): number {
   if (!str) return 0;
   const clean = str.trim().toUpperCase();
-  if (clean.endsWith('M') || clean.includes('MILLION')) {
-    const num = parseFloat(clean.replace(/[^\d.]/g, ''));
-    return Math.round(num * 1_000_000);
+  if (/(\d+(?:\.\d+)?)\s*(?:B\b|BILLION)/i.test(clean)) {
+    const m = clean.match(/(\d+(?:\.\d+)?)\s*(?:B\b|BILLION)/i);
+    return Math.round(parseFloat(m![1]) * 1_000_000_000);
   }
-  if (clean.endsWith('K') || clean.includes('THOUSAND')) {
-    const num = parseFloat(clean.replace(/[^\d.]/g, ''));
-    return Math.round(num * 1_000);
+  if (/(\d+(?:\.\d+)?)\s*(?:M\b|MILLION)/i.test(clean)) {
+    const m = clean.match(/(\d+(?:\.\d+)?)\s*(?:M\b|MILLION)/i);
+    return Math.round(parseFloat(m![1]) * 1_000_000);
   }
-  if (clean.endsWith('B') || clean.includes('BILLION')) {
-    const num = parseFloat(clean.replace(/[^\d.]/g, ''));
-    return Math.round(num * 1_000_000_000);
+  if (/(\d+(?:\.\d+)?)\s*(?:K\b|THOUSAND)/i.test(clean)) {
+    const m = clean.match(/(\d+(?:\.\d+)?)\s*(?:K\b|THOUSAND)/i);
+    return Math.round(parseFloat(m![1]) * 1_000);
   }
-  return Math.round(parseFloat(clean.replace(/,/g, '')) || 0);
+  const cleanedNum = clean.replace(/,/g, '').match(/\d+(?:\.\d+)?/);
+  return cleanedNum ? Math.round(parseFloat(cleanedNum[0])) : 0;
 }
 
 export function formatCompactNumber(num: number): string {
@@ -94,29 +95,31 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
     };
   }
 
-  // 2. Check Web-Use headless browser service (local bridge or external service)
-  const webUseUrl = (typeof process !== 'undefined' && process.env?.WEB_USE_SERVICE_URL) || 'http://127.0.0.1:8088';
-  try {
-    const bridgeRes = await fetch(`${webUseUrl}/scrape?platform=instagram&handle=${encodeURIComponent(cleanHandle)}`, {
-      signal: AbortSignal.timeout(6000),
-    });
-    if (bridgeRes.ok) {
-      const data = (await bridgeRes.json()) as any;
-      if (data && data.success && data.followers > 0) {
-        return {
-          name: data.name || cleanHandle,
-          handle: `@${cleanHandle}`,
-          followers: data.followers,
-          following: data.following || 0,
-          posts: data.posts || 0,
-          avatarUrl: data.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`,
-          exists: true,
-          isVerifiedReal: !!data.isVerified,
-        };
+  // 2. Check Web-Use headless browser service (only if explicitly configured or local development)
+  const webUseUrl = typeof process !== 'undefined' ? process.env?.WEB_USE_SERVICE_URL : undefined;
+  if (webUseUrl) {
+    try {
+      const bridgeRes = await fetch(`${webUseUrl}/scrape?platform=instagram&handle=${encodeURIComponent(cleanHandle)}`, {
+        signal: AbortSignal.timeout(4000),
+      });
+      if (bridgeRes.ok) {
+        const data = (await bridgeRes.json()) as any;
+        if (data && data.success && data.followers > 0) {
+          return {
+            name: data.name || cleanHandle,
+            handle: `@${cleanHandle}`,
+            followers: data.followers,
+            following: data.following || 0,
+            posts: data.posts || 0,
+            avatarUrl: data.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`,
+            exists: true,
+            isVerifiedReal: !!data.isVerified,
+          };
+        }
       }
+    } catch (_bridgeErr) {
+      // Web-Use bridge not reachable, proceed to direct fetch
     }
-  } catch (_bridgeErr) {
-    // Web-Use bridge not reachable on edge/isolate, proceed to direct fetch
   }
 
   const url = `https://www.instagram.com/${cleanHandle}/`;
@@ -131,46 +134,62 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
 
     if (res.ok) {
       const htmlContent = await res.text();
-      const descMatch = htmlContent.match(
-        /<meta (?:property|name)=\"(?:og:description|description)\" content=\"([^\"]+)\"/i
-      );
-      const titleMatch = htmlContent.match(
-        /<meta (?:property|name)=\"(?:og:title|title)\" content=\"([^\"]+)\"/i
-      );
-      const imgMatch = htmlContent.match(
-        /<meta (?:property|name)=\"(?:og:image)\" content=\"([^\"]+)\"/i
+
+      // 1. Direct global stats match across raw HTML (immune to attribute ordering)
+      const globalStatsMatch = htmlContent.match(
+        /([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following,\s*([0-9.,KMBkmb]+)\s+Posts/i
       );
 
-      if (descMatch) {
-        const rawDesc = descMatch[1];
-        const statsMatch = rawDesc.match(
+      // 2. Resilient meta description match with any attribute order
+      const descMatch =
+        htmlContent.match(/<meta[^>]+(?:property|name)=["'](?:og:description|description)["'][^>]+content=["']([^"']+)["']/i) ||
+        htmlContent.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:description|description)["']/i);
+
+      let followers = 0;
+      let following = 0;
+      let posts = 0;
+
+      if (globalStatsMatch) {
+        followers = parseCount(globalStatsMatch[1]);
+        following = parseCount(globalStatsMatch[2]);
+        posts = parseCount(globalStatsMatch[3]);
+      } else if (descMatch) {
+        const statsMatch = descMatch[1].match(
           /([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following,\s*([0-9.,KMBkmb]+)\s+Posts/i
         );
-
-        let followers = 0;
-        let following = 0;
-        let posts = 0;
-
         if (statsMatch) {
           followers = parseCount(statsMatch[1]);
           following = parseCount(statsMatch[2]);
           posts = parseCount(statsMatch[3]);
         }
+      }
 
-        let name = cleanHandle;
-        if (titleMatch) {
-          const rawTitle = titleMatch[1];
-          const nameMatch = rawTitle.match(/^([^(•]+)/);
-          if (nameMatch) {
-            name = decodeEntities(nameMatch[1].trim());
-          }
+      // Title & Name extraction
+      const titleMatch =
+        htmlContent.match(/<meta[^>]+(?:property|name)=["'](?:og:title|title)["'][^>]+content=["']([^"']+)["']/i) ||
+        htmlContent.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:title|title)["']/i) ||
+        htmlContent.match(/<title>([^<]+)<\/title>/i);
+
+      let name = cleanHandle;
+      if (titleMatch) {
+        const rawTitle = titleMatch[1];
+        const nameMatch = rawTitle.match(/^([^(•|]+)/);
+        if (nameMatch) {
+          name = decodeEntities(nameMatch[1].trim());
         }
+      }
 
-        let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`;
-        if (imgMatch) {
-          avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
-        }
+      // Avatar extraction
+      const imgMatch =
+        htmlContent.match(/<meta[^>]+(?:property|name)=["'](?:og:image)["'][^>]+content=["']([^"']+)["']/i) ||
+        htmlContent.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image)["']/i);
 
+      let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`;
+      if (imgMatch) {
+        avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
+      }
+
+      if (followers > 0) {
         return {
           name,
           handle: `@${cleanHandle}`,
@@ -187,7 +206,7 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
     console.warn('Instagram live scrape network attempt:', err?.message);
   }
 
-  // Clean fallback when unindexed or blocked by Meta IP firewall
+  // Clean genuine fallback when unindexed or blocked by Meta IP firewall
   return {
     name: cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
     handle: `@${cleanHandle}`,
@@ -229,28 +248,30 @@ export async function scrapeTikTokProfile(handle: string): Promise<{
     };
   }
 
-  // Check Web-Use headless browser service
-  const webUseUrl = (typeof process !== 'undefined' && process.env?.WEB_USE_SERVICE_URL) || 'http://127.0.0.1:8088';
-  try {
-    const bridgeRes = await fetch(`${webUseUrl}/scrape?platform=tiktok&handle=${encodeURIComponent(cleanHandle)}`, {
-      signal: AbortSignal.timeout(6000),
-    });
-    if (bridgeRes.ok) {
-      const data = (await bridgeRes.json()) as any;
-      if (data && data.success && data.followers > 0) {
-        return {
-          name: data.name || cleanHandle,
-          handle: `@${cleanHandle}`,
-          followers: data.followers,
-          following: data.following || 0,
-          posts: data.posts || 45,
-          avatarUrl: data.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`,
-          exists: true,
-          isVerifiedReal: !!data.isVerified,
-        };
+  // Check Web-Use headless browser service if configured
+  const webUseUrl = typeof process !== 'undefined' ? process.env?.WEB_USE_SERVICE_URL : undefined;
+  if (webUseUrl) {
+    try {
+      const bridgeRes = await fetch(`${webUseUrl}/scrape?platform=tiktok&handle=${encodeURIComponent(cleanHandle)}`, {
+        signal: AbortSignal.timeout(4000),
+      });
+      if (bridgeRes.ok) {
+        const data = (await bridgeRes.json()) as any;
+        if (data && data.success && data.followers > 0) {
+          return {
+            name: data.name || cleanHandle,
+            handle: `@${cleanHandle}`,
+            followers: data.followers,
+            following: data.following || 0,
+            posts: data.posts || 0,
+            avatarUrl: data.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`,
+            exists: true,
+            isVerifiedReal: !!data.isVerified,
+          };
+        }
       }
-    }
-  } catch (_bridgeErr) {}
+    } catch (_bridgeErr) {}
+  }
 
   const url = `https://www.tiktok.com/@${cleanHandle}`;
 
@@ -264,42 +285,59 @@ export async function scrapeTikTokProfile(handle: string): Promise<{
 
     if (res.ok) {
       const html = await res.text();
-      const descMatch = html.match(/<meta (?:property|name)=\"(?:og:description|description)\" content=\"([^\"]+)\"/i);
-      const titleMatch = html.match(/<meta (?:property|name)=\"(?:og:title|title)\" content=\"([^\"]+)\"/i);
-      const imgMatch = html.match(/<meta (?:property|name)=\"(?:og:image)\" content=\"([^\"]+)\"/i);
+
+      // 1. Direct global follower/following match
+      const globalStatsMatch = html.match(/([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following/i);
+
+      // 2. Resilient meta description match
+      const descMatch =
+        html.match(/<meta[^>]+(?:property|name)=["'](?:og:description|description)["'][^>]+content=["']([^"']+)["']/i) ||
+        html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:description|description)["']/i);
 
       let followers = 0;
       let following = 0;
 
-      if (descMatch) {
-        const desc = descMatch[1];
-        const m = desc.match(/([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following/i);
+      if (globalStatsMatch) {
+        followers = parseCount(globalStatsMatch[1]);
+        following = parseCount(globalStatsMatch[2]);
+      } else if (descMatch) {
+        const m = descMatch[1].match(/([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following/i);
         if (m) {
           followers = parseCount(m[1]);
           following = parseCount(m[2]);
         }
       }
 
+      const titleMatch =
+        html.match(/<meta[^>]+(?:property|name)=["'](?:og:title|title)["'][^>]+content=["']([^"']+)["']/i) ||
+        html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:title|title)["']/i);
+
       let name = cleanHandle;
       if (titleMatch) {
         name = titleMatch[1].replace(/\s+on TikTok$/i, '').trim();
       }
+
+      const imgMatch =
+        html.match(/<meta[^>]+(?:property|name)=["'](?:og:image)["'][^>]+content=["']([^"']+)["']/i) ||
+        html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image)["']/i);
 
       let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=111827&color=ffffff&bold=true`;
       if (imgMatch) {
         avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
       }
 
-      return {
-        name,
-        handle: `@${cleanHandle}`,
-        followers,
-        following,
-        posts: 0,
-        avatarUrl,
-        exists: true,
-        isVerifiedReal: true,
-      };
+      if (followers > 0) {
+        return {
+          name,
+          handle: `@${cleanHandle}`,
+          followers,
+          following,
+          posts: 0,
+          avatarUrl,
+          exists: true,
+          isVerifiedReal: true,
+        };
+      }
     }
   } catch (e) {
     // ignore
@@ -358,32 +396,49 @@ export async function scrapeYouTubeProfile(handle: string): Promise<{
 
     if (res.ok) {
       const html = await res.text();
-      const titleMatch = html.match(/<meta (?:property|name)=\"(?:og:title|title)\" content=\"([^\"]+)\"/i);
-      const imgMatch = html.match(/<meta (?:property|name)=\"(?:og:image)\" content=\"([^\"]+)\"/i);
+
+      // 1. JSON interaction statistic (userInteractionCount)
+      let subscribers = 0;
+      const statMatch = html.match(/\"userInteractionCount\":\s*\"([0-9]+)\"/);
+      if (statMatch) {
+        subscribers = parseInt(statMatch[1], 10) || 0;
+      }
+
+      // 2. Subtitle or badge: "21.3M subscribers" or "21.3 million subscribers"
+      if (!subscribers) {
+        const subMatch = html.match(/([0-9.,KMBkmb]+(?:\s*million|\s*billion)?\s+subscribers?)/i);
+        if (subMatch) {
+          subscribers = parseCount(subMatch[1]);
+        }
+      }
+
+      const titleMatch =
+        html.match(/<meta[^>]+(?:property|name)=["'](?:og:title|title)["'][^>]+content=["']([^"']+)["']/i) ||
+        html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:title|title)["']/i) ||
+        html.match(/<title>([^<]+)<\/title>/i);
 
       let name = cleanHandle;
-      if (titleMatch) name = titleMatch[1].trim();
+      if (titleMatch) name = titleMatch[1].replace(/\s+-\s+YouTube$/i, '').trim();
+
+      const imgMatch =
+        html.match(/<meta[^>]+(?:property|name)=["'](?:og:image)["'][^>]+content=["']([^"']+)["']/i) ||
+        html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image)["']/i);
 
       let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=EF4444&color=ffffff&bold=true`;
       if (imgMatch) avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
 
-      // Parse subscribers from YouTube HTML
-      const subMatch = html.match(/([0-9.,KMBkmb]+(?:\s*million|\s*billion)?\s+subscribers?)/i);
-      let subscribers = 0;
-      if (subMatch) {
-        subscribers = parseCount(subMatch[1]);
+      if (subscribers > 0) {
+        return {
+          name,
+          handle: `@${cleanHandle}`,
+          followers: subscribers,
+          following: 0,
+          posts: 0,
+          avatarUrl,
+          exists: true,
+          isVerifiedReal: true,
+        };
       }
-
-      return {
-        name,
-        handle: `@${cleanHandle}`,
-        followers: subscribers,
-        following: 0,
-        posts: 0,
-        avatarUrl,
-        exists: true,
-        isVerifiedReal: subscribers > 0,
-      };
     }
   } catch (e) {
     // ignore

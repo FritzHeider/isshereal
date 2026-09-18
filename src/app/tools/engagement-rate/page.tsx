@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export default function EngagementRatePage() {
-  const [followers, setFollowers] = useState('48000');
-  const [likes, setLikes] = useState('1200');
-  const [comments, setComments] = useState('45');
+  const [followers, setFollowers] = useState('');
+  const [likes, setLikes] = useState('');
+  const [comments, setComments] = useState('');
   const [rate, setRate] = useState<number | null>(null);
 
   const calculate = (e: React.FormEvent) => {
@@ -54,6 +54,7 @@ export default function EngagementRatePage() {
               type="number"
               value={followers}
               onChange={(e) => setFollowers(e.target.value)}
+              placeholder="e.g. 50000"
               required
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500"
             />
@@ -67,6 +68,7 @@ export default function EngagementRatePage() {
                 type="number"
                 value={likes}
                 onChange={(e) => setLikes(e.target.value)}
+                placeholder="e.g. 1200"
                 required
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500"
               />
@@ -79,6 +81,7 @@ export default function EngagementRatePage() {
                 type="number"
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
+                placeholder="e.g. 45"
                 required
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500"
               />

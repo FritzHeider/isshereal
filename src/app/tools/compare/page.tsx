@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ScoreGauge } from '@/components/ScoreGauge';
 import { ProgressBar } from '@/components/ProgressBar';
 import { getVerifiedCreator } from '@/data/verified-creators';
+import { calculateProfileScore } from '@/lib/audit-engine';
 
 export default function ComparePage() {
   const [profileA, setProfileA] = useState('@nike');
@@ -17,29 +18,57 @@ export default function ComparePage() {
     const clean = handleStr.replace(/^@/, '').toLowerCase().trim();
     const v = getVerifiedCreator(clean);
     if (v) {
-      const isGood = (v.verified || v.followers > 100000);
-      const score = clean === 'lucamodels' ? 31 : (clean === 'alex_travels' ? 22 : 94);
-      const real = score > 80 ? 95 : 35;
       return {
         name: v.name,
         handle: v.handle,
-        followers: v.followers.toLocaleString(),
-        score,
-        realPct: real,
-        fakePct: 100 - real,
-        verdict: score >= 75 ? 'Likely Authentic' : 'High Risk',
-        isGood: score >= 75,
+        followers: `${(v.followers / (v.followers >= 1_000_000 ? 1_000_000 : 1_000)).toFixed(1)}${v.followers >= 1_000_000 ? 'M' : 'K'} followers`,
+        score: v.score,
+        realPct: v.realPct,
+        fakePct: v.fakePct,
+        verdict: v.verdict,
+        isGood: v.score >= 75,
       };
     }
+    // Check localStorage cache
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem(`audit_${clean}`) || localStorage.getItem(`audit_instagram_${clean}`);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.score) {
+            return {
+              name: parsed.name || handleStr,
+              handle: parsed.handle || handleStr,
+              followers: parsed.followers || 'Audited Profile',
+              score: parsed.score,
+              realPct: parsed.realPct || (100 - parsed.fakePct),
+              fakePct: parsed.fakePct || 10,
+              verdict: parsed.verdict || 'Audited Profile',
+              isGood: parsed.score >= 75,
+            };
+          }
+        } catch (e) {}
+      }
+    }
+    // Live calculate for unlisted profile
+    const calculated = calculateProfileScore({
+      platform: 'Instagram',
+      handle: `@${clean}`,
+      name: clean.charAt(0).toUpperCase() + clean.slice(1),
+      followers: fallbackScore > 75 ? 250000 : 25000,
+      following: 350,
+      posts: 120,
+      avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(clean)}&background=059669&color=ffffff&bold=true`,
+    });
     return {
       name: handleStr,
       handle: handleStr,
-      followers: 'Audited Profile',
-      score: fallbackScore,
-      realPct: fallbackScore > 60 ? 85 : 40,
-      fakePct: fallbackScore > 60 ? 15 : 60,
-      verdict: fallbackScore >= 75 ? 'Likely Authentic' : 'High Risk',
-      isGood: fallbackScore >= 75,
+      followers: calculated.followers,
+      score: calculated.score,
+      realPct: calculated.realPct,
+      fakePct: calculated.fakePct,
+      verdict: calculated.verdict,
+      isGood: calculated.score >= 75,
     };
   };
 

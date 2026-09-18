@@ -37,11 +37,11 @@ function AnalyzeContent() {
   const [category, setCategory] = useState('social');
   const [platform, setPlatform] = useState('instagram');
   const [handle, setHandle] = useState(initialHandle);
-  const [followers, setFollowers] = useState('25000');
-  const [following, setFollowing] = useState('450');
-  const [posts, setPosts] = useState('85');
-  const [likes, setLikes] = useState('650');
-  const [comments, setComments] = useState('28');
+  const [followers, setFollowers] = useState('');
+  const [following, setFollowing] = useState('');
+  const [posts, setPosts] = useState('');
+  const [likes, setLikes] = useState('');
+  const [comments, setComments] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetchingLive, setFetchingLive] = useState(false);
   const [liveSuccessMsg, setLiveSuccessMsg] = useState<string | null>(null);
@@ -145,17 +145,23 @@ function AnalyzeContent() {
     const cleanHandle = handle.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim();
 
     try {
+      const numFollowers = followers.trim() ? parseFloat(followers.replace(/,/g, '')) : undefined;
+      const numFollowing = following.trim() ? parseFloat(following.replace(/,/g, '')) : undefined;
+      const numPosts = posts.trim() ? parseFloat(posts.replace(/,/g, '')) : undefined;
+      const numLikes = likes.trim() ? parseFloat(likes.replace(/,/g, '')) : undefined;
+      const numComments = comments.trim() ? parseFloat(comments.replace(/,/g, '')) : undefined;
+
       const res = await fetch('/api/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           platform,
           handle: cleanHandle,
-          followers: parseFloat(followers.replace(/,/g, '')) || 0,
-          following: parseFloat(following.replace(/,/g, '')) || 0,
-          posts: parseFloat(posts.replace(/,/g, '')) || 0,
-          likes: parseFloat(likes.replace(/,/g, '')) || 0,
-          comments: parseFloat(comments.replace(/,/g, '')) || 0,
+          followers: numFollowers,
+          following: numFollowing,
+          posts: numPosts,
+          likes: numLikes,
+          comments: numComments,
         }),
       });
 

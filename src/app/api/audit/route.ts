@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
     // 2. If user provides explicit numbers from form/verification modal
     if (followers !== undefined && Number(followers) > 0) {
       const numFollowers = Number(followers);
-      const numFollowing = Number(following) || Math.round(numFollowers * 0.02);
-      const numPosts = Number(posts) || 45;
+      const numFollowing = following !== undefined && following !== '' ? Math.max(0, Number(following)) : 0;
+      const numPosts = posts !== undefined && posts !== '' ? Math.max(0, Number(posts)) : 0;
       const customAvatar = avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=059669&color=ffffff&bold=true`;
 
       const audit = calculateProfileScore({
