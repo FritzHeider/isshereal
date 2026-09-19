@@ -102,7 +102,11 @@ export function Hero() {
     setLoadingStep(`Connecting to ${detectedPlatform === 'instagram' ? 'Instagram' : detectedPlatform}...`);
 
     try {
-      const cleanHandle = query.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim();
+      const cleanHandle = query
+        .replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '')
+        .replace(/^@/, '')
+        .split(/[/?#]/)[0]
+        .trim();
 
       const stepTimer = setTimeout(() => {
         setLoadingStep(`Analyzing ${cleanHandle}'s audience metrics...`);
@@ -131,13 +135,16 @@ export function Hero() {
         }
         router.push(`/report/${data.report.id}`);
       } else {
-        router.push(`/analyze?handle=${encodeURIComponent(cleanHandle)}`);
+        router.push(`/report/${detectedPlatform === 'instagram' ? 'ig_' : ''}${encodeURIComponent(cleanHandle)}`);
       }
     } catch (err: any) {
       console.error('Audit failed:', err);
-      // Fallback to analyze page with handle pre-populated
-      const cleanHandle = query.replace(/^@/, '').trim();
-      router.push(`/analyze?handle=${encodeURIComponent(cleanHandle)}`);
+      const cleanHandle = query
+        .replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '')
+        .replace(/^@/, '')
+        .split(/[/?#]/)[0]
+        .trim();
+      router.push(`/report/ig_${encodeURIComponent(cleanHandle)}`);
     } finally {
       setLoading(false);
     }

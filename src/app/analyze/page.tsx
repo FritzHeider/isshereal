@@ -48,7 +48,7 @@ function AnalyzeContent() {
 
   React.useEffect(() => {
     if (initialHandle) {
-      const clean = initialHandle.replace(/^@/, '').toLowerCase().trim();
+      const clean = initialHandle.replace(/^@/, '').split(/[/?#]/)[0].toLowerCase().trim();
       const v = getVerifiedCreator(clean);
       if (v) {
         setHandle(v.handle);
@@ -69,7 +69,12 @@ function AnalyzeContent() {
     setFetchingLive(true);
     setLiveSuccessMsg(null);
 
-    const clean = handle.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim().toLowerCase();
+    const clean = handle
+      .replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '')
+      .replace(/^@/, '')
+      .split(/[/?#]/)[0]
+      .trim()
+      .toLowerCase();
 
     // Check verified dataset first
     const v = getVerifiedCreator(clean);
@@ -141,8 +146,11 @@ function AnalyzeContent() {
     e.preventDefault();
     if (!handle.trim()) return;
 
-    setLoading(true);
-    const cleanHandle = handle.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim();
+    const cleanHandle = handle
+      .replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '')
+      .replace(/^@/, '')
+      .split(/[/?#]/)[0]
+      .trim();
 
     try {
       const numFollowers = followers.trim() ? parseFloat(followers.replace(/,/g, '')) : undefined;

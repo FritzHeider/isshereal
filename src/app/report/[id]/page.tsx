@@ -50,6 +50,7 @@ export default function ReportPage() {
   const cleanHandle = (customHandle || rawId)
     .replace(/^(ig_|instagram_|youtube_|tiktok_)/i, '')
     .replace(/^@/, '')
+    .split(/[/?#]/)[0]
     .toLowerCase()
     .trim();
 
@@ -262,9 +263,12 @@ export default function ReportPage() {
 
           <form onSubmit={handleApplyCustomNumbers} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Follower Count <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-slate-700">
+                  Follower Count <span className="text-rose-500">*</span>
+                </label>
+                <span className="text-[11px] text-slate-400">Type or select a tier</span>
+              </div>
               <input
                 type="text"
                 placeholder="e.g. 14,200 or 1.2M"
@@ -273,6 +277,28 @@ export default function ReportPage() {
                 required
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-medium"
               />
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                <span className="text-[11px] text-slate-400 font-medium">Quick presets:</span>
+                {[
+                  { label: '10K Emerging', val: '10,000', following: '450', posts: '95' },
+                  { label: '50K Micro', val: '50,000', following: '720', posts: '180' },
+                  { label: '250K Mid-Tier', val: '250,000', following: '410', posts: '340' },
+                  { label: '1M+ Macro', val: '1,200,000', following: '290', posts: '850' },
+                ].map((tier) => (
+                  <button
+                    key={tier.label}
+                    type="button"
+                    onClick={() => {
+                      setEditFollowers(tier.val);
+                      setEditFollowing(tier.following);
+                      setEditPosts(tier.posts);
+                    }}
+                    className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-600 text-[11px] font-medium transition-colors cursor-pointer"
+                  >
+                    {tier.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">

@@ -124,86 +124,103 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
 
   const url = `https://www.instagram.com/${cleanHandle}/`;
 
-  try {
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
-    });
+  const botUas = [
+    'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+    'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)',
+    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+  ];
 
-    if (res.ok) {
-      const htmlContent = await res.text();
+  let lastStatus = 0;
+  let lastUrl = '';
+  let lastHtmlSnippet = '';
 
-      // 1. Direct global stats match across raw HTML (immune to attribute ordering)
-      const globalStatsMatch = htmlContent.match(
-        /([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following,\s*([0-9.,KMBkmb]+)\s+Posts/i
-      );
+  for (const ua of botUas) {
+    try {
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent': ua,
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+      });
 
-      // 2. Resilient meta description match with any attribute order
-      const descMatch =
-        htmlContent.match(/<meta[^>]+(?:property|name)=["'](?:og:description|description)["'][^>]+content=["']([^"']+)["']/i) ||
-        htmlContent.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:description|description)["']/i);
+      lastStatus = res.status;
+      lastUrl = res.url;
 
-      let followers = 0;
-      let following = 0;
-      let posts = 0;
+      if (res.ok) {
+        const htmlContent = await res.text();
+        lastHtmlSnippet = htmlContent.slice(0, 200);
 
-      if (globalStatsMatch) {
-        followers = parseCount(globalStatsMatch[1]);
-        following = parseCount(globalStatsMatch[2]);
-        posts = parseCount(globalStatsMatch[3]);
-      } else if (descMatch) {
-        const statsMatch = descMatch[1].match(
+        // 1. Direct global stats match across raw HTML (immune to attribute ordering)
+        const globalStatsMatch = htmlContent.match(
           /([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following,\s*([0-9.,KMBkmb]+)\s+Posts/i
         );
-        if (statsMatch) {
-          followers = parseCount(statsMatch[1]);
-          following = parseCount(statsMatch[2]);
-          posts = parseCount(statsMatch[3]);
+
+        // 2. Resilient meta description match with any attribute order
+        const descMatch =
+          htmlContent.match(/<meta[^>]+(?:property|name)=["'](?:og:description|description)["'][^>]+content=["']([^"']+)["']/i) ||
+          htmlContent.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:description|description)["']/i);
+
+        let followers = 0;
+        let following = 0;
+        let posts = 0;
+
+        if (globalStatsMatch) {
+          followers = parseCount(globalStatsMatch[1]);
+          following = parseCount(globalStatsMatch[2]);
+          posts = parseCount(globalStatsMatch[3]);
+        } else if (descMatch) {
+          const statsMatch = descMatch[1].match(
+            /([0-9.,KMBkmb]+)\s+Followers,\s*([0-9.,KMBkmb]+)\s+Following,\s*([0-9.,KMBkmb]+)\s+Posts/i
+          );
+          if (statsMatch) {
+            followers = parseCount(statsMatch[1]);
+            following = parseCount(statsMatch[2]);
+            posts = parseCount(statsMatch[3]);
+          }
+        }
+
+        // Title & Name extraction
+        const titleMatch =
+          htmlContent.match(/<meta[^>]+(?:property|name)=["'](?:og:title|title)["'][^>]+content=["']([^"']+)["']/i) ||
+          htmlContent.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:title|title)["']/i) ||
+          htmlContent.match(/<title>([^<]+)<\/title>/i);
+
+        let name = cleanHandle;
+        if (titleMatch) {
+          const rawTitle = titleMatch[1];
+          const nameMatch = rawTitle.match(/^([^(•|]+)/);
+          if (nameMatch) {
+            name = decodeEntities(nameMatch[1].trim());
+          }
+        }
+
+        // Avatar extraction
+        const imgMatch =
+          htmlContent.match(/<meta[^>]+(?:property|name)=["'](?:og:image)["'][^>]+content=["']([^"']+)["']/i) ||
+          htmlContent.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image)["']/i);
+
+        let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`;
+        if (imgMatch) {
+          avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
+        }
+
+        if (followers > 0) {
+          return {
+            name,
+            handle: `@${cleanHandle}`,
+            followers,
+            following,
+            posts,
+            avatarUrl,
+            exists: true,
+            isVerifiedReal: true,
+          };
         }
       }
-
-      // Title & Name extraction
-      const titleMatch =
-        htmlContent.match(/<meta[^>]+(?:property|name)=["'](?:og:title|title)["'][^>]+content=["']([^"']+)["']/i) ||
-        htmlContent.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:title|title)["']/i) ||
-        htmlContent.match(/<title>([^<]+)<\/title>/i);
-
-      let name = cleanHandle;
-      if (titleMatch) {
-        const rawTitle = titleMatch[1];
-        const nameMatch = rawTitle.match(/^([^(•|]+)/);
-        if (nameMatch) {
-          name = decodeEntities(nameMatch[1].trim());
-        }
-      }
-
-      // Avatar extraction
-      const imgMatch =
-        htmlContent.match(/<meta[^>]+(?:property|name)=["'](?:og:image)["'][^>]+content=["']([^"']+)["']/i) ||
-        htmlContent.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image)["']/i);
-
-      let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`;
-      if (imgMatch) {
-        avatarUrl = imgMatch[1].replace(/&amp;/g, '&');
-      }
-
-      if (followers > 0) {
-        return {
-          name,
-          handle: `@${cleanHandle}`,
-          followers,
-          following,
-          posts,
-          avatarUrl,
-          exists: true,
-          isVerifiedReal: true,
-        };
-      }
+    } catch (err: any) {
+      console.warn(`Instagram live scrape with ${ua.slice(0, 15)}:`, err?.message);
     }
-  } catch (err: any) {
-    console.warn('Instagram live scrape network attempt:', err?.message);
   }
 
   // Clean genuine fallback when unindexed or blocked by Meta IP firewall

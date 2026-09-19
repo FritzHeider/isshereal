@@ -225,7 +225,7 @@ export function VerifiedAuditsGrid() {
                   </span>
 
                   <Link
-                    href={`/analyze?handle=${encodeURIComponent(audit.handle.replace('@', ''))}&platform=${encodeURIComponent(audit.platform.toLowerCase())}`}
+                    href={`/report/${encodeURIComponent(audit.handle.replace('@', ''))}`}
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 group-hover:text-emerald-600 transition-colors"
                   >
                     <span>View Audit</span>

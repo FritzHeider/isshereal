@@ -17,7 +17,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Profile handle is required' }, { status: 400 });
     }
 
-    const cleanHandle = handle.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim().toLowerCase();
+    const cleanHandle = handle
+      .replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '')
+      .replace(/^@/, '')
+      .split(/[/?#]/)[0]
+      .trim()
+      .toLowerCase();
 
     // 1. Check verified real profiles first
     const verified = getVerifiedCreator(cleanHandle);
@@ -111,7 +116,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Handle or ID is required' }, { status: 400 });
   }
 
-  const cleanHandle = handle.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '').replace(/^@/, '').split('/')[0].trim().toLowerCase();
+  const cleanHandle = handle
+    .replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '')
+    .replace(/^@/, '')
+    .split(/[/?#]/)[0]
+    .trim()
+    .toLowerCase();
 
   // 1. Check in-memory store
   const cached = getAuditFromStore(cleanHandle);
