@@ -18,6 +18,28 @@ export interface VerifiedCreator {
 }
 
 export const VERIFIED_CREATORS: Record<string, VerifiedCreator> = {
+  fritzthatcat: {
+    handle: '@fritzthatcat',
+    name: 'Fritz',
+    platform: 'Instagram',
+    followers: 4893,
+    following: 2050,
+    posts: 2222,
+    avatarUrl: '/images/avatars/fritzthatcat.jpg',
+    verified: true,
+    score: 87,
+    verdict: 'Top Tier Authentic Community Profile',
+    fakePct: 11,
+    realPct: 89,
+    engagementRate: '3.4%',
+    suspiciousSpike: 'Consistent multi-year publishing history with 2,222 organic posts',
+    riskSignals: ['Zero active commercial engagement pod or automated script activity detected'],
+    verifiedSignals: [
+      'Over 2,220 historical public photo releases demonstrating genuine human creator activity',
+      'Balanced community following ratio (4,893:2,050) typical of active social creator engagement',
+      'Active feline and lifestyle creator community footprint',
+    ],
+  },
   nike: {
     handle: '@nike',
     name: 'Nike',
@@ -1074,6 +1096,18 @@ export function getVerifiedCreator(cleanHandle: string): VerifiedCreator | null 
   if (VERIFIED_CREATORS[norm]) return VERIFIED_CREATORS[norm];
   
   // Brand & creator lookups
+  if (
+    norm === 'fritzthatcat' ||
+    norm === 'fritz' ||
+    norm === 'fritz_that_cat' ||
+    norm === 'fritzthecat' ||
+    norm === 'fritzheider' ||
+    norm === 'fritz_heider' ||
+    norm.includes('fritzthatcat') ||
+    norm.includes('fritz_that_cat')
+  ) {
+    return VERIFIED_CREATORS.fritzthatcat;
+  }
   if (norm === 'nike' || norm.includes('nike')) return VERIFIED_CREATORS.nike;
   if (norm === 'nasa' || norm.includes('nasa')) return VERIFIED_CREATORS.nasa;
   if (norm === 'mrbeast' || norm.includes('mrbeast')) return VERIFIED_CREATORS.mrbeast;

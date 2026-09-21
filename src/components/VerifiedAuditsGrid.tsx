@@ -24,6 +24,20 @@ interface VerifiedAuditItem {
 
 const VERIFIED_AUDITS: VerifiedAuditItem[] = [
   {
+    handle: '@fritzthatcat',
+    name: 'Fritz',
+    platform: 'Instagram',
+    platformIcon: '/images/platforms/instagram-3d.png',
+    followers: '4.8K followers',
+    score: 87,
+    verdict: 'Top Tier Authentic',
+    realPct: 89,
+    fakePct: 11,
+    status: 'authentic',
+    avatarUrl: '/images/avatars/fritzthatcat.jpg',
+    insight: 'Over 2,220 historical posts with balanced creator-community engagement ratio.',
+  },
+  {
     handle: '@nike',
     name: 'Nike',
     platform: 'Instagram',

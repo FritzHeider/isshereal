@@ -233,6 +233,28 @@ export const HOW_IT_WORKS: StepItem[] = [
 
 export const SAMPLE_REPORTS: SampleReport[] = [
   {
+    id: 'fritzthatcat',
+    name: 'Fritz',
+    handle: '@fritzthatcat',
+    platform: 'Instagram',
+    score: 87,
+    followers: '4.8K followers',
+    verdict: 'Top Tier Authentic Community Profile',
+    fakePct: 11,
+    avatarColor: 'bg-emerald-600',
+    avatarImage: '/images/avatars/fritzthatcat.jpg',
+    engagementRate: '3.4%',
+    suspiciousSpike: 'Consistent multi-year publishing history with 2,222 organic posts',
+    riskSignals: [
+      'Zero active commercial engagement pod or automated script activity detected',
+    ],
+    verifiedSignals: [
+      'Over 2,220 historical public photo releases demonstrating genuine human creator activity',
+      'Balanced community following ratio (4,893:2,050) typical of active social creator engagement',
+      'Active feline and lifestyle creator community footprint',
+    ],
+  },
+  {
     id: 'mrbeast',
     name: 'MrBeast',
     handle: '@mrbeast',
