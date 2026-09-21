@@ -1,11 +1,16 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 
+/** Sanitize handle: alphanumeric, underscore, dots only */
+function sanitizeHandle(raw: string): string {
+  return raw.replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 64);
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const handle = searchParams.get('handle') || 'unknown';
-  const score = parseInt(searchParams.get('score') || '50');
+  const handle = sanitizeHandle(searchParams.get('handle') || 'unknown');
+  const scoreRaw = parseInt(searchParams.get('score') || '50');
+  const score = isNaN(scoreRaw) ? 50 : Math.max(0, Math.min(100, scoreRaw));
   const verdict = score >= 75 ? 'Likely Authentic' : score >= 50 ? 'Mixed Signals' : 'High Risk';
   const scoreColor = score >= 75 ? '#059669' : score >= 50 ? '#d97706' : '#e11d48';
 
@@ -25,6 +30,12 @@ export async function GET(req: NextRequest) {
         <div style={{ fontSize: '28px', fontWeight: '700', color: scoreColor, padding: '8px 24px', borderRadius: '999px', border: `2px solid ${scoreColor}` }}>{verdict}</div>
       </div>
     ),
-    { width: 1200, height: 630 }
+    {
+      width: 1200,
+      height: 630,
+      headers: {
+        'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=43200',
+      },
+    }
   );
 }
