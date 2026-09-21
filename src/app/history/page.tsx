@@ -1,87 +1,150 @@
 'use client';
 
-import React from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { History as HistoryIcon, ArrowLeft, ArrowRight } from 'lucide-react';
-import { SAMPLE_REPORTS } from '@/data/content';
 import { ScoreGauge } from '@/components/ScoreGauge';
-import { RiskBadge } from '@/components/RiskBadge';
+import { Button } from '@/components/ui/button';
+import { Clock, Trash2, ArrowRight, Search, User } from 'lucide-react';
+
+interface AuditHistory {
+  id: string;
+  handle: string;
+  platform: string;
+  score: number;
+  name?: string;
+  avatarUrl?: string;
+  timestamp: number;
+}
 
 export default function HistoryPage() {
-  return (
-    <div className="pt-28 pb-20 container-x max-w-4xl">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 mb-6 transition-colors"
-      >
-        <ArrowLeft size={14} />
-        Back to Home
-      </Link>
+  const [history, setHistory] = useState<AuditHistory[]>([]);
+  const [loading, setLoading] = useState(true);
 
-      <div className="flex items-center justify-between mb-8">
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  const loadHistory = () => {
+    try {
+      const items: AuditHistory[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('audit_')) {
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
+          if (data && data.handle) {
+            items.push(data);
+          }
+        }
+      }
+      items.sort((a, b) => b.timestamp - a.timestamp);
+      setHistory(items);
+    } catch (error) {
+      console.error('Error loading history:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearHistory = () => {
+    if (confirm('Are you sure you want to clear all audit history?')) {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('audit_')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      setHistory([]);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-12 max-w-6xl">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <HistoryIcon size={18} />
-            </div>
-            <h1 className="font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">
-              Audit History
-            </h1>
-          </div>
-          <p className="text-slate-500 text-sm mt-1">
-            Recently analyzed profiles and cached authenticity reports
-          </p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Audit History</h1>
+          <p className="text-slate-600 dark:text-slate-400">Recently analyzed profiles</p>
         </div>
+        
+        {history.length > 0 && (
+          <Button 
+            variant="outline" 
+            onClick={clearHistory}
+            className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-900/30"
+          >
+            <Trash2 className="w-4 h-4" />
+            Clear History
+          </Button>
+        )}
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xl divide-y divide-slate-100 overflow-hidden">
-        {SAMPLE_REPORTS.map((report) => (
-          <div
-            key={report.id}
-            className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors"
-          >
-            <div className="flex items-center gap-4">
-              <div
-                className={`w-12 h-12 rounded-2xl ${report.avatarColor} text-white font-bold flex items-center justify-center text-base shadow-sm shrink-0`}
-              >
-                {report.name.charAt(0)}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-base text-slate-900">
-                    {report.name}
-                  </h3>
-                  <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                    {report.platform}
-                  </span>
+      {history.length === 0 ? (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-12 text-center flex flex-col items-center">
+          <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+            <Search className="w-8 h-8 text-slate-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">No audits yet</h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-6">Start by analyzing a profile to see your history here.</p>
+          <Link href="/">
+            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl">
+              New Audit
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {history.map((item) => (
+            <Link href={`/report/${item.id || encodeURIComponent(item.handle)}?platform=${item.platform}`} key={item.id || item.handle}>
+              <div className="group bg-white dark:bg-slate-900 rounded-3xl shadow-sm hover:shadow-md border border-slate-200 dark:border-slate-800 p-6 transition-all duration-300">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+                      {item.avatarUrl ? (
+                        <img src={item.avatarUrl} alt={item.handle} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-6 h-6 text-slate-400" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 dark:text-white truncate max-w-[120px]">
+                        {item.name || `@${item.handle}`}
+                      </h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">@{item.handle}</p>
+                    </div>
+                  </div>
+                  <div className="w-12 h-12">
+                    <ScoreGauge score={item.score} size={48} showLabel={false} />
+                  </div>
                 </div>
-                <div className="text-xs text-slate-500 font-mono mt-0.5">
-                  {report.handle} · {report.followers}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-5 justify-between sm:justify-end">
-              <div className="flex items-center gap-3">
-                <ScoreGauge score={report.score} size={48} strokeWidth={6} />
-                <div className="text-right">
-                  <RiskBadge score={report.score} label={report.verdict} />
-                  <div className="text-[11px] text-slate-500 mt-1">
-                    {report.fakePct}% fake / inactive
+                
+                <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 capitalize">
+                    <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                    {item.platform}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-400">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>
+                      {new Date(item.timestamp).toLocaleDateString(undefined, { 
+                        month: 'short', day: 'numeric' 
+                      })}
+                    </span>
                   </div>
                 </div>
               </div>
-
-              <Link
-                href={`/report/${report.id}`}
-                className="p-2 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors"
-              >
-                <ArrowRight size={18} />
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

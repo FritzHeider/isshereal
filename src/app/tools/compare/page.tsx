@@ -1,241 +1,231 @@
 'use client';
 
-import React, { useState } from 'react';
-import { GitCompareArrows, ArrowLeft, ShieldCheck, ArrowRight, ExternalLink } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScoreGauge } from '@/components/ScoreGauge';
 import { ProgressBar } from '@/components/ProgressBar';
-import { getVerifiedCreator } from '@/data/verified-creators';
-import { calculateProfileScore } from '@/lib/audit-engine';
+import { RiskBadge } from '@/components/RiskBadge';
+import { Loader2, ArrowUpCircle, ArrowDownCircle, MinusCircle, User } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function ComparePage() {
-  const [profileA, setProfileA] = useState('@nike');
-  const [profileB, setProfileB] = useState('@natgeo');
-  const [compared, setCompared] = useState(true);
+  const [handleA, setHandleA] = useState('');
+  const [handleB, setHandleB] = useState('');
+  const [platform, setPlatform] = useState('instagram');
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<{ a: any; b: any } | null>(null);
+  const [error, setError] = useState('');
 
-  const getScoreData = (handleStr: string, fallbackScore: number) => {
-    const clean = handleStr.replace(/^@/, '').toLowerCase().trim();
-    const v = getVerifiedCreator(clean);
-    if (v) {
-      return {
-        name: v.name,
-        handle: v.handle,
-        followers: `${(v.followers / (v.followers >= 1_000_000 ? 1_000_000 : 1_000)).toFixed(1)}${v.followers >= 1_000_000 ? 'M' : 'K'} followers`,
-        score: v.score,
-        realPct: v.realPct,
-        fakePct: v.fakePct,
-        verdict: v.verdict,
-        isGood: v.score >= 75,
-      };
+  const handleCompare = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!handleA || !handleB) {
+      setError('Please enter both handles');
+      return;
     }
-    // Check localStorage cache
-    if (typeof window !== 'undefined') {
-      const cached = localStorage.getItem(`audit_${clean}`) || localStorage.getItem(`audit_instagram_${clean}`);
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          if (parsed && parsed.score) {
-            return {
-              name: parsed.name || handleStr,
-              handle: parsed.handle || handleStr,
-              followers: parsed.followers || 'Audited Profile',
-              score: parsed.score,
-              realPct: parsed.realPct || (100 - parsed.fakePct),
-              fakePct: parsed.fakePct || 10,
-              verdict: parsed.verdict || 'Audited Profile',
-              isGood: parsed.score >= 75,
-            };
-          }
-        } catch (e) {}
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const [resA, resB] = await Promise.all([
+        fetch(`/api/audit?handle=${encodeURIComponent(handleA)}&platform=${platform}`),
+        fetch(`/api/audit?handle=${encodeURIComponent(handleB)}&platform=${platform}`),
+      ]);
+
+      if (!resA.ok || !resB.ok) {
+        throw new Error('Failed to fetch audit data');
       }
+
+      const dataA = await resA.json();
+      const dataB = await resB.json();
+
+      setResults({ a: dataA, b: dataB });
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during comparison');
+    } finally {
+      setLoading(false);
     }
-    // Live calculate for unlisted profile
-    const calculated = calculateProfileScore({
-      platform: 'Instagram',
-      handle: `@${clean}`,
-      name: clean.charAt(0).toUpperCase() + clean.slice(1),
-      followers: fallbackScore > 75 ? 250000 : 25000,
-      following: 350,
-      posts: 120,
-      avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(clean)}&background=059669&color=ffffff&bold=true`,
-    });
-    return {
-      name: handleStr,
-      handle: handleStr,
-      followers: calculated.followers,
-      score: calculated.score,
-      realPct: calculated.realPct,
-      fakePct: calculated.fakePct,
-      verdict: calculated.verdict,
-      isGood: calculated.score >= 75,
-    };
   };
 
-  const dataA = getScoreData(profileA, 88);
-  const dataB = getScoreData(profileB, 92);
-
-  const handleCompare = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCompared(true);
+  const getWinnerIcon = (valA: number, valB: number, higherIsBetter: boolean) => {
+    if (valA === valB) return <MinusCircle className="w-5 h-5 text-slate-400" />;
+    
+    let isAWinner = higherIsBetter ? valA > valB : valA < valB;
+    
+    if (isAWinner) {
+      return <ArrowUpCircle className="w-5 h-5 text-emerald-500" />;
+    }
+    return <ArrowDownCircle className="w-5 h-5 text-red-500" />;
   };
 
   return (
-    <div className="pt-28 pb-20 container-x max-w-4xl">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 mb-6 transition-colors"
-      >
-        <ArrowLeft size={14} />
-        Back to Home
-      </Link>
+    <div className="container mx-auto px-4 py-12 max-w-5xl">
+      <div className="text-center mb-12">
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+          Compare Profiles
+        </h1>
+        <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Analyze and compare two creator profiles side-by-side to see who has better engagement and more authentic followers.
+        </p>
+      </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xl p-6 sm:p-8">
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <GitCompareArrows size={20} />
+      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8 mb-12">
+        <form onSubmit={handleCompare} className="flex flex-col md:flex-row gap-4 items-end">
+          <div className="flex-1 w-full space-y-2">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Profile A Handle</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">@</span>
+              <input
+                type="text"
+                value={handleA}
+                onChange={(e) => setHandleA(e.target.value.replace('@', ''))}
+                className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                placeholder="cristiano"
+              />
             </div>
-            <div>
-              <h1 className="font-extrabold text-xl sm:text-2xl text-slate-900">
-                Profile Comparison
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500">
-                Compare two profiles head-to-head to determine audience health
-              </p>
+          </div>
+          
+          <div className="flex items-center justify-center py-4 md:py-0 px-2 text-slate-400 font-medium">
+            VS
+          </div>
+          
+          <div className="flex-1 w-full space-y-2">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Profile B Handle</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">@</span>
+              <input
+                type="text"
+                value={handleB}
+                onChange={(e) => setHandleB(e.target.value.replace('@', ''))}
+                className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                placeholder="leomessi"
+              />
             </div>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 text-white text-xs font-semibold">
-            <span className="text-emerald-400">⚡</span>
-            <span>Live Web-Use Telemetry</span>
-          </div>
-        </div>
-
-        {/* Quick Presets */}
-        <div className="mb-6 flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-slate-400 font-medium">Comparison Presets:</span>
-          {[
-            { label: 'Nike vs NatGeo', a: '@nike', b: '@natgeo' },
-            { label: 'MrBeast vs Luca', a: '@mrbeast', b: '@lucamodels' },
-            { label: 'Figma vs Nike', a: '@figma', b: '@nike' },
-          ].map((p) => (
-            <button
-              key={p.label}
-              type="button"
-              onClick={() => {
-                setProfileA(p.a);
-                setProfileB(p.b);
-                setCompared(true);
-              }}
-              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-700 font-medium transition-colors cursor-pointer"
+          <div className="w-full md:w-auto space-y-2">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Platform</label>
+            <select
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              className="w-full md:w-40 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
             >
-              {p.label}
-            </button>
-          ))}
-        </div>
+              <option value="instagram">Instagram</option>
+              <option value="tiktok">TikTok</option>
+              <option value="twitter">X (Twitter)</option>
+              <option value="youtube">YouTube</option>
+            </select>
+          </div>
 
-        <form onSubmit={handleCompare} className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Profile A
-            </label>
-            <input
-              type="text"
-              value={profileA}
-              onChange={(e) => setProfileA(e.target.value)}
-              required
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Profile B
-            </label>
-            <input
-              type="text"
-              value={profileB}
-              onChange={(e) => setProfileB(e.target.value)}
-              required
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <Button
-              type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-full py-2.5 text-sm font-semibold shadow-md shadow-emerald-600/20"
-            >
-              Compare Profiles
-            </Button>
-          </div>
+          <Button 
+            type="submit" 
+            disabled={loading}
+            className="w-full md:w-auto py-3 px-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-[50px]"
+          >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Compare'}
+          </Button>
         </form>
 
-        {compared && (
-          <div className="grid sm:grid-cols-2 gap-6 pt-6 border-t border-slate-100 animate-fade-up">
-            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200/60 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="font-bold text-slate-900 text-base">{dataA.name}</div>
-                  <span className="text-xs font-mono text-slate-500">{dataA.handle}</span>
-                </div>
-                <div className="text-xs text-slate-500 mb-4">{dataA.followers}</div>
-                <div className="flex items-center gap-4 mb-4">
-                  <ScoreGauge score={dataA.score} size={76} strokeWidth={8} />
-                  <div>
-                    <div className={`text-xs font-bold ${dataA.isGood ? 'text-emerald-700' : 'text-rose-600'}`}>
-                      {dataA.verdict}
-                    </div>
-                    <div className="text-xs text-slate-500">{dataA.score}/100 Health score</div>
-                  </div>
-                </div>
-                <ProgressBar label="Real Followers" pct={dataA.realPct} color="#059669" />
-                <div className="mt-2">
-                  <ProgressBar label="Fake / Inactive" pct={dataA.fakePct} color="#f43f5e" />
-                </div>
-              </div>
-
-              <Link
-                href={`/analyze?handle=${encodeURIComponent(dataA.handle.replace('@', ''))}`}
-                className="mt-5 inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:underline"
-              >
-                <span>Full Audit Report</span>
-                <ExternalLink size={12} />
-              </Link>
-            </div>
-
-            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200/60 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="font-bold text-slate-900 text-base">{dataB.name}</div>
-                  <span className="text-xs font-mono text-slate-500">{dataB.handle}</span>
-                </div>
-                <div className="text-xs text-slate-500 mb-4">{dataB.followers}</div>
-                <div className="flex items-center gap-4 mb-4">
-                  <ScoreGauge score={dataB.score} size={76} strokeWidth={8} />
-                  <div>
-                    <div className={`text-xs font-bold ${dataB.isGood ? 'text-emerald-700' : 'text-rose-600'}`}>
-                      {dataB.verdict}
-                    </div>
-                    <div className="text-xs text-slate-500">{dataB.score}/100 Health score</div>
-                  </div>
-                </div>
-                <ProgressBar label="Real Followers" pct={dataB.realPct} color="#059669" />
-                <div className="mt-2">
-                  <ProgressBar label="Fake / Inactive" pct={dataB.fakePct} color="#f43f5e" />
-                </div>
-              </div>
-
-              <Link
-                href={`/analyze?handle=${encodeURIComponent(dataB.handle.replace('@', ''))}`}
-                className="mt-5 inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:underline"
-              >
-                <span>Full Audit Report</span>
-                <ExternalLink size={12} />
-              </Link>
-            </div>
+        {error && (
+          <div className="mt-4 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm text-center">
+            {error}
           </div>
         )}
       </div>
+
+      {results && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Profile A */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center">
+            <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden mb-4">
+              {results.a.avatarUrl ? (
+                <img src={results.a.avatarUrl} alt={results.a.handle} className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-10 h-10 text-slate-400" />
+              )}
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">{results.a.name || `@${results.a.handle}`}</h2>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">@{results.a.handle}</p>
+            
+            <div className="mb-8 w-full flex justify-center">
+              <ScoreGauge score={results.a.score} size={180} />
+            </div>
+
+            <div className="w-full space-y-6">
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+                <span className="text-slate-600 dark:text-slate-400">Engagement Rate</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-slate-900 dark:text-white">{results.a.engagementRate}%</span>
+                  {getWinnerIcon(parseFloat(results.a.engagementRate), parseFloat(results.b.engagementRate), true)}
+                </div>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+                <span className="text-slate-600 dark:text-slate-400">Real Followers</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-slate-900 dark:text-white">{results.a.realFollowersPercentage}%</span>
+                  {getWinnerIcon(parseFloat(results.a.realFollowersPercentage), parseFloat(results.b.realFollowersPercentage), true)}
+                </div>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+                <span className="text-slate-600 dark:text-slate-400">Bot Risk</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-slate-900 dark:text-white">{100 - parseFloat(results.a.realFollowersPercentage)}%</span>
+                  {getWinnerIcon(100 - parseFloat(results.a.realFollowersPercentage), 100 - parseFloat(results.b.realFollowersPercentage), false)}
+                </div>
+              </div>
+              <div className="flex justify-between items-center pb-2">
+                <span className="text-slate-600 dark:text-slate-400">Verdict</span>
+                <RiskBadge score={results.a.score} />
+              </div>
+            </div>
+          </div>
+
+          {/* Profile B */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center">
+            <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden mb-4">
+              {results.b.avatarUrl ? (
+                <img src={results.b.avatarUrl} alt={results.b.handle} className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-10 h-10 text-slate-400" />
+              )}
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">{results.b.name || `@${results.b.handle}`}</h2>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">@{results.b.handle}</p>
+            
+            <div className="mb-8 w-full flex justify-center">
+              <ScoreGauge score={results.b.score} size={180} />
+            </div>
+
+            <div className="w-full space-y-6">
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+                <span className="text-slate-600 dark:text-slate-400">Engagement Rate</span>
+                <div className="flex items-center gap-2">
+                  {getWinnerIcon(parseFloat(results.b.engagementRate), parseFloat(results.a.engagementRate), true)}
+                  <span className="font-semibold text-slate-900 dark:text-white">{results.b.engagementRate}%</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+                <span className="text-slate-600 dark:text-slate-400">Real Followers</span>
+                <div className="flex items-center gap-2">
+                  {getWinnerIcon(parseFloat(results.b.realFollowersPercentage), parseFloat(results.a.realFollowersPercentage), true)}
+                  <span className="font-semibold text-slate-900 dark:text-white">{results.b.realFollowersPercentage}%</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+                <span className="text-slate-600 dark:text-slate-400">Bot Risk</span>
+                <div className="flex items-center gap-2">
+                  {getWinnerIcon(100 - parseFloat(results.b.realFollowersPercentage), 100 - parseFloat(results.a.realFollowersPercentage), false)}
+                  <span className="font-semibold text-slate-900 dark:text-white">{100 - parseFloat(results.b.realFollowersPercentage)}%</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center pb-2">
+                <RiskBadge score={results.b.score} />
+                <span className="text-slate-600 dark:text-slate-400">Verdict</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

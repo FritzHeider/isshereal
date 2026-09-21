@@ -139,7 +139,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Copyright and Privacy Disclaimer */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div>
             © 2026 isshereal.com — authenticity analytics for everyone.
           </div>

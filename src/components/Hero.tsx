@@ -180,12 +180,12 @@ export function Hero() {
             </div>
 
             {/* H1 Headline */}
-            <h1 className="font-extrabold text-4xl sm:text-5xl lg:text-6xl text-slate-900 tracking-tight leading-[1.06]">
+            <h1 className="font-extrabold text-4xl sm:text-5xl lg:text-6xl text-slate-900 dark:text-slate-100 tracking-tight leading-[1.06]">
               Is <span className="text-emerald-600 font-black tracking-tighter">(s)he</span> real?
             </h1>
 
             {/* Value Proposition Subheadline */}
-            <p className="mt-5 text-lg sm:text-xl text-slate-600 max-w-xl leading-relaxed">
+            <p className="mt-5 text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed">
               Analyze any Instagram, TikTok, YouTube, dating, marketplace or
               freelance profile for fake followers, bots, catfish and scams — with a
               real authenticity score and AI verdict.
@@ -194,7 +194,7 @@ export function Hero() {
             {/* Wide Search Bar Form */}
             <form
               onSubmit={handleAudit}
-              className="mt-8 w-full max-w-xl bg-white rounded-2xl border border-slate-200 shadow-xl shadow-slate-200/60 p-2 sm:p-2.5 flex flex-col sm:flex-row gap-2 transition-all focus-within:border-emerald-500 focus-within:ring-3 focus-within:ring-emerald-500/15"
+              className="mt-8 w-full max-w-xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/60 p-2 sm:p-2.5 flex flex-col sm:flex-row gap-2 transition-all focus-within:border-emerald-500 focus-within:ring-3 focus-within:ring-emerald-500/15"
             >
               <div className="flex items-center flex-1 px-3">
                 <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mr-2.5 shrink-0">
@@ -203,7 +203,7 @@ export function Hero() {
                   ) : detectedPlatform === 'youtube' ? (
                     <Youtube size={18} className="text-red-600" />
                   ) : detectedPlatform === 'tiktok' ? (
-                    <Music2 size={18} className="text-slate-900" />
+                    <Music2 size={18} className="text-slate-900 dark:text-slate-100" />
                   ) : (
                     <Search size={18} />
                   )}
@@ -216,7 +216,7 @@ export function Hero() {
                     if (error) setError(null);
                   }}
                   placeholder="Paste an Instagram @handle, YouTube, or link..."
-                  className="w-full bg-transparent text-sm sm:text-base text-slate-900 placeholder:text-slate-400 outline-none"
+                  className="w-full bg-transparent text-sm sm:text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none"
                   disabled={loading}
                 />
                 <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md shrink-0">
@@ -267,7 +267,11 @@ export function Hero() {
                     setQuery(creator.label);
                     router.push(`/analyze?handle=${creator.handle}&platform=instagram`);
                   }}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200/90 text-slate-700 hover:border-emerald-500 hover:text-emerald-700 hover:bg-emerald-50/50 shadow-2xs transition-all cursor-pointer font-mono font-medium"
+                  onMouseEnter={() => {
+                    // Prefetch audit data on hover for faster navigation
+                    fetch(`/api/audit?handle=${creator.handle}&platform=instagram`, { priority: 'low' as RequestPriority }).catch(() => {});
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/90 text-slate-700 hover:border-emerald-500 hover:text-emerald-700 hover:bg-emerald-50/50 shadow-2xs transition-all cursor-pointer font-mono font-medium"
                 >
                   <span>{creator.label}</span>
                   <span className="text-[10px] text-emerald-600 bg-emerald-100/70 px-1 py-0.2 rounded font-sans font-bold">
@@ -290,28 +294,28 @@ export function Hero() {
             </button>
 
             {/* Social Proof Stats Row */}
-            <div className="grid grid-cols-3 gap-6 sm:gap-10 mt-12 pt-8 border-t border-slate-200/80 w-full max-w-xl">
+            <div className="grid grid-cols-3 gap-6 sm:gap-10 mt-12 pt-8 border-t border-slate-200 dark:border-slate-800/80 w-full max-w-xl">
               <div>
-                <div className="font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">
+                <div className="font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-slate-100 tracking-tight">
                   10.4M+
                 </div>
-                <div className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                   profiles analyzed
                 </div>
               </div>
               <div>
-                <div className="font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">
+                <div className="font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-slate-100 tracking-tight">
                   99.2%
                 </div>
-                <div className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                   model accuracy
                 </div>
               </div>
               <div>
-                <div className="font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">
+                <div className="font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-slate-100 tracking-tight">
                   10
                 </div>
-                <div className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                   platforms & apps
                 </div>
               </div>
@@ -322,7 +326,7 @@ export function Hero() {
           <div className="lg:col-span-5 relative mt-6 lg:mt-0">
             {/* Top Floating Pill Badge */}
             <div className="absolute -top-6 -right-2 z-20 animate-float hidden sm:block">
-              <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-100 p-3 flex items-center gap-3">
+              <div className="bg-white dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-3 flex items-center gap-3">
                 <span
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-base ${
                     currentProfile.score >= 75
@@ -350,7 +354,7 @@ export function Hero() {
             </div>
 
             {/* Main Mock Card */}
-            <div className="rounded-3xl border border-slate-200/90 bg-white shadow-2xl shadow-slate-200/80 overflow-hidden relative transition-all duration-300">
+            <div className="rounded-3xl border border-slate-200 dark:border-slate-800/90 bg-white dark:bg-slate-900 shadow-2xl shadow-slate-200/80 overflow-hidden relative transition-all duration-300">
               {/* Card Header (Dark Slate with Profile Avatar) */}
               <div className="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
                 <div className="flex items-center gap-3">
@@ -402,7 +406,7 @@ export function Hero() {
                     />
 
                     {/* Suspicious spike alert snippet */}
-                    <div className="flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200/60 rounded-lg p-2.5 mt-2">
+                    <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/60 rounded-lg p-2.5 mt-2">
                       <TrendingUp
                         size={15}
                         className={currentProfile.score >= 75 ? 'text-emerald-600 shrink-0' : 'text-rose-500 shrink-0'}
@@ -413,7 +417,7 @@ export function Hero() {
                 </div>
 
                 {/* Interactive Platform Tabs */}
-                <div className="pt-3 border-t border-slate-100">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-center justify-between mb-2.5">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                       Interactive Live Preview
@@ -428,8 +432,8 @@ export function Hero() {
                       onClick={() => setActivePlatform('instagram')}
                       className={`rounded-xl border p-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${
                         activePlatform === 'instagram'
-                          ? 'border-emerald-500 bg-emerald-50/60 text-slate-900 shadow-xs ring-1 ring-emerald-500/20'
-                          : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 text-slate-600'
+                          ? 'border-emerald-500 bg-emerald-50/60 text-slate-900 dark:text-slate-100 shadow-xs ring-1 ring-emerald-500/20'
+                          : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400'
                       }`}
                     >
                       <div className="relative w-5 h-5 shrink-0">
@@ -448,8 +452,8 @@ export function Hero() {
                       onClick={() => setActivePlatform('tiktok')}
                       className={`rounded-xl border p-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${
                         activePlatform === 'tiktok'
-                          ? 'border-emerald-500 bg-emerald-50/60 text-slate-900 shadow-xs ring-1 ring-emerald-500/20'
-                          : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 text-slate-600'
+                          ? 'border-emerald-500 bg-emerald-50/60 text-slate-900 dark:text-slate-100 shadow-xs ring-1 ring-emerald-500/20'
+                          : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400'
                       }`}
                     >
                       <div className="relative w-5 h-5 shrink-0">
@@ -468,8 +472,8 @@ export function Hero() {
                       onClick={() => setActivePlatform('youtube')}
                       className={`rounded-xl border p-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${
                         activePlatform === 'youtube'
-                          ? 'border-emerald-500 bg-emerald-50/60 text-slate-900 shadow-xs ring-1 ring-emerald-500/20'
-                          : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 text-slate-600'
+                          ? 'border-emerald-500 bg-emerald-50/60 text-slate-900 dark:text-slate-100 shadow-xs ring-1 ring-emerald-500/20'
+                          : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400'
                       }`}
                     >
                       <div className="relative w-5 h-5 shrink-0">

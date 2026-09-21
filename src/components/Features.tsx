@@ -23,7 +23,7 @@ const SECONDARY_ICONS: Record<string, React.ReactNode> = {
 
 export function Features() {
   return (
-    <section id="features" className="py-24 bg-white border-t border-slate-100">
+    <section id="features" className="py-24 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
       <div className="container-x">
         {/* Section Header */}
         <div className="max-w-3xl mb-16">
@@ -31,10 +31,10 @@ export function Features() {
             <Sparkles size={13} />
             <span>Why isshereal</span>
           </div>
-          <h2 className="font-extrabold text-3xl sm:text-5xl text-slate-900 tracking-tight leading-[1.1]">
+          <h2 className="font-extrabold text-3xl sm:text-5xl text-slate-900 dark:text-slate-100 tracking-tight leading-[1.1]">
             Everything you need to verify anyone
           </h2>
-          <p className="text-base sm:text-lg text-slate-600 mt-4 leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 mt-4 leading-relaxed">
             Detect fake followers, expose automated bots and catfish, and make
             data-driven decisions — whether vetting creator brand deals or dating
             matches.
@@ -46,7 +46,7 @@ export function Features() {
           {SPOTLIGHT_FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className="rounded-3xl border border-slate-200 bg-linear-to-b from-white to-slate-50/50 p-6 sm:p-8 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 transition-all duration-300 group overflow-hidden relative"
+              className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-linear-to-b from-white to-slate-50/50 p-6 sm:p-8 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 transition-all duration-300 group overflow-hidden relative"
             >
               <div>
                 <div className="flex items-center justify-between mb-6">
@@ -58,17 +58,17 @@ export function Features() {
                   </div>
                 </div>
 
-                <h3 className="font-extrabold text-xl sm:text-2xl text-slate-900 group-hover:text-emerald-700 transition-colors">
+                <h3 className="font-extrabold text-xl sm:text-2xl text-slate-900 dark:text-slate-100 group-hover:text-emerald-700 transition-colors">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-slate-600 mt-2.5 leading-relaxed max-w-md">
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2.5 leading-relaxed max-w-md">
                   {feature.text}
                 </p>
               </div>
 
               {/* 3D Rendered Graphic Asset */}
               {feature.image && (
-                <div className="relative mt-8 h-48 sm:h-56 w-full rounded-2xl overflow-hidden border border-slate-200/80 shadow-inner group-hover:scale-[1.02] transition-transform duration-500">
+                <div className="relative mt-8 h-48 sm:h-56 w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800/80 shadow-inner group-hover:scale-[1.02] transition-transform duration-500">
                   <Image
                     src={feature.image}
                     alt={feature.title}
@@ -83,19 +83,19 @@ export function Features() {
         </div>
 
         {/* Secondary Capabilities Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-8 border-t border-slate-100">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-8 border-t border-slate-100 dark:border-slate-800">
           {FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className="p-6 rounded-2xl border border-slate-200/70 bg-slate-50/40 hover:bg-white hover:border-emerald-200 hover:shadow-md transition-all group"
+              className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800/70 bg-slate-50 dark:bg-slate-950/40 hover:bg-white dark:bg-slate-900 hover:border-emerald-200 hover:shadow-md transition-all group"
             >
               <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 {SECONDARY_ICONS[feature.icon]}
               </div>
-              <h4 className="font-bold text-base text-slate-900 group-hover:text-emerald-700 transition-colors">
+              <h4 className="font-bold text-base text-slate-900 dark:text-slate-100 group-hover:text-emerald-700 transition-colors">
                 {feature.title}
               </h4>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">
                 {feature.text}
               </p>
             </div>

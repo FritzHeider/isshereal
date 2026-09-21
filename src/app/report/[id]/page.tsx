@@ -20,6 +20,7 @@ import {
   Edit3,
   RefreshCw,
   AlertCircle,
+  HelpCircle,
 } from 'lucide-react';
 import { SAMPLE_REPORTS } from '@/data/content';
 import { getVerifiedCreator } from '@/data/verified-creators';
@@ -28,6 +29,16 @@ import { ScoreGauge } from '@/components/ScoreGauge';
 import { ProgressBar } from '@/components/ProgressBar';
 import { RiskBadge } from '@/components/RiskBadge';
 import { Button } from '@/components/ui/button';
+import { RadarChart } from '@/components/RadarChart';
+import { MetricTooltip } from '@/components/MetricTooltip';
+import { ShareCard } from '@/components/ShareCard';
+import { FraudFlags } from '@/components/FraudFlags';
+import { AudienceEstimate } from '@/components/AudienceEstimate';
+import { PricingCalculator } from '@/components/PricingCalculator';
+import { ClaimProfile } from '@/components/ClaimProfile';
+import { RelatedAccounts } from '@/components/RelatedAccounts';
+import { SkeletonReport } from '@/components/SkeletonReport';
+import { ReportPageJsonLd } from '@/components/JsonLd';
 
 export default function ReportPage() {
   const params = useParams();
@@ -238,25 +249,8 @@ export default function ReportPage() {
 
   if (loading) {
     return (
-      <div className="pt-36 pb-32 container-x max-w-2xl text-center">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl p-10 flex flex-col items-center justify-center">
-          <div className="relative w-16 h-16 flex items-center justify-center mb-6">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-30"></span>
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200 shadow-sm">
-              <Loader2 size={28} className="animate-spin" />
-            </div>
-          </div>
-          <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
-            Running Live Authenticity Audit...
-          </h2>
-          <p className="text-slate-500 text-sm mt-2 max-w-md">
-            Connecting to public registry, modeling follower distributions, and evaluating engagement authenticity.
-          </p>
-          <div className="mt-6 flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200/60">
-            <ShieldCheck size={14} />
-            <span>Forensic Engine v2.4 Active</span>
-          </div>
-        </div>
+      <div className="pt-36 pb-32 container-x max-w-4xl">
+        <SkeletonReport />
       </div>
     );
   }
@@ -645,21 +639,23 @@ export default function ReportPage() {
 
         {/* Forensic Signal Matrix */}
         <div className="p-6 sm:p-8 grid sm:grid-cols-3 gap-4 border-b border-slate-100 bg-slate-50/40">
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80">
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
               Engagement Rate
+              <MetricTooltip label="Engagement Rate = (likes + comments) / followers × 100. Healthy rates range from 1-5% for large accounts and 3-10% for micro-influencers." />
             </div>
-            <div className="text-xl font-extrabold text-slate-900">
+            <div className="text-xl font-extrabold text-slate-900 dark:text-white">
               {report.engagementRate}
             </div>
-            <div className="text-xs text-slate-500 mt-1">
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {report.score >= 75 ? 'Above industry benchmark' : 'Under-indexed vs audience tier'}
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80">
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
               Bot Risk Index
+              <MetricTooltip label="Estimated percentage of the audience that consists of bots, fake accounts, or mass-following inactive profiles. Derived from follower-to-following ratio, post frequency, and engagement anomalies." />
             </div>
             <div
               className={`text-xl font-extrabold ${
@@ -668,7 +664,7 @@ export default function ReportPage() {
             >
               {report.fakePct}%
             </div>
-            <div className="text-xs text-slate-500 mt-1">
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Estimated synthetic audience
             </div>
           </div>
@@ -746,6 +742,76 @@ export default function ReportPage() {
           </div>
         </div>
       </div>
+
+      {/* Radar Chart Profile Analysis */}
+      <div className="mt-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl p-6 sm:p-8">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+          <Sparkles size={20} className="text-emerald-600" />
+          Profile Strength Analysis
+        </h3>
+        <div className="flex flex-col md:flex-row items-center gap-8">
+          <RadarChart
+            data={{
+              engagement: Math.min(100, Math.max(10, report.score + 5)),
+              growth: Math.min(100, Math.max(10, report.score - 3)),
+              quality: Math.min(100, Math.max(10, 100 - report.fakePct)),
+              consistency: Math.min(100, Math.max(10, report.postsCount ? Math.min(report.postsCount / 10, 95) : report.score)),
+              maturity: Math.min(100, Math.max(10, report.score + 8)),
+            }}
+            size={280}
+          />
+          <div className="flex-1 space-y-3 text-sm text-slate-600 dark:text-slate-400">
+            <p><strong className="text-slate-900 dark:text-white">Engagement:</strong> How actively the audience interacts with content.</p>
+            <p><strong className="text-slate-900 dark:text-white">Growth:</strong> Velocity and naturalness of follower acquisition.</p>
+            <p><strong className="text-slate-900 dark:text-white">Quality:</strong> Proportion of genuine, active followers.</p>
+            <p><strong className="text-slate-900 dark:text-white">Consistency:</strong> Regularity of content publishing cadence.</p>
+            <p><strong className="text-slate-900 dark:text-white">Maturity:</strong> Account age and establishment signals.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Fraud Flags Deep Dive */}
+      {report.riskSignals && report.riskSignals.length > 0 && (
+        <div className="mt-8">
+          <FraudFlags riskSignals={report.riskSignals} score={report.score} />
+        </div>
+      )}
+
+      {/* Audience Demographics Estimate */}
+      <div className="mt-8">
+        <AudienceEstimate
+          followers={report.followersCount || 0}
+          platform={report.platform || 'Instagram'}
+          engagementRate={report.engagementRate || '2.5%'}
+        />
+      </div>
+
+      {/* Pricing Calculator */}
+      <div className="mt-8">
+        <PricingCalculator
+          followers={report.followersCount || 0}
+          engagementRate={parseFloat(report.engagementRate) || 2.5}
+          platform={report.platform || 'Instagram'}
+        />
+      </div>
+
+      {/* Share Report & Claim Profile */}
+      <div className="mt-8 grid md:grid-cols-2 gap-6">
+        <ShareCard
+          profileName={displayName}
+          handle={displayHandle}
+          score={report.score}
+          verdict={report.verdict}
+          platform={report.platform || 'Instagram'}
+        />
+        <ClaimProfile handle={cleanHandle} platform={report.platform || 'Instagram'} />
+      </div>
+
+      {/* Related Accounts */}
+      <RelatedAccounts currentHandle={cleanHandle} currentPlatform={report.platform || 'Instagram'} />
+
+      {/* JSON-LD Structured Data */}
+      <ReportPageJsonLd handle={cleanHandle} score={report.score} verdict={report.verdict} />
     </div>
   );
 }

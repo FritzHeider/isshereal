@@ -18,7 +18,7 @@ export function ProgressBar({
   return (
     <div className="w-full">
       <div className="flex justify-between items-center text-xs mb-1.5">
-        <span className="text-slate-600 font-medium">{label}</span>
+        <span className="text-slate-600 dark:text-slate-400 font-medium">{label}</span>
         <span className="font-semibold" style={{ color }}>
           {pct}%
         </span>

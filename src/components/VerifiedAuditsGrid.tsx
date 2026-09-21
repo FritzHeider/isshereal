@@ -125,7 +125,7 @@ const VERIFIED_AUDITS: VerifiedAuditItem[] = [
 
 export function VerifiedAuditsGrid() {
   return (
-    <section className="py-24 bg-gradient-to-b from-white via-slate-50/50 to-white border-t border-slate-100 relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-b from-white via-slate-50/50 to-white border-t border-slate-100 dark:border-slate-800 relative overflow-hidden">
       {/* Background Decorative Blur */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-emerald-50/60 rounded-full blur-3xl pointer-events-none -z-10" />
 
@@ -137,10 +137,10 @@ export function VerifiedAuditsGrid() {
               <ShieldCheck size={14} className="text-emerald-600" />
               <span>Real Forensics Database</span>
             </div>
-            <h2 className="font-extrabold text-3xl sm:text-4xl text-slate-900 tracking-tight">
+            <h2 className="font-extrabold text-3xl sm:text-4xl text-slate-900 dark:text-slate-100 tracking-tight">
               Live Verified Audits & Risk Benchmarks
             </h2>
-            <p className="text-slate-600 text-base sm:text-lg mt-2 leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg mt-2 leading-relaxed">
               Explore authentic audits analyzed with transparent mathematical formulas and real-time Web-Use browser inspection.
             </p>
           </div>
@@ -160,13 +160,13 @@ export function VerifiedAuditsGrid() {
             return (
               <div
                 key={audit.handle}
-                className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-xl hover:border-emerald-300 transition-all duration-300 flex flex-col justify-between group"
+                className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800/80 p-6 shadow-sm hover:shadow-xl hover:border-emerald-300 transition-all duration-300 flex flex-col justify-between group"
               >
                 <div>
                   {/* Top Header */}
                   <div className="flex items-center justify-between gap-3 mb-5">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-2xl overflow-hidden border border-slate-200 shadow-xs shrink-0">
+                      <div className="relative w-12 h-12 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xs shrink-0">
                         <Image
                           src={audit.avatarUrl}
                           alt={audit.name}
@@ -175,7 +175,7 @@ export function VerifiedAuditsGrid() {
                         />
                       </div>
                       <div>
-                        <div className="flex items-center gap-1.5 font-bold text-slate-900 text-base">
+                        <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100 text-base">
                           <span>{audit.name}</span>
                           <div className="relative w-4 h-4 shrink-0">
                             <Image
@@ -186,7 +186,7 @@ export function VerifiedAuditsGrid() {
                             />
                           </div>
                         </div>
-                        <span className="text-xs font-mono text-slate-500">
+                        <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
                           {audit.handle} · {audit.followers}
                         </span>
                       </div>
@@ -196,7 +196,7 @@ export function VerifiedAuditsGrid() {
                   </div>
 
                   {/* Score & Gauge Bar */}
-                  <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-100 flex items-center gap-4 mb-4">
+                  <div className="bg-slate-50 dark:bg-slate-950/80 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex items-center gap-4 mb-4">
                     <div className="shrink-0">
                       <ScoreGauge score={audit.score} size={64} strokeWidth={7} />
                     </div>
@@ -222,14 +222,14 @@ export function VerifiedAuditsGrid() {
                   </div>
 
                   {/* Insight Quote */}
-                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 italic mb-4">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2 italic mb-4">
                     &ldquo;{audit.insight}&rdquo;
                   </p>
                 </div>
 
                 {/* Footer Action */}
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     {audit.status === 'suspicious' ? (
                       <AlertTriangle size={13} className="text-rose-500" />
                     ) : (
@@ -240,7 +240,7 @@ export function VerifiedAuditsGrid() {
 
                   <Link
                     href={`/report/${encodeURIComponent(audit.handle.replace('@', ''))}`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 group-hover:text-emerald-600 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 transition-colors"
                   >
                     <span>View Audit</span>
                     <ExternalLink size={12} />

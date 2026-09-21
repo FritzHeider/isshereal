@@ -12,13 +12,13 @@ const STEP_ICONS: Record<string, React.ReactNode> = {
 
 export function HowItWorks() {
   return (
-    <section className="py-24 bg-white border-t border-slate-100">
+    <section className="py-24 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
       <div className="container-x">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
             How it works
           </span>
-          <h2 className="font-extrabold text-3xl sm:text-4xl text-slate-900 mt-2 tracking-tight">
+          <h2 className="font-extrabold text-3xl sm:text-4xl text-slate-900 dark:text-slate-100 mt-2 tracking-tight">
             A real verdict in three steps
           </h2>
         </div>
@@ -27,7 +27,7 @@ export function HowItWorks() {
           {HOW_IT_WORKS.map((step, idx) => (
             <div
               key={step.title}
-              className="relative rounded-2xl border border-slate-200/80 bg-slate-50/30 p-8 flex flex-col items-start hover:border-emerald-200 hover:shadow-md transition-all"
+              className="relative rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/30 p-8 flex flex-col items-start hover:border-emerald-200 hover:shadow-md transition-all"
             >
               {/* Step Number Badge */}
               <div className="w-10 h-10 rounded-full bg-emerald-600 text-white font-extrabold text-base flex items-center justify-center mb-6 shadow-sm shadow-emerald-500/20">
@@ -38,10 +38,10 @@ export function HowItWorks() {
                 {STEP_ICONS[step.icon]}
               </div>
 
-              <h3 className="font-bold text-xl text-slate-900 mb-2">
+              <h3 className="font-bold text-xl text-slate-900 dark:text-slate-100 mb-2">
                 {step.title}
               </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 {step.text}
               </p>
             </div>

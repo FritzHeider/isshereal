@@ -13,11 +13,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       default:
         'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all duration-200 active:scale-[0.98]',
       outline:
-        'border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 active:scale-[0.98]',
+        'border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:bg-slate-950 text-slate-700 active:scale-[0.98]',
       ghost:
-        'hover:bg-slate-100 text-slate-700 hover:text-slate-900',
+        'hover:bg-slate-100 text-slate-700 hover:text-slate-900 dark:text-slate-100',
       secondary:
-        'bg-slate-100 hover:bg-slate-200 text-slate-900 active:scale-[0.98]',
+        'bg-slate-100 hover:bg-slate-200 text-slate-900 dark:text-slate-100 active:scale-[0.98]',
       link: 'text-emerald-700 underline-offset-4 hover:underline p-0 h-auto',
     };
 

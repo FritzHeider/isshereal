@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X, ArrowRight } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 import { Button } from './ui/button';
 
 const NAV_LINKS = [
@@ -47,7 +48,7 @@ export function Navbar() {
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-white/85 backdrop-blur-md border-b border-slate-200/80 shadow-xs'
+          ? 'bg-white dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 shadow-xs'
           : 'bg-transparent'
       }`}
     >
@@ -65,7 +66,7 @@ export function Navbar() {
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 leading-none">
+              <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 dark:text-slate-100 leading-none">
                 isshereal<span className="text-emerald-600">.com</span>
               </span>
               <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
@@ -84,7 +85,7 @@ export function Navbar() {
             <button
               key={link.label}
               onClick={() => handleNavClick(link.href)}
-              className="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors cursor-pointer"
+              className="text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-emerald-600 transition-colors cursor-pointer"
             >
               {link.label}
             </button>
@@ -114,7 +115,7 @@ export function Navbar() {
 
       {/* Mobile Drawer */}
       {open && (
-        <div className="md:hidden bg-white/95 backdrop-blur-lg border-b border-slate-200 px-6 py-5 space-y-4 shadow-xl animate-fade-up">
+        <div className="md:hidden bg-white dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800 px-6 py-5 space-y-4 shadow-xl animate-fade-up">
           <div className="flex flex-col space-y-3">
             {NAV_LINKS.map((link) => (
               <button

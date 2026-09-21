@@ -8,6 +8,10 @@ import {
 import { saveAuditToStore, getAuditFromStore } from '@/lib/audit-store';
 import { getVerifiedCreator } from '@/data/verified-creators';
 
+const headers = {
+  'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=43200',
+};
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -38,7 +42,7 @@ export async function POST(req: NextRequest) {
         isVerified: true,
       });
       saveAuditToStore(audit);
-      return NextResponse.json({ success: true, report: audit });
+      return NextResponse.json({ success: true, report: audit }, { headers });
     }
 
     // 2. If user provides explicit numbers from form/verification modal
@@ -61,7 +65,7 @@ export async function POST(req: NextRequest) {
       });
 
       saveAuditToStore(audit);
-      return NextResponse.json({ success: true, report: audit });
+      return NextResponse.json({ success: true, report: audit }, { headers });
     }
 
     // 3. Try live scraping based on platform
@@ -89,7 +93,7 @@ export async function POST(req: NextRequest) {
       });
 
       saveAuditToStore(audit);
-      return NextResponse.json({ success: true, report: audit });
+      return NextResponse.json({ success: true, report: audit }, { headers });
     }
 
     // 4. Return provisional baseline report with needsVerification flag so the audit page never blocks
@@ -112,7 +116,7 @@ export async function POST(req: NextRequest) {
       handle: `@${cleanHandle}`,
       platform,
       message: 'Platform firewall restricted automated crawl. Showing preliminary baseline.',
-    });
+    }, { headers });
   } catch (error: any) {
     console.error('Audit API error:', error);
     return NextResponse.json({ error: error.message || 'Internal audit error' }, { status: 500 });
@@ -138,7 +142,7 @@ export async function GET(req: NextRequest) {
   // 1. Check in-memory store
   const cached = getAuditFromStore(cleanHandle);
   if (cached) {
-    return NextResponse.json({ success: true, report: cached });
+    return NextResponse.json({ success: true, report: cached }, { headers });
   }
 
   // 2. Check verified real profiles
@@ -155,7 +159,7 @@ export async function GET(req: NextRequest) {
       isVerified: true,
     });
     saveAuditToStore(audit);
-    return NextResponse.json({ success: true, report: audit });
+    return NextResponse.json({ success: true, report: audit }, { headers });
   }
 
   // 3. Try live scraping
@@ -183,7 +187,7 @@ export async function GET(req: NextRequest) {
     });
 
     saveAuditToStore(audit);
-    return NextResponse.json({ success: true, report: audit });
+    return NextResponse.json({ success: true, report: audit }, { headers });
   }
 
   // Return provisional baseline audit if scraping was firewalled so report page renders immediately
@@ -205,5 +209,5 @@ export async function GET(req: NextRequest) {
     needsInput: true,
     handle: `@${cleanHandle}`,
     platform,
-  });
+  }, { headers });
 }

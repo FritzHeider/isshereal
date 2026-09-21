@@ -25,6 +25,9 @@ const config: Config = {
         },
       },
       keyframes: {
+        'count-up': { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+        'skeleton-pulse': { '0%, 100%': { opacity: '1' }, '50%': { opacity: '.5' } },
+        'slide-up': { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
         'fade-up': {
           '0%': { opacity: '0', transform: 'translateY(16px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
@@ -35,6 +38,9 @@ const config: Config = {
         },
       },
       animation: {
+        'count-up': 'count-up 1.2s ease-out',
+        'skeleton-pulse': 'skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'slide-up': 'slide-up 0.5s ease-out',
         'fade-up': 'fade-up 0.5s ease-out forwards',
         float: 'float 3.5s ease-in-out infinite',
       },

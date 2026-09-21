@@ -33,7 +33,7 @@ export function SampleReports() {
         );
 
   return (
-    <section id="samples" className="py-24 bg-slate-50/60 border-t border-slate-100">
+    <section id="samples" className="py-24 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-800">
       <div className="container-x">
         {/* Header & Filter Controls */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
@@ -41,10 +41,10 @@ export function SampleReports() {
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
               Sample reports
             </span>
-            <h2 className="font-extrabold text-3xl sm:text-4xl text-slate-900 mt-2 tracking-tight">
+            <h2 className="font-extrabold text-3xl sm:text-4xl text-slate-900 dark:text-slate-100 mt-2 tracking-tight">
               See what an audit looks like
             </h2>
-            <p className="text-base text-slate-600 mt-2">
+            <p className="text-base text-slate-600 dark:text-slate-400 mt-2">
               Real, mixed results — from clean top creators to obvious bot farms and romance scams.
             </p>
           </div>
@@ -58,7 +58,7 @@ export function SampleReports() {
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                   selectedFilter === tab
                     ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-100'
                 }`}
               >
                 {tab}
@@ -72,13 +72,13 @@ export function SampleReports() {
           {filteredReports.map((report) => (
             <div
               key={report.id}
-              className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 transition-all duration-300 group relative"
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 transition-all duration-300 group relative"
             >
               <div>
                 {/* Header with Photo Avatar & Platform Badge */}
                 <div className="flex items-center justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-xs border border-slate-100 shrink-0 group-hover:scale-105 transition-transform">
+                    <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-xs border border-slate-100 dark:border-slate-800 shrink-0 group-hover:scale-105 transition-transform">
                       <Image
                         src={report.avatarImage}
                         alt={report.name}
@@ -87,32 +87,32 @@ export function SampleReports() {
                       />
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition-colors">
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 line-clamp-1 group-hover:text-emerald-700 transition-colors">
                         {report.name}
                       </h4>
-                      <p className="text-xs text-slate-500 font-mono">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                         {report.handle}
                       </p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
                     {report.platform}
                   </span>
                 </div>
 
                 {/* Score and Gauge Box */}
-                <div className="flex items-center justify-between bg-slate-50 rounded-xl p-3 my-4">
+                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-950 rounded-xl p-3 my-4">
                   <ScoreGauge score={report.score} size={64} strokeWidth={8} />
                   <div className="text-right">
                     <RiskBadge score={report.score} label={report.verdict} />
-                    <p className="text-xs text-slate-500 mt-1 font-medium">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
                       {report.followers}
                     </p>
                   </div>
                 </div>
 
                 {/* Fake/Inactive percentage */}
-                <div className="flex items-center justify-between text-xs text-slate-600 font-medium">
+                <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-medium">
                   <span>Audience Risk:</span>
                   <span
                     className={`font-bold ${
@@ -125,11 +125,11 @@ export function SampleReports() {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+              <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => setActiveModalReport(report)}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-slate-100 transition-colors cursor-pointer"
                 >
                   <Eye size={13} />
                   <span>Quick view</span>
@@ -150,7 +150,7 @@ export function SampleReports() {
         {/* Interactive Quick View Modal */}
         {activeModalReport && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-up">
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden relative">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden relative">
               {/* Modal Header */}
               <div className="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
                 <div className="flex items-center gap-3">
@@ -181,14 +181,14 @@ export function SampleReports() {
 
               {/* Modal Body */}
               <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
-                <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl">
+                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl">
                   <div className="flex items-center gap-4">
                     <ScoreGauge score={activeModalReport.score} size={72} strokeWidth={8} />
                     <div>
                       <div className="text-xs text-slate-400 font-semibold uppercase">
                         Quality Verdict
                       </div>
-                      <div className="font-bold text-base text-slate-900 mt-0.5">
+                      <div className="font-bold text-base text-slate-900 dark:text-slate-100 mt-0.5">
                         {activeModalReport.verdict}
                       </div>
                     </div>
@@ -224,8 +224,8 @@ export function SampleReports() {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     Calculated via isshereal forensic v2.4
                   </span>
                   <Link href={`/report/${activeModalReport.id}`}>
