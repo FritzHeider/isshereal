@@ -26,16 +26,16 @@ export default function Home() {
       <div className="scroll-reveal">
         <Features />
       </div>
-      <div className="scroll-reveal">
+      <div className="scroll-reveal content-defer">
         <ToolsSection />
       </div>
-      <div className="scroll-reveal">
+      <div className="scroll-reveal content-defer">
         <HowItWorks />
       </div>
-      <div className="scroll-reveal">
+      <div className="scroll-reveal content-defer">
         <SampleReports />
       </div>
-      <div className="scroll-reveal">
+      <div className="scroll-reveal content-defer">
         <FAQ />
       </div>
     </>

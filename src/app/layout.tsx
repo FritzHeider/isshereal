@@ -46,6 +46,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        {/* Resource hints: establish early connections per modern-web-guidance */}
+        <link rel="preconnect" href="https://ui-avatars.com" />
+        <link rel="dns-prefetch" href="https://scontent-sjc3-1.cdninstagram.com" />
+        <link rel="dns-prefetch" href="https://www.instagram.com" />
+      </head>
       <body className="min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white bg-[#fcfdfd] dark:bg-slate-950 dark:text-slate-100">
         <ThemeProvider>
           <Navbar />
