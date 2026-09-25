@@ -8,7 +8,7 @@ crons = ["*/5 * * * *"]
 
 [[kv_namespaces]]
 binding = "UPTIME_KV"
-id = "placeholder_uptime_kv_id"
+id = "fa4e5ffd7888452c8eee868fd272b994"
 
 [vars]
 SITE_URL = "https://isshereal.com"

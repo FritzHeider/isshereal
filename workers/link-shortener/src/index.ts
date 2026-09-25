@@ -34,7 +34,7 @@ export default {
     if (path.startsWith('/api/links')) {
       if (request.method === 'POST') {
         const apiKey = request.headers.get('X-API-Key');
-        if (apiKey !== 'secret-api-key') {
+        if (!apiKey || apiKey !== (env as any).API_KEY) {
           return new Response('Unauthorized', { status: 401, headers: corsHeaders });
         }
 
