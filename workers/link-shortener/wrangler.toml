@@ -1,0 +1,13 @@
+name = "isshereal-link-shortener"
+account_id = "fd2ff8c29a6d58c479032efea6c9ea62"
+compatibility_date = "2026-04-01"
+main = "src/index.ts"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "LINKS_KV"
+id = "placeholder_links_kv_id"
+
+[[kv_namespaces]]
+binding = "ANALYTICS_KV"
+id = "placeholder_analytics_kv_id"

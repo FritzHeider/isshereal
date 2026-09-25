@@ -1,0 +1,14 @@
+name = "isshereal-report-digest"
+account_id = "fd2ff8c29a6d58c479032efea6c9ea62"
+compatibility_date = "2026-04-01"
+main = "src/index.ts"
+
+[triggers]
+crons = ["0 9 * * *"]
+
+[[kv_namespaces]]
+binding = "DIGEST_KV"
+id = "placeholder_digest_kv_id"
+
+[vars]
+SITE_URL = "https://isshereal.com"

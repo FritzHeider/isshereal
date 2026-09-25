@@ -20,12 +20,24 @@ export default function Home() {
     <>
       <HomePageJsonLd />
       <Hero />
-      <VerifiedAuditsGrid />
-      <Features />
-      <ToolsSection />
-      <HowItWorks />
-      <SampleReports />
-      <FAQ />
+      <div className="scroll-reveal">
+        <VerifiedAuditsGrid />
+      </div>
+      <div className="scroll-reveal">
+        <Features />
+      </div>
+      <div className="scroll-reveal">
+        <ToolsSection />
+      </div>
+      <div className="scroll-reveal">
+        <HowItWorks />
+      </div>
+      <div className="scroll-reveal">
+        <SampleReports />
+      </div>
+      <div className="scroll-reveal">
+        <FAQ />
+      </div>
     </>
   );
 }
