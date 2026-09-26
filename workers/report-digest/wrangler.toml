@@ -12,3 +12,13 @@ id = "b56da34bd788470e9090743b97580d4f"
 
 [vars]
 SITE_URL = "https://isshereal.com"
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false

@@ -11,3 +11,13 @@ id = "b37e9bd76fb54edabf6d9c387074931e"
 [[kv_namespaces]]
 binding = "ANALYTICS_KV"
 id = "c06c1a1a7dc04f38ab575bc7008b434e"
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false

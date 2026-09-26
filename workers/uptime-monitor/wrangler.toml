@@ -13,3 +13,13 @@ id = "fa4e5ffd7888452c8eee868fd272b994"
 [vars]
 SITE_URL = "https://isshereal.com"
 ALERT_THRESHOLD_MS = "5000"
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false
