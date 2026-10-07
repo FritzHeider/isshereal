@@ -2,6 +2,7 @@ import { Hero } from '@/components/Hero';
 import { Features } from '@/components/Features';
 import { ToolsSection } from '@/components/ToolsSection';
 import { HowItWorks } from '@/components/HowItWorks';
+import { OnboardingTour } from '@/components/OnboardingTour';
 import dynamic from 'next/dynamic';
 import { HomePageJsonLd } from '@/components/JsonLd';
 
@@ -20,6 +21,7 @@ export default function Home() {
     <>
       <HomePageJsonLd />
       <Hero />
+      <OnboardingTour />
       <div className="scroll-reveal">
         <VerifiedAuditsGrid />
       </div>

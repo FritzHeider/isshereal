@@ -51,8 +51,14 @@ export function ScoreGauge({
   const strokeDashoffset = circumference - ((animate ? displayScore : score) / 100) * circumference;
   const { stroke, text } = getRiskColor(animate ? displayScore : score);
 
+  const getGlowStyle = (s: number) => {
+    if (s >= 75) return '0 0 30px oklch(72% 0.19 160 / 0.3)';
+    if (s >= 50) return '0 0 30px oklch(75% 0.15 85 / 0.3)';
+    return '0 0 30px oklch(65% 0.2 25 / 0.3)';
+  };
+
   return (
-    <div className="relative inline-flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+    <div className="relative inline-flex items-center justify-center shrink-0 rounded-full transition-shadow duration-300" style={{ width: size, height: size, boxShadow: getGlowStyle(animate ? displayScore : score) }}>
       <svg
         width={size}
         height={size}

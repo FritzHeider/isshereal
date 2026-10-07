@@ -6,6 +6,7 @@
   :root {
     --background: #fcfdfd;
     --foreground: #0f172a;
+    color-scheme: light dark;
   }
 
   body {
@@ -166,4 +167,175 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+
+/* Popover tooltip styling */
+[popover] {
+  border: none;
+  padding: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+[popover]::backdrop {
+  background: transparent;
+}
+
+/* Fallback for browsers without anchor positioning */
+@supports not (anchor-name: --a) {
+  [role="tooltip"][popover] {
+    position: fixed;
+    inset: unset;
+    bottom: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+
+/* Custom scrollbar styling (standard properties, not webkit) */
+html {
+  scrollbar-color: #059669 transparent;
+  scrollbar-width: thin;
+}
+
+.dark html, html.dark {
+  scrollbar-color: #34d399 #0f172a;
+}
+
+/* Premium layered shadows (modern-web-guidance: visual-effects) */
+.shadow-layered {
+  box-shadow:
+    0 1px 2px oklch(0% 0 0 / 0.04),
+    0 2px 4px oklch(0% 0 0 / 0.04),
+    0 4px 8px oklch(0% 0 0 / 0.04),
+    0 8px 16px oklch(0% 0 0 / 0.02);
+}
+
+.dark .shadow-layered {
+  box-shadow:
+    0 1px 2px oklch(0% 0 0 / 0.2),
+    0 2px 4px oklch(0% 0 0 / 0.15),
+    0 4px 8px oklch(0% 0 0 / 0.1),
+    0 8px 16px oklch(0% 0 0 / 0.05);
+}
+
+/* Emerald gradient using oklch for perceptual uniformity */
+.gradient-emerald {
+  background: linear-gradient(
+    135deg,
+    oklch(72% 0.19 160),
+    oklch(62% 0.17 165)
+  );
+}
+
+/* Soft edge content fade for truncated text */
+.text-fade {
+  position: relative;
+  max-height: 6rem;
+  overflow: hidden;
+}
+
+.text-fade::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2rem;
+  background: linear-gradient(to bottom, transparent, var(--background, #fcfdfd));
+  pointer-events: none;
+}
+
+.dark .text-fade::after {
+  background: linear-gradient(to bottom, transparent, #020617);
+}
+
+/* Respect OS text scaling */
+html {
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+
+/* Animate details/summary open/close (modern-web-guidance: animate-to-intrinsic-sizes) */
+details > div {
+  interpolate-size: allow-keywords;
+  transition: height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+}
+
+/* Form validation feedback only after interaction */
+input:user-invalid {
+  border-color: #e11d48;
+  background-color: oklch(95% 0.02 15);
+}
+
+.dark input:user-invalid {
+  border-color: #fb7185;
+  background-color: oklch(20% 0.02 15);
+}
+
+input:user-valid {
+  border-color: #059669;
+}
+
+.dark input:user-valid {
+  border-color: #34d399;
+}
+
+input:user-invalid + .validation-error {
+  display: block;
+}
+
+.validation-error {
+  display: none;
+  color: #e11d48;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.dark .validation-error {
+  color: #fb7185;
+}
+
+/* Container queries for self-aware components */
+.cq-container {
+  container-type: inline-size;
+}
+
+@container (max-width: 280px) {
+  .cq-compact .metric-value {
+    font-size: 1.25rem;
+  }
+  .cq-compact .metric-label {
+    font-size: 0.625rem;
+  }
+}
+
+@container (max-width: 200px) {
+  .cq-compact .metric-detail {
+    display: none;
+  }
+}
+
+@keyframes slide-up-toast {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to { opacity: 1; transform: none; }
+}
+.animate-slide-up {
+  animation: slide-up-toast 0.3s ease-out;
+}
+
+/* Scroll snap for mobile carousels */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.snap-x::-webkit-scrollbar {
+  display: none;
+}
+.snap-x {
+  scrollbar-width: none;
 }

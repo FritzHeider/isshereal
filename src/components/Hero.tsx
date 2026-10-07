@@ -211,14 +211,27 @@ export function Hero() {
                 <input
                   type="text"
                   value={query}
+                  onFocus={() => {
+                    if (query.trim()) {
+                      router.prefetch(`/report/${query.trim().replace('@', '')}`);
+                    }
+                  }}
                   onChange={(e) => {
                     setQuery(e.target.value);
                     if (error) setError(null);
+                    if (e.target.value.length > 2) {
+                      router.prefetch(`/report/${e.target.value.trim().replace('@', '')}`);
+                    }
                   }}
                   placeholder="Paste an Instagram @handle, YouTube, or link..."
                   className="w-full bg-transparent text-sm sm:text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none"
                   disabled={loading}
+                  required
+                  minLength={1}
+                  maxLength={64}
+                  pattern="[a-zA-Z0-9_.]+"
                 />
+                <span className="validation-error">Invalid handle</span>
                 <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md shrink-0">
                   {detectedPlatform}
                 </span>
@@ -363,6 +376,7 @@ export function Hero() {
                       src={currentProfile.avatar}
                       alt={currentProfile.name}
                       fill
+                      priority
                       className="object-cover"
                     />
                   </div>
@@ -441,6 +455,7 @@ export function Hero() {
                           src="/images/platforms/instagram-3d.png"
                           alt="Instagram 3D"
                           fill
+                          priority
                           className="object-contain"
                         />
                       </div>
@@ -461,6 +476,7 @@ export function Hero() {
                           src="/images/platforms/tiktok-3d.png"
                           alt="TikTok 3D"
                           fill
+                          priority
                           className="object-contain"
                         />
                       </div>
@@ -481,6 +497,7 @@ export function Hero() {
                           src="/images/platforms/youtube-3d.png"
                           alt="YouTube 3D"
                           fill
+                          priority
                           className="object-contain"
                         />
                       </div>

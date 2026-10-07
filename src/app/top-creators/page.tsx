@@ -29,7 +29,7 @@ export default function TopCreatorsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible">
           {creators.map((creator, index) => {
             const getScoreColor = (score: number) => {
               if (score >= 80) return 'text-emerald-500';
@@ -42,7 +42,7 @@ export default function TopCreatorsPage() {
               <Link
                 href={`/report/instagram_${creator.handle}`}
                 key={creator.handle}
-                className="group relative bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-all block"
+                className="group relative bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-all block snap-center shrink-0 w-[280px] md:w-auto md:shrink"
               >
                 <div className="absolute top-4 right-4 text-4xl font-black text-slate-100 dark:text-slate-800 group-hover:text-emerald-50 dark:group-hover:text-emerald-900/20 transition-colors z-0">
                   #{index + 1}

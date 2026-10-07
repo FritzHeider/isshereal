@@ -84,6 +84,8 @@ export function SampleReports() {
                         alt={report.name}
                         fill
                         className="object-cover"
+                        sizes="(max-width: 768px) 80px, 120px"
+                        quality={85}
                       />
                     </div>
                     <div>
@@ -160,6 +162,8 @@ export function SampleReports() {
                       alt={activeModalReport.name}
                       fill
                       className="object-cover"
+                      sizes="(max-width: 768px) 80px, 120px"
+                      quality={85}
                     />
                   </div>
                   <div>

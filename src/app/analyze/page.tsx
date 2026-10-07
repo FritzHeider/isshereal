@@ -332,7 +332,11 @@ function AnalyzeContent() {
                 placeholder="@username or profile link"
                 required
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm text-slate-900"
+                minLength={1}
+                maxLength={64}
+                pattern="[a-zA-Z0-9_.]+"
               />
+              <span className="validation-error">Invalid handle format</span>
             </div>
             {liveSuccessMsg && (
               <div className="mt-2 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-2 flex items-center gap-1.5">
