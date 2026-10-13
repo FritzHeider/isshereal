@@ -95,7 +95,58 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
     };
   }
 
-  // 2. Check Web-Use headless browser service (Cloud Run or local)
+  // 2. Try RapidAPI Instagram Scraper (fast, reliable, works from any IP)
+  const rapidApiKey = typeof process !== 'undefined' ? process.env?.RAPIDAPI_KEY : undefined;
+  const rapidApiHost = typeof process !== 'undefined' 
+    ? (process.env?.RAPIDAPI_HOST || 'instagram-scraper-api2.p.rapidapi.com') 
+    : undefined;
+  if (rapidApiKey && rapidApiHost) {
+    try {
+      const apiRes = await fetch(
+        `https://${rapidApiHost}/v1/info?username_or_id_or_url=${encodeURIComponent(cleanHandle)}`,
+        {
+          headers: {
+            'x-rapidapi-key': rapidApiKey,
+            'x-rapidapi-host': rapidApiHost,
+          },
+          signal: AbortSignal.timeout(10000),
+        }
+      );
+      if (apiRes.ok) {
+        const raw = (await apiRes.json()) as any;
+        // Handle both direct response and nested data.user formats
+        const user = raw?.data?.user || raw?.data || raw;
+        const followerCount = 
+          user?.edge_followed_by?.count ?? 
+          user?.follower_count ?? 
+          user?.followers_count ?? 0;
+        const followingCount = 
+          user?.edge_follow?.count ?? 
+          user?.following_count ?? 0;
+        const postsCount = 
+          user?.edge_owner_to_timeline_media?.count ?? 
+          user?.media_count ?? 0;
+
+        if (followerCount > 0) {
+          return {
+            name: user?.full_name || user?.name || cleanHandle,
+            handle: `@${user?.username || cleanHandle}`,
+            followers: followerCount,
+            following: followingCount,
+            posts: postsCount,
+            avatarUrl: user?.profile_pic_url_hd || user?.profile_pic_url || 
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=10b981&color=ffffff&bold=true`,
+            exists: true,
+            isVerifiedReal: !!user?.is_verified,
+          };
+        }
+      }
+    } catch (_rapidErr) {
+      // RapidAPI not reachable or quota exceeded, try next strategy
+    }
+  }
+
+  // 3. Check Web-Use headless browser service (Cloud Run or local)
   const webUseUrl = typeof process !== 'undefined' ? process.env?.WEB_USE_SERVICE_URL : undefined;
   const webUseKey = typeof process !== 'undefined' ? process.env?.WEB_USE_API_KEY : undefined;
   if (webUseUrl) {
