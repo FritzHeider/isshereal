@@ -287,22 +287,31 @@ def scrape_youtube(page, handle: str) -> Dict[str, Any]:
 _browser = None
 _playwright = None
 
+PROXY_URL = os.environ.get("PROXY_URL", "")  # e.g. http://user:pass@gate.dataimpulse.com:823
+
 
 def get_browser():
     global _browser, _playwright
     if _browser is None or not _browser.is_connected():
         from playwright.sync_api import sync_playwright
         _playwright = sync_playwright().start()
-        _browser = _playwright.chromium.launch(
-            headless=True,
-            args=[
+
+        launch_args = {
+            "headless": True,
+            "args": [
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-gpu",
                 "--single-process",
             ],
-        )
+        }
+
+        # Route through residential proxy if configured
+        if PROXY_URL:
+            launch_args["proxy"] = {"server": PROXY_URL}
+
+        _browser = _playwright.chromium.launch(**launch_args)
     return _browser
 
 
