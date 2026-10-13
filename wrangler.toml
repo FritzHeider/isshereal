@@ -22,7 +22,7 @@ PLATFORM_NAME = "isshereal.com"
 SUPPORT_EMAIL = "support@isshereal.com"
 WEB_USE_SERVICE_URL = "https://isshereal-scraper.fly.dev"
 WEB_USE_API_KEY = "isshereal-bridge-2026-Qx7nR"
-RAPIDAPI_HOST = "instagram-scraper-api2.p.rapidapi.com"
+RAPIDAPI_HOST = "best-instagram-scraper-free-1000-calls.p.rapidapi.com"
 
 [observability]
 enabled = true

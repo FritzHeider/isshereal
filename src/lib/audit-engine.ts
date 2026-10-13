@@ -100,21 +100,43 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
   const rapidApiHost = typeof process !== 'undefined' 
     ? (process.env?.RAPIDAPI_HOST || 'instagram-scraper-api2.p.rapidapi.com') 
     : undefined;
-  if (rapidApiKey && rapidApiHost) {
-    try {
-      const apiRes = await fetch(
-        `https://${rapidApiHost}/v1/info?username_or_id_or_url=${encodeURIComponent(cleanHandle)}`,
-        {
+  if (rapidApiKey) {
+    // Try multiple API hosts/endpoints for resilience
+    const apiEndpoints = [
+      // Primary: configured host
+      ...(rapidApiHost ? [{
+        host: rapidApiHost,
+        url: rapidApiHost.includes('best-instagram-scraper')
+          ? `https://${rapidApiHost}/users/profile?user=${encodeURIComponent(cleanHandle)}`
+          : rapidApiHost.includes('instagram-cheapest')
+          ? `https://${rapidApiHost}/api/v1/instagram/user/${encodeURIComponent(cleanHandle)}`
+          : `https://${rapidApiHost}/v1/info?username_or_id_or_url=${encodeURIComponent(cleanHandle)}`,
+      }] : []),
+      // Fallback: other popular APIs
+      { host: 'instagram-scraper-api2.p.rapidapi.com', url: `https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${encodeURIComponent(cleanHandle)}` },
+      { host: 'instagram-cheapest.p.rapidapi.com', url: `https://instagram-cheapest.p.rapidapi.com/api/v1/instagram/user/${encodeURIComponent(cleanHandle)}` },
+    ];
+
+    // Deduplicate by host
+    const seen = new Set<string>();
+    const uniqueEndpoints = apiEndpoints.filter(e => { if (seen.has(e.host)) return false; seen.add(e.host); return true; });
+
+    for (const endpoint of uniqueEndpoints) {
+      try {
+        const apiRes = await fetch(endpoint.url, {
           headers: {
             'x-rapidapi-key': rapidApiKey,
-            'x-rapidapi-host': rapidApiHost,
+            'x-rapidapi-host': endpoint.host,
           },
           signal: AbortSignal.timeout(10000),
-        }
-      );
-      if (apiRes.ok) {
+        });
+        if (!apiRes.ok) continue;
+
         const raw = (await apiRes.json()) as any;
-        // Handle both direct response and nested data.user formats
+        // Skip "not subscribed" or error responses
+        if (raw?.message && !raw?.data && !raw?.username) continue;
+
+        // Handle multiple response formats
         const user = raw?.data?.user || raw?.data || raw;
         const followerCount = 
           user?.edge_followed_by?.count ?? 
@@ -140,9 +162,9 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
             isVerifiedReal: !!user?.is_verified,
           };
         }
+      } catch (_rapidErr) {
+        continue; // Try next API host
       }
-    } catch (_rapidErr) {
-      // RapidAPI not reachable or quota exceeded, try next strategy
     }
   }
 
