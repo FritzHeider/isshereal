@@ -95,12 +95,16 @@ export async function scrapeInstagramProfile(handle: string): Promise<{
     };
   }
 
-  // 2. Check Web-Use headless browser service (only if explicitly configured or local development)
+  // 2. Check Web-Use headless browser service (Cloud Run or local)
   const webUseUrl = typeof process !== 'undefined' ? process.env?.WEB_USE_SERVICE_URL : undefined;
+  const webUseKey = typeof process !== 'undefined' ? process.env?.WEB_USE_API_KEY : undefined;
   if (webUseUrl) {
     try {
+      const headers: Record<string, string> = {};
+      if (webUseKey) headers['Authorization'] = `Bearer ${webUseKey}`;
       const bridgeRes = await fetch(`${webUseUrl}/scrape?platform=instagram&handle=${encodeURIComponent(cleanHandle)}`, {
-        signal: AbortSignal.timeout(4000),
+        headers,
+        signal: AbortSignal.timeout(20000), // Cloud Run cold start + Chromium warmup
       });
       if (bridgeRes.ok) {
         const data = (await bridgeRes.json()) as any;
@@ -267,10 +271,14 @@ export async function scrapeTikTokProfile(handle: string): Promise<{
 
   // Check Web-Use headless browser service if configured
   const webUseUrl = typeof process !== 'undefined' ? process.env?.WEB_USE_SERVICE_URL : undefined;
+  const webUseKey = typeof process !== 'undefined' ? process.env?.WEB_USE_API_KEY : undefined;
   if (webUseUrl) {
     try {
+      const headers: Record<string, string> = {};
+      if (webUseKey) headers['Authorization'] = `Bearer ${webUseKey}`;
       const bridgeRes = await fetch(`${webUseUrl}/scrape?platform=tiktok&handle=${encodeURIComponent(cleanHandle)}`, {
-        signal: AbortSignal.timeout(4000),
+        headers,
+        signal: AbortSignal.timeout(20000),
       });
       if (bridgeRes.ok) {
         const data = (await bridgeRes.json()) as any;
@@ -399,6 +407,37 @@ export async function scrapeYouTubeProfile(handle: string): Promise<{
       exists: true,
       isVerifiedReal: true,
     };
+  }
+
+  // Check Web-Use headless browser service if configured
+  const webUseUrl = typeof process !== 'undefined' ? process.env?.WEB_USE_SERVICE_URL : undefined;
+  const webUseKey = typeof process !== 'undefined' ? process.env?.WEB_USE_API_KEY : undefined;
+  if (webUseUrl) {
+    try {
+      const headers: Record<string, string> = {};
+      if (webUseKey) headers['Authorization'] = `Bearer ${webUseKey}`;
+      const bridgeRes = await fetch(`${webUseUrl}/scrape?platform=youtube&handle=${encodeURIComponent(cleanHandle)}`, {
+        headers,
+        signal: AbortSignal.timeout(20000),
+      });
+      if (bridgeRes.ok) {
+        const data = (await bridgeRes.json()) as any;
+        if (data && data.success && data.followers > 0) {
+          return {
+            name: data.name || cleanHandle,
+            handle: `@${cleanHandle}`,
+            followers: data.followers,
+            following: data.following || 0,
+            posts: data.posts || 0,
+            avatarUrl: data.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=ef4444&color=ffffff&bold=true`,
+            exists: true,
+            isVerifiedReal: !!data.isVerified,
+          };
+        }
+      }
+    } catch (_bridgeErr) {
+      // Web-Use bridge not reachable, proceed to direct fetch
+    }
   }
 
   const url = `https://www.youtube.com/@${cleanHandle}`;
