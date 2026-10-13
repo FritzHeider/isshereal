@@ -141,14 +141,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, report: audit }, { headers: cacheHeaders });
     }
 
-    // 4. Return provisional baseline report with needsVerification flag
+    // 4. Return empty report with needsVerification — NEVER show fake data
     const baseline = calculateProfileScore({
       platform: capitalize(platform) as any,
       handle: `@${cleanHandle}`,
       name: cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
-      followers: 12500,
-      following: 480,
-      posts: 96,
+      followers: 0,
+      following: 0,
+      posts: 0,
       avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=059669&color=ffffff&bold=true`,
     });
     baseline.needsVerification = true;
@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
       needsInput: true,
       handle: `@${cleanHandle}`,
       platform,
-      message: 'Platform firewall restricted automated crawl. Showing preliminary baseline.',
+      message: 'We couldn\'t access this profile automatically. Please enter the real stats below for an accurate audit.',
     }, { headers: cacheHeaders });
   } catch (error: unknown) {
     console.error('Audit API error:', error);
@@ -234,14 +234,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, report: audit }, { headers: cacheHeaders });
   }
 
-  // Return provisional baseline audit if scraping was firewalled
+  // Return empty report — NEVER show fake data
   const baseline = calculateProfileScore({
     platform: capitalize(platform) as any,
     handle: `@${cleanHandle}`,
     name: cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
-    followers: 12500,
-    following: 480,
-    posts: 96,
+    followers: 0,
+    following: 0,
+    posts: 0,
     avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanHandle)}&background=059669&color=ffffff&bold=true`,
   });
   baseline.needsVerification = true;

@@ -1,7 +1,14 @@
+# fly.toml app configuration file generated for isshereal-scraper on 2026-10-13T05:06:48-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
 app = 'isshereal-scraper'
 primary_region = 'ord'
 
 [build]
+[env]
+  PORT = '8080'
 
 [http_service]
   internal_port = 8080
@@ -13,6 +20,3 @@ primary_region = 'ord'
 [[vm]]
   size = 'shared-cpu-1x'
   memory = '1gb'
-
-[env]
-  PORT = '8080'

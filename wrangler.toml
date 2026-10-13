@@ -20,6 +20,8 @@ custom_domain = true
 [vars]
 PLATFORM_NAME = "isshereal.com"
 SUPPORT_EMAIL = "support@isshereal.com"
+WEB_USE_SERVICE_URL = "https://isshereal-scraper.fly.dev"
+WEB_USE_API_KEY = "isshereal-bridge-2026-Qx7nR"
 
 [observability]
 enabled = true

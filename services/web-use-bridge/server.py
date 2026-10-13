@@ -55,6 +55,78 @@ def clean_handle(handle: str) -> str:
 # ── Scraper functions ─────────────────────────────────────────────────────
 
 def scrape_instagram(page, handle: str) -> Dict[str, Any]:
+    """Scrape Instagram profile using multiple strategies."""
+    avatar_url_default = f"https://ui-avatars.com/api/?name={handle}&background=059669&color=ffffff&bold=true"
+
+    # Strategy 0: Try the web profile info endpoint (no browser needed)
+    try:
+        import urllib.request
+        import urllib.error
+
+        # Instagram serves OG data to known crawlers
+        crawlers = [
+            ("facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)", f"https://www.instagram.com/{handle}/"),
+            ("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)", f"https://www.instagram.com/{handle}/"),
+            ("Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36", f"https://i.instagram.com/api/v1/users/web_profile_info/?username={handle}"),
+        ]
+
+        for ua, url in crawlers:
+            try:
+                req = urllib.request.Request(url, headers={
+                    "User-Agent": ua,
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "X-IG-App-ID": "936619743392459",
+                })
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    body = resp.read().decode("utf-8", errors="replace")
+
+                # Try JSON response (mobile API)
+                if body.strip().startswith("{"):
+                    data = json.loads(body)
+                    user = data.get("data", {}).get("user", {})
+                    if user:
+                        return {
+                            "success": True,
+                            "platform": "Instagram",
+                            "handle": f"@{handle}",
+                            "name": user.get("full_name", handle),
+                            "followers": user.get("edge_followed_by", {}).get("count", 0),
+                            "following": user.get("edge_follow", {}).get("count", 0),
+                            "posts": user.get("edge_owner_to_timeline_media", {}).get("count", 0),
+                            "avatarUrl": user.get("profile_pic_url_hd", user.get("profile_pic_url", avatar_url_default)),
+                            "bio": user.get("biography", ""),
+                            "isVerified": user.get("is_verified", False),
+                        }
+
+                # Try HTML OG meta (crawler response)
+                desc = re.search(r'content="([^"]*?Followers[^"]*?Following[^"]*?Posts[^"]*?)"', body)
+                if desc:
+                    stats = re.search(
+                        r'([\d.,KMBkmb]+)\s+Followers,\s*([\d.,KMBkmb]+)\s+Following,\s*([\d.,KMBkmb]+)\s+Posts',
+                        desc.group(1), re.IGNORECASE
+                    )
+                    if stats:
+                        title_m = re.search(r'content="([^"]*?)\s*[\(•]', body)
+                        img_m = re.search(r'og:image["\s]+content="([^"]+)"', body)
+                        return {
+                            "success": True,
+                            "platform": "Instagram",
+                            "handle": f"@{handle}",
+                            "name": title_m.group(1).strip() if title_m else handle,
+                            "followers": parse_count(stats.group(1)),
+                            "following": parse_count(stats.group(2)),
+                            "posts": parse_count(stats.group(3)),
+                            "avatarUrl": (img_m.group(1).replace("&amp;", "&") if img_m else avatar_url_default),
+                            "bio": "",
+                            "isVerified": "verified" in body.lower(),
+                        }
+            except Exception:
+                continue
+    except Exception:
+        pass
+
+    # Strategy 1: Full Playwright browser render (fallback)
     url = f"https://www.instagram.com/{handle}/"
     page.goto(url, wait_until="domcontentloaded", timeout=15000)
     page.wait_for_timeout(2500)
