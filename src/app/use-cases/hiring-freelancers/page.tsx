@@ -1,362 +1,211 @@
-'use client';
-
-import React, { useState } from 'react';
+import type { Metadata } from 'next';
+import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import {
-  Briefcase,
-  ShieldCheck,
-  Code2,
-  GitBranch,
-  Video,
-  Search,
-  ArrowRight,
-  CheckCircle2,
-  Terminal,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CaseFile } from '@/components/cases/CaseFile';
+
+const DESCRIPTION =
+  'How to check a freelancer’s public history before you hand over the keys: borrowed portfolios, traded reviews, proxy interviews, and how to onboard safely.';
+
+export const metadata: Metadata = {
+  title: 'Hiring freelancers',
+  description: DESCRIPTION,
+  alternates: { canonical: '/use-cases/hiring-freelancers' },
+  openGraph: {
+    title: 'Hiring freelancers · Is the freelancer you interviewed the one doing the work?',
+    description: DESCRIPTION,
+    url: '/use-cases/hiring-freelancers',
+    type: 'article',
+  },
+};
 
 export default function HiringFreelancersPage() {
-  const router = useRouter();
-  const [handle, setHandle] = useState('');
-  const [videoPolicy, setVideoPolicy] = useState<'live' | 'excuses' | 'loop'>('live');
-  const [githubHistory, setGithubHistory] = useState<'organic' | 'spurt' | 'none'>('organic');
-  const [timezoneMatch, setTimezoneMatch] = useState<boolean>(true);
-  const [liveCoding, setLiveCoding] = useState<'fluent' | 'copypaste'>('fluent');
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!handle.trim()) return;
-    const clean = handle.replace(/^@/, '').trim();
-    router.push(`/analyze?handle=${encodeURIComponent(clean)}`);
-  };
-
-  // Score
-  let riskScore = 15;
-  if (videoPolicy === 'excuses') riskScore += 35;
-  if (videoPolicy === 'loop') riskScore += 50;
-  if (githubHistory === 'spurt') riskScore += 25;
-  if (githubHistory === 'none') riskScore += 20;
-  if (!timezoneMatch) riskScore += 30;
-  if (liveCoding === 'copypaste') riskScore += 30;
-
-  riskScore = Math.min(riskScore, 100);
-
   return (
-    <div className="pt-28 pb-20">
-      {/* Hero Section */}
-      <section className="container-x">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 mb-4">
-          <Link href="/" className="hover:underline">Home</Link>
-          <span>/</span>
-          <span>Use Cases</span>
-          <span>/</span>
-          <span className="text-slate-800">Hiring Freelancers</span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-              <Briefcase size={14} className="text-emerald-600" />
-              Talent & Remote Contractor Auditing
-            </div>
-
-            <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
-              Verify freelance developers <span className="text-emerald-600">before sharing production keys</span>.
-            </h1>
-
-            <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl">
-              Bait-and-switch agencies, fake GitHub activity scripts, and stolen portfolio screenshots plague modern remote hiring. Audit candidate public footprints, developer identity, and authenticity signals before onboarding.
+    <CaseFile
+      code="FL"
+      slug="hiring-freelancers"
+      crumb="Hiring freelancers"
+      glyph="freelance"
+      opening={{
+        title: (
+          <>
+            Is the freelancer you interviewed the one <span className="safe">doing the work?</span>
+          </>
+        ),
+        lede: (
+          <>
+            <p>
+              Usually. Most freelancers are exactly who their profile says, and many are better than their profile
+              admits.
             </p>
-
-            {/* Quick Audit Bar */}
-            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-lg pt-2">
-              <div className="relative flex-1">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Enter candidate's GitHub, X, or social handle"
-                  value={handle}
-                  onChange={(e) => setHandle(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-xs"
-                />
-              </div>
-              <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-2xl shadow-md">
-                Audit Candidate
-                <ArrowRight size={16} className="ml-1.5" />
-              </Button>
-            </form>
-
-            <div className="flex items-center gap-6 pt-2 text-xs text-slate-500">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-emerald-500" />
-                Audits GitHub, X, LinkedIn, YouTube
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-emerald-500" />
-                Protects intellectual property & codebase
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 relative">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 aspect-square bg-slate-900 flex items-center justify-center">
-              <Image
-                src="/images/features/ai-forensics.png"
-                alt="AI forensics code and developer profile analysis"
-                fill
-                className="object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-transparent to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/60 shadow-lg text-slate-900">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Subcontractor Alert</span>
-                  <span className="text-xs font-extrabold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
-                    Bait-and-Switch Ring
-                  </span>
-                </div>
-                <div className="mt-2 text-sm font-semibold">
-                  Over 28% of remote contractor profiles act as broker fronts for unvetted third parties.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Candidate Diagnostic */}
-      <section className="container-x mt-24">
-        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-xl">
-          <div className="max-w-2xl mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3">
-              <Terminal size={14} />
-              Forensic Candidate Checklist
-            </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Bait-and-Switch & Outsourcing Diagnostic
-            </h2>
-            <p className="text-slate-600 text-sm sm:text-base mt-2">
-              Select what occurred during your initial screening call to evaluate subcontractor risk.
+            <p>
+              The trouble cases are specific: a borrowed portfolio, a batch of traded reviews, a polished interviewer who
+              passes your job to someone you never met. Each leaves marks in the public record. Check them before you
+              hand over the keys.
             </p>
+          </>
+        ),
+        aside: (
+          <div className="case-ticket">
+            <p className="case-ticket__head label">
+              <span>Job ticket</span>
+              <span className="tabular">FL-0071</span>
+            </p>
+            <dl className="specs">
+              <dt>Candidate</dt>
+              <dd className="tabular">pixel_pro_dev</dd>
+              <dt>Platform</dt>
+              <dd>Fiverr / Upwork</dd>
+              <dt>Print</dt>
+              <dd>Partly developed</dd>
+              <dt>Next step</dt>
+              <dd>Paid trial, live call</dd>
+            </dl>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-            {/* Input Controls */}
-            <div className="lg:col-span-7 space-y-5">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
-                  Technical Interview Video Verification
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  {[
-                    { id: 'live', label: 'Clear Live Video with Audio Sync' },
-                    { id: 'excuses', label: 'Excuses (Broken webcam / Bad wifi)' },
-                    { id: 'loop', label: 'Lip-sync delay / Static avatar loop' },
-                  ].map((v) => (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() => setVideoPolicy(v.id as any)}
-                      className={`p-3 rounded-xl border text-left font-semibold transition-all cursor-pointer ${
-                        videoPolicy === v.id
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      {v.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
-                  GitHub / Code History Consistency
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  {[
-                    { id: 'organic', label: 'Multi-year organic commits' },
-                    { id: 'spurt', label: 'Sudden burst of 500 commits in 1 week' },
-                    { id: 'none', label: 'Empty or private-only history' },
-                  ].map((g) => (
-                    <button
-                      key={g.id}
-                      type="button"
-                      onClick={() => setGithubHistory(g.id as any)}
-                      className={`p-3 rounded-xl border text-left font-semibold transition-all cursor-pointer ${
-                        githubHistory === g.id
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      {g.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
-                  Timezone & IP Geographical Alignment
-                </label>
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  {[
-                    { match: true, label: 'Matches Stated Resume Location' },
-                    { match: false, label: 'Inconsistent (Timezone difference > 5h)' },
-                  ].map((t) => (
-                    <button
-                      key={String(t.match)}
-                      type="button"
-                      onClick={() => setTimezoneMatch(t.match)}
-                      className={`p-3 rounded-xl border text-left font-semibold transition-all cursor-pointer ${
-                        timezoneMatch === t.match
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
-                  Live Coding Assessment
-                </label>
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  {[
-                    { id: 'fluent', label: 'Walks through logic, types live' },
-                    { id: 'copypaste', label: 'Long pauses, pasting blocks from hidden screen' },
-                  ].map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setLiveCoding(c.id as any)}
-                      className={`p-3 rounded-xl border text-left font-semibold transition-all cursor-pointer ${
-                        liveCoding === c.id
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                      }`}
-                    >
-                      {c.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Results card */}
-            <div className="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-6 border border-slate-800 space-y-5">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Candidate Risk Score
-                </span>
-                <div className="text-3xl font-black text-white mt-1">
-                  {riskScore > 65 ? (
-                    <span className="text-red-400">High Risk ({riskScore}%) — Probable Proxy</span>
-                  ) : riskScore > 35 ? (
-                    <span className="text-amber-400">Moderate Concerns ({riskScore}%)</span>
-                  ) : (
-                    <span className="text-emerald-400">Verified Signals ({riskScore}%)</span>
-                  )}
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-800/90 border border-slate-700 text-xs text-slate-300 leading-relaxed">
-                {riskScore > 65 ? (
-                  <span className="text-red-300">
-                    <strong>Critical Warning:</strong> Candidate demonstrates standard traits of a proxy front. A senior engineer performs the screening, while unvetted third parties work on your repository.
-                  </span>
-                ) : (
-                  <span>
-                    Signals appear aligned. Always implement least-privilege repository permissions and protect production environment secrets.
-                  </span>
-                )}
-              </div>
-
-              <Link href="/analyze" className="block">
-                <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl">
-                  Run Public Handle Scan
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4 Core Risks */}
-      <section className="container-x mt-24">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            Key Contractor Fraud Vectors
-          </h2>
-          <p className="text-slate-600 text-sm sm:text-base mt-3">
-            Ensure the talent you interviewed is the actual developer writing code in your repository.
+        ),
+      }}
+      example={{
+        reportId: 'pixelpro',
+        kicker: 'Worked example · FL-0071 · fictional',
+        title: (
+          <>
+            Pixel Pro came through, <span className="amber">mostly.</span>
+          </>
+        ),
+        body: (
+          <>
+            <p>
+              A mixed print, which is the most common kind. The account has a real working history behind it, and a few
+              patches that didn’t develop.
+            </p>
+            <p>
+              Mixed doesn’t mean dishonest. It tells you where to ask questions before you sign, and which questions to
+              ask.
+            </p>
+          </>
+        ),
+        alt: 'Profile photo for “Pixel Pro Dev”: a man in thick-rimmed glasses in front of monitors full of code',
+        ghostNotes: [
+          'Twelve reviews arrived inside one day. That pattern shows up when freelancers buy small orders from each other to swap reviews. It inflates the count. It doesn’t prove the work is bad.',
+          'Some portfolio links lead to public templates. Plenty of good developers start from one. Ask which parts they wrote and have them walk you through a decision they made.',
+        ],
+        developedNotes: [
+          'The platform checked an ID document. That ties the account to a real person, though not necessarily to the person on your call.',
+          'Forty orders spread over eighteen months is what a working freelancer looks like. Slow, steady history is the hardest thing to fake.',
+          'Platforms award this badge on delivery and dispute records. It is earned over time rather than bought.',
+        ],
+      }}
+      flags={{
+        title: (
+          <>
+            Seven marks <span className="ghost">left in the record</span>
+          </>
+        ),
+        lede: (
+          <p>
+            None of these is a reason to reject someone outright. Each one has a simple test you can run in the interview
+            or the first week, and an honest candidate will pass it without fuss.
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-              <Video size={24} />
-            </div>
-            <h3 className="font-bold text-lg text-slate-900">Proxy Interviewers</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Fluent native speakers are hired to pass the verbal and technical screenings, then quietly hand off all project tasks to junior overseas teams.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <GitBranch size={24} />
-            </div>
-            <h3 className="font-bold text-lg text-slate-900">Fabricated Git History</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Scripts like git-faker generate thousands of fake historical commits to turn contribution squares green overnight without contributing genuine code.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Code2 size={24} />
-            </div>
-            <h3 className="font-bold text-lg text-slate-900">Synthetic UI Portfolios</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Designers claim authorship of complex SaaS dashboards generated in seconds using Midjourney or cloned from popular Dribbble designers.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <ShieldCheck size={24} />
-            </div>
-            <h3 className="font-bold text-lg text-slate-900">Secrets Exfiltration</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Unverified contractors frequently test repositories for embedded AWS tokens, Stripe test keys, or customer database backups.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Footer banner */}
-      <section className="container-x mt-20">
-        <div className="rounded-3xl bg-slate-900 text-white p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
-          <div className="space-y-2 text-center md:text-left">
-            <h3 className="text-2xl sm:text-3xl font-bold">Audit developer accounts in seconds.</h3>
-            <p className="text-slate-400 text-sm max-w-lg">
-              Check public footprints across GitHub, X, Reddit, and portfolio links.
-            </p>
-          </div>
-          <Link href="/analyze">
-            <Button className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-8 py-3.5 rounded-full text-base shadow-lg">
-              Run Free Talent Audit
-            </Button>
-          </Link>
-        </div>
-      </section>
-    </div>
+        ),
+        items: [
+          {
+            flag: 'The camera stays off for the interview, or the picture doesn’t quite keep time with the voice.',
+            action:
+              'Make a short live video call a condition. If the face and voice don’t line up, end the call politely and move on.',
+          },
+          {
+            flag: 'Code history that appeared all at once: hundreds of commits in one week, or nothing public at all.',
+            action:
+              'Read the dates, not the green squares. Ask for one repository they’re proud of and a walk-through of one choice they made in it.',
+          },
+          {
+            flag: 'Working hours that don’t match the location on the profile.',
+            action:
+              'Ask directly. Good freelancers work across time zones all the time. Being vague about it is the flag, not the distance.',
+          },
+          {
+            flag: 'Live coding with long silences followed by finished blocks of code.',
+            action: 'Pair for twenty minutes on a small, real task and ask them to talk while they type.',
+          },
+          {
+            flag: 'Portfolio pieces that appear in someone else’s portfolio, or look generated.',
+            action:
+              'Reverse image search the screenshots. Ask for the live link and a commit or file that carries their name.',
+          },
+          {
+            flag: 'Reviews bunched into a day or two, all five stars, all short.',
+            action:
+              'Read the oldest reviews rather than the newest. If the platform allows it, message one past client.',
+          },
+          {
+            flag: 'Asks for production access, credentials or admin rights before any work is done.',
+            action:
+              'Start with a paid trial on a separate branch and the least access the task needs. Rotate anything you shared when the contract ends.',
+          },
+        ],
+        memo: {
+          re: 'Onboarding a contractor',
+          title: 'The first week',
+          steps: [
+            'Begin with a small paid trial task with a clear finish line.',
+            'Give the least access the task needs: a branch, a staging environment, no production secrets.',
+            'Keep payment in platform milestones or escrow until work is delivered.',
+            'Put ownership of the work in writing before the first commit.',
+            'Keep keys and credentials out of the repository, and rotate them when the contract ends.',
+          ],
+          sign: 'Filed under FL · keep for reference',
+        },
+      }}
+      intake={{
+        title: 'Check the candidate',
+        lede: (
+          <p>
+            Paste whatever they’ve given you: a GitHub username, an X or Instagram handle, a YouTube channel, a portfolio
+            link. We read what’s public. The candidate isn’t notified.
+          </p>
+        ),
+        label: 'Candidate’s handle or profile link',
+        placeholder: '@pixel_pro_dev',
+        hint: 'For freelance platform profiles that need a login, the next page lets you type in the numbers you can see: orders, reviews, member since.',
+      }}
+      limits={{
+        title: 'A print can’t see the keyboard',
+        body: (
+          <p>
+            A print shows an account’s history and audience. It cannot tell you who is typing, how good their code is,
+            or whether they’ll hit a deadline. The live call and a paired task do that work; the print tells you where to
+            look first.
+          </p>
+        ),
+        questions: [
+          {
+            q: 'Is a mixed print a reason not to hire?',
+            a: (
+              <p>
+                Not on its own. Most people with years of work behind them have a patch or two that didn’t develop. Read
+                the ghost lines and ask about them.
+              </p>
+            ),
+          },
+          {
+            q: 'Can this tell me if someone is a proxy?',
+            a: (
+              <p>
+                No. Proxy interviewing happens on the call, not in the public record. A live video call with the camera
+                on and a short paired task are what catch it.
+              </p>
+            ),
+          },
+          {
+            q: 'I’m checking a whole agency’s team. Is there a faster way?',
+            a: (
+              <p>
+                The <Link href="/tools/bulk">bulk tool</Link> takes a list of handles and develops each one in turn, then lets
+                you export the results.
+              </p>
+            ),
+          },
+        ],
+      }}
+    />
   );
 }

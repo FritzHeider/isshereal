@@ -1,292 +1,198 @@
-'use client';
-
-import React, { useState } from 'react';
+import type { Metadata } from 'next';
+import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import {
-  ShieldAlert,
-  ShieldCheck,
-  TrendingDown,
-  DollarSign,
-  Users,
-  Search,
-  ArrowRight,
-  BarChart3,
-  CheckCircle2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CaseFile } from '@/components/cases/CaseFile';
+import { GhostCost } from '@/components/cases/GhostCost';
+import { Reading } from '@/components/darkroom/Reading';
+
+const DESCRIPTION =
+  'How to see how much of a creator’s audience is real before you pay for a sponsorship: follower bursts, engagement pods, view gaps, and what to ask for.';
+
+export const metadata: Metadata = {
+  title: 'Influencer vetting',
+  description: DESCRIPTION,
+  alternates: { canonical: '/use-cases/influencer-vetting' },
+  openGraph: {
+    title: 'Influencer vetting · Is the audience you’re paying for real?',
+    description: DESCRIPTION,
+    url: '/use-cases/influencer-vetting',
+    type: 'article',
+  },
+};
 
 export default function InfluencerVettingPage() {
-  const router = useRouter();
-  const [handle, setHandle] = useState('');
-  const [followers, setFollowers] = useState<number>(150000);
-  const [campaignBudget, setCampaignBudget] = useState<number>(3000);
-  const [estimatedFakeRate, setEstimatedFakeRate] = useState<number>(34);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!handle.trim()) return;
-    const clean = handle.replace(/^@/, '').trim();
-    router.push(`/analyze?handle=${encodeURIComponent(clean)}`);
-  };
-
-  // Calculations
-  const wastedBudget = Math.round(campaignBudget * (estimatedFakeRate / 100));
-  const realAudience = Math.round(followers * (1 - estimatedFakeRate / 100));
-  const claimedCPM = ((campaignBudget / followers) * 1000).toFixed(2);
-  const trueCPM = ((campaignBudget / Math.max(realAudience, 1)) * 1000).toFixed(2);
-
   return (
-    <div className="pt-28 pb-20">
-      {/* Hero Section */}
-      <section className="container-x">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 mb-4">
-          <Link href="/" className="hover:underline">Home</Link>
-          <span>/</span>
-          <span>Use Cases</span>
-          <span>/</span>
-          <span className="text-slate-800">Influencer Vetting</span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-              <ShieldAlert size={14} className="text-emerald-600" />
-              Influencer Marketing Risk Intelligence
-            </div>
-
-            <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
-              Stop burning marketing budget on <span className="text-emerald-600">bot-boosted creators</span>.
-            </h1>
-
-            <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl">
-              Up to 48% of influencer sponsored post fees are pocketed for impressions delivered to ghost followers, comment pods, and click-farms. Run an instant forensic audit on any creator before sending an offer.
+    <CaseFile
+      code="IV"
+      slug="influencer-vetting"
+      crumb="Influencer vetting"
+      glyph="social"
+      opening={{
+        title: (
+          <>
+            Is the audience you’re paying for <span className="safe">real?</span>
+          </>
+        ),
+        lede: (
+          <>
+            <p>
+              A sponsorship buys the attention of real people. Some audiences are padded with bought followers, bots and
+              engagement pods, and the follower count looks the same either way.
             </p>
-
-            {/* Quick Audit Bar */}
-            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-lg pt-2">
-              <div className="relative flex-1">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Enter creator @handle (Instagram, TikTok, YouTube)"
-                  value={handle}
-                  onChange={(e) => setHandle(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-xs"
-                />
-              </div>
-              <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-2xl shadow-md">
-                Audit Creator
-                <ArrowRight size={16} className="ml-1.5" />
-              </Button>
-            </form>
-
-            <div className="flex items-center gap-6 pt-2 text-xs text-slate-500">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-emerald-500" />
-                No login or API token needed
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-emerald-500" />
-                Audited 10.4M+ profiles
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 relative">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 aspect-square bg-slate-900 flex items-center justify-center">
-              <Image
-                src="/images/features/fake-detector.png"
-                alt="Influencer fake follower scanner 3D visualization"
-                fill
-                className="object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-slate-950/70 via-transparent to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/60 shadow-lg text-slate-900">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Industry Benchmark</span>
-                  <span className="text-xs font-extrabold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-200">
-                    High Risk Alert
-                  </span>
-                </div>
-                <div className="mt-2 text-sm font-semibold">
-                  34.2% of mid-tier influencer audiences fail forensic authenticity checks.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive ROI & Waste Calculator */}
-      <section className="container-x mt-24">
-        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 border border-slate-800 relative overflow-hidden">
-          <div className="max-w-2xl mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3">
-              <DollarSign size={14} />
-              Interactive Tool
-            </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-              Sponsor Budget Waste Calculator
-            </h2>
-            <p className="text-slate-400 text-sm sm:text-base mt-2">
-              Estimate how much of your creator fee goes directly into the void of fake followers and bot engagement.
+            <p>
+              The print shows how much of an audience develops. Look before you send the brief, and price the deal on the
+              part that came through.
             </p>
+          </>
+        ),
+        aside: (
+          <div className="case-dial">
+            <Reading
+              value={67}
+              label="Ghost · example"
+              tone="ghost"
+              size="l"
+              note="Of a 480,000-follower audience, about 158,000 developed. The rest never came up."
+            />
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Input Controls */}
-            <div className="lg:col-span-7 space-y-6">
-              <div>
-                <div className="flex justify-between text-sm font-medium mb-2">
-                  <span className="text-slate-300">Creator Follower Count</span>
-                  <span className="text-emerald-400 font-bold">{followers.toLocaleString()} followers</span>
-                </div>
-                <input
-                  type="range"
-                  min="10000"
-                  max="2000000"
-                  step="10000"
-                  value={followers}
-                  onChange={(e) => setFollowers(Number(e.target.value))}
-                  className="w-full accent-emerald-500 bg-slate-800 rounded-lg cursor-pointer"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between text-sm font-medium mb-2">
-                  <span className="text-slate-300">Proposed Sponsorship Fee</span>
-                  <span className="text-emerald-400 font-bold">${campaignBudget.toLocaleString()} USD</span>
-                </div>
-                <input
-                  type="range"
-                  min="200"
-                  max="25000"
-                  step="100"
-                  value={campaignBudget}
-                  onChange={(e) => setCampaignBudget(Number(e.target.value))}
-                  className="w-full accent-emerald-500 bg-slate-800 rounded-lg cursor-pointer"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between text-sm font-medium mb-2">
-                  <span className="text-slate-300">Estimated Bot / Inactive Audience Rate</span>
-                  <span className="text-red-400 font-bold">{estimatedFakeRate}% fake</span>
-                </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="85"
-                  step="1"
-                  value={estimatedFakeRate}
-                  onChange={(e) => setEstimatedFakeRate(Number(e.target.value))}
-                  className="w-full accent-red-500 bg-slate-800 rounded-lg cursor-pointer"
-                />
-              </div>
-            </div>
-
-            {/* Results Card */}
-            <div className="lg:col-span-5 bg-slate-800/80 rounded-2xl p-6 border border-slate-700 space-y-5">
-              <div className="border-b border-slate-700/80 pb-4">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Estimated Wasted Spend</span>
-                <div className="text-3xl sm:text-4xl font-black text-red-400 mt-1 flex items-baseline gap-2">
-                  ${wastedBudget.toLocaleString()}
-                  <span className="text-xs font-medium text-slate-400">dollars wasted on bots</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-700">
-                  <span className="text-slate-400 block mb-1">Effective Real Reach</span>
-                  <span className="text-base font-bold text-emerald-400">{realAudience.toLocaleString()}</span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-700">
-                  <span className="text-slate-400 block mb-1">True CPM vs Stated</span>
-                  <span className="text-base font-bold text-amber-400">${trueCPM} <span className="text-[10px] text-slate-500 font-normal">(${claimedCPM})</span></span>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 text-xs leading-relaxed">
-                <strong>Negotiation Tip:</strong> With a {estimatedFakeRate}% fake follower score, offer <span className="font-bold underline">${(campaignBudget - wastedBudget).toLocaleString()}</span> instead of the asking rate to protect your ROAS.
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4 Red Flags */}
-      <section className="container-x mt-24">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            The 4 Critical Warning Signs We Audit
-          </h2>
-          <p className="text-slate-600 text-sm sm:text-base mt-3">
-            Our algorithmic forensic models inspect signals that typical vanity follower numbers completely disguise.
+        ),
+      }}
+      example={{
+        reportId: 'lucamodels',
+        kicker: 'Worked example · IV-0031 · fictional',
+        title: (
+          <>
+            Luca came up <span className="ghost">two-thirds ghost.</span>
+          </>
+        ),
+        body: (
+          <>
+            <p>
+              Luca is fictional, but the shape is common: years of genuine work, good photographs, and a recent burst of
+              followers that never developed.
+            </p>
+            <p>
+              Padded audiences often sit on top of real creators. That is why an account can look fine at a glance and
+              still deliver very little to a sponsor.
+            </p>
+          </>
+        ),
+        alt: 'Profile photo for “Luca”: a young man in an olive jacket, backlit by a low evening sun',
+        ghostNotes: [
+          'Likes and comments per post measured 0.42%, far lower than accounts this size usually see. Ghost followers don’t like anything, so a padded audience drags the rate down.',
+          'About 180,000 followers arrived within 48 hours, mostly accounts with no posts of their own. Audiences don’t grow like that without a viral post to explain it, and there wasn’t one.',
+          'The same few emoji, a few minutes after each post. Pods trade comments to game the feed. The accounts are real; the audience isn’t.',
+        ],
+        developedNotes: [
+          'Three years of steady posting is real work, and it developed as such.',
+          'The photographs are good and consistent. The quality of the work isn’t in question here. The audience is.',
+        ],
+      }}
+      flags={{
+        title: (
+          <>
+            Six ways an audience <span className="ghost">stays ghost</span>
+          </>
+        ),
+        lede: (
+          <p>
+            Big accounts attract some bots without trying, so a little ghost is normal. What matters is the size of the
+            gap and whether the creator will show you their numbers.
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
-              <TrendingDown size={24} />
-            </div>
-            <h3 className="font-bold text-lg text-slate-900">Overnight Follower Spikes</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Organic growth happens smoothly. Sudden vertical jumps of 10k-50k followers in 24 hours indicate bulk follower purchases from reselling panels.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Users size={24} />
-            </div>
-            <h3 className="font-bold text-lg text-slate-900">Engagement Pod Activity</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Influencers join Telegram or WhatsApp pods where members exchange automated 2-word comments (&ldquo;Love this!&rdquo;, &ldquo;Stunning 🔥&rdquo;) within minutes of posting.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <BarChart3 size={24} />
-            </div>
-            <h3 className="font-bold text-lg text-slate-900">View-to-Follower Anomaly</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              A profile claiming 500,000 followers whose Reels or TikToks consistently struggle to break 2,000 views is a massive indicator of dead ghost accounts.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <ShieldCheck size={24} />
-            </div>
-            <h3 className="font-bold text-lg text-slate-900">Mass-Follower Ratio</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Audience members who follow more than 1,500 profiles rarely see any given post in their feed due to feed saturation. We calculate active net visibility.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Footer banner */}
-      <section className="container-x mt-20">
-        <div className="rounded-3xl bg-linear-to-r from-emerald-600 to-teal-700 text-white p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
-            <h3 className="text-2xl sm:text-3xl font-bold">Ready to audit your roster of creators?</h3>
-            <p className="text-emerald-100 text-sm max-w-lg">
-              Start with free instant audits on Instagram, TikTok, YouTube, X, and Reddit.
-            </p>
-          </div>
-          <Link href="/analyze">
-            <Button className="bg-white hover:bg-slate-100 text-slate-950 font-bold px-8 py-3.5 rounded-full text-base shadow-lg">
-              Analyze a Profile Now
-            </Button>
-          </Link>
-        </div>
-      </section>
-    </div>
+        ),
+        items: [
+          {
+            flag: 'Follower jumps of tens of thousands overnight, with no viral post to explain them.',
+            action:
+              'Ask for a follower-growth screenshot from the platform’s own insights, with dates, and compare it with when their best posts went out.',
+          },
+          {
+            flag: 'Comments that are short, generic and early: “Love this”, a row of fire emoji, within minutes of posting.',
+            action: 'Read the comments on three older posts. Real audiences ask questions, disagree and tag friends.',
+          },
+          {
+            flag: 'Views far below follower count: half a million followers, two thousand views a reel.',
+            action: 'Pay on views or results rather than followers. Ask for average reach over the last thirty days.',
+          },
+          {
+            flag: 'Followers who themselves follow thousands of accounts and post nothing.',
+            action: 'Spot-check twenty followers. Empty profiles following five thousand people aren’t watching anyone.',
+          },
+          {
+            flag: 'An audience location that doesn’t fit the content or the language.',
+            action:
+              'Ask for the country breakdown from insights. A London food creator whose followers are mostly somewhere unrelated deserves a question.',
+          },
+          {
+            flag: 'Reluctance to share insights screenshots or a dated media kit.',
+            action: 'Make it part of the brief. Creators with real audiences usually share without fuss.',
+          },
+        ],
+        memo: {
+          re: 'Before the contract',
+          title: 'Before you sign',
+          steps: [
+            'Ask for insights screenshots: reach, audience countries, follower growth, with dates.',
+            'Price on views, clicks or sales where you can, rather than on follower count.',
+            'Start with one paid post before a long series.',
+            'Write the deliverables, dates and usage rights into the agreement.',
+            'Re-check the account before the second payment. Audiences change.',
+          ],
+          sign: 'Filed under IV · keep for reference',
+        },
+      }}
+      extra={<GhostCost slug="influencer-vetting" />}
+      intake={{
+        title: 'Develop a creator',
+        lede: (
+          <p>
+            Paste an Instagram, TikTok or YouTube handle. The creator isn’t notified, and nothing is posted anywhere. If
+            you have a whole roster, the <Link href="/tools/bulk">bulk tool</Link> takes a list.
+          </p>
+        ),
+        label: 'Creator’s handle or profile link',
+        placeholder: '@lucamodels',
+        hint: 'Instagram, TikTok and YouTube handles or links all work.',
+      }}
+      limits={{
+        title: 'Ghosts aren’t always bought',
+        body: (
+          <p>
+            A ghost is a follower who never developed: no posts, no activity, no sign of a person watching. Some are
+            bought. Some are bots that follow large accounts on their own. Some are real people who stopped opening the
+            app years ago. The print shows how much of the audience is there, not how the rest got in.
+          </p>
+        ),
+        questions: [
+          {
+            q: 'Does a high ghost share mean the creator bought followers?',
+            a: (
+              <p>
+                Not necessarily. Bots follow big accounts without being asked, and old audiences go quiet. Ask the creator
+                about any spike; many will explain a giveaway or a feature and show you the insights.
+              </p>
+            ),
+          },
+          {
+            q: 'How much ghost is normal?',
+            a: (
+              <p>
+                Some, always. Every large account picks up drifting bots and abandoned profiles. Compare creators of a
+                similar size in the same niche, rather than holding anyone to zero.
+              </p>
+            ),
+          },
+          {
+            q: 'What should I do with a mixed result?',
+            a: (
+              <p>
+                Talk to the creator. Price the deal on the developed audience and ask for their numbers. A creator who
+                won’t share them is telling you something too.
+              </p>
+            ),
+          },
+        ],
+      }}
+    />
   );
 }

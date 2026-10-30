@@ -1,92 +1,91 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import {
-  ShieldCheck,
-  Search,
-  Loader2,
-  Sparkles,
-  BadgeCheck,
-  HeartHandshake,
-  Store,
-  Briefcase,
-  AlertCircle,
-  Zap,
-  Check,
-  RefreshCw,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { CATEGORIES, PLATFORMS, SAMPLE_REPORTS } from '@/data/content';
+import { getVerifiedCreator } from '@/data/verified-creators';
+import { Edge } from '@/components/darkroom/Edge';
+import { Glyph, platformCode, platformGlyph, type GlyphName } from '@/components/darkroom/Glyph';
+import { Reading } from '@/components/darkroom/Reading';
 
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  BadgeCheck: <BadgeCheck size={18} />,
-  HeartHandshake: <HeartHandshake size={18} />,
-  Store: <Store size={18} />,
-  Briefcase: <Briefcase size={18} />,
+const CATEGORY_GLYPH: Record<string, GlyphName> = {
+  social: 'social',
+  dating: 'dating',
+  marketplace: 'marketplace',
+  freelance: 'freelance',
 };
 
-import { getVerifiedCreator } from '@/data/verified-creators';
+const QUICK = [
+  { label: '@nike', handle: 'nike', plat: 'instagram' },
+  { label: '@natgeo', handle: 'natgeo', plat: 'instagram' },
+  { label: '@mrbeast', handle: 'mrbeast', plat: 'youtube' },
+  { label: '@figma', handle: 'figma', plat: 'instagram' },
+  { label: '@cristiano', handle: 'cristiano', plat: 'instagram' },
+];
 
-function AnalyzeContent() {
-  const searchParams = useSearchParams();
+function stripHandle(raw: string) {
+  return raw
+    .replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '')
+    .replace(/^@/, '')
+    .split(/[/?#]/)[0]
+    .trim();
+}
+
+const num = (v: string) => (v.trim() ? parseFloat(v.replace(/,/g, '')) : undefined);
+
+type Status = { tone: 'info' | 'developed' | 'error'; text: string } | null;
+
+export default function AnalyzePage() {
   const router = useRouter();
-  const initialHandle = searchParams.get('handle') || '';
+  // Read ?handle= after mount so the bench prerenders as static HTML (no fallback swap, no layout shift).
+  const [initialHandle, setInitialHandle] = useState('');
+  useEffect(() => {
+    const h = new URLSearchParams(window.location.search).get('handle') || '';
+    if (h) {
+      setHandle(h);
+      setInitialHandle(h);
+    }
+  }, []);
 
   const [category, setCategory] = useState('social');
   const [platform, setPlatform] = useState('instagram');
-  const [handle, setHandle] = useState(initialHandle);
+  const [handle, setHandle] = useState('');
   const [followers, setFollowers] = useState('');
   const [following, setFollowing] = useState('');
   const [posts, setPosts] = useState('');
   const [likes, setLikes] = useState('');
   const [comments, setComments] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [fetchingLive, setFetchingLive] = useState(false);
-  const [liveSuccessMsg, setLiveSuccessMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [status, setStatus] = useState<Status>(null);
+  const [handleError, setHandleError] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (initialHandle) {
-      const clean = initialHandle.replace(/^@/, '').split(/[/?#]/)[0].toLowerCase().trim();
-      const v = getVerifiedCreator(clean);
-      if (v) {
-        setHandle(v.handle);
-        setPlatform(v.platform.toLowerCase());
-        setFollowers(v.followers.toString());
-        setFollowing(v.following.toString());
-        setPosts(v.posts.toString());
-        setLiveSuccessMsg(`Loaded verified public metrics for ${v.name}: ${v.followers.toLocaleString()} followers`);
-      } else {
-        handleAutoFetch();
-      }
-    }
-  }, [initialHandle]);
+  const loadVerified = (key: string, message: (name: string, n: number) => string) => {
+    const v = getVerifiedCreator(key);
+    if (!v) return false;
+    setHandle(v.handle);
+    setPlatform(v.platform.toLowerCase());
+    setFollowers(v.followers.toString());
+    setFollowing(v.following.toString());
+    setPosts(v.posts.toString());
+    setStatus({ tone: 'developed', text: message(v.name, v.followers) });
+    return true;
+  };
 
-  // Auto-fetch live numbers from Instagram/platform
-  const handleAutoFetch = async () => {
-    if (!handle.trim()) return;
-    setFetchingLive(true);
-    setLiveSuccessMsg(null);
-
-    const clean = handle
-      .replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '')
-      .replace(/^@/, '')
-      .split(/[/?#]/)[0]
-      .trim()
-      .toLowerCase();
-
-    // Check verified dataset first
-    const v = getVerifiedCreator(clean);
-    if (v) {
-      setFollowers(v.followers.toString());
-      setFollowing(v.following.toString());
-      setPosts(v.posts.toString());
-      setLiveSuccessMsg(`Verified public telemetry for ${v.name}: ${v.followers.toLocaleString()} followers`);
-      setFetchingLive(false);
+  const fetchNumbers = async (raw = handle) => {
+    const clean = stripHandle(raw).toLowerCase();
+    if (!clean) {
+      setHandleError('Paste a handle or a profile link first.');
       return;
     }
-
+    setFetching(true);
+    setStatus({ tone: 'info', text: `Pulling public numbers for @${clean}.` });
+    if (loadVerified(clean, (name, n) => `Verified public numbers for ${name}: ${n.toLocaleString('en-US')} followers.`)) {
+      setFetching(false);
+      return;
+    }
     try {
       const res = await fetch(`/api/audit?handle=${encodeURIComponent(clean)}&platform=${platform}`);
       if (res.ok) {
@@ -95,397 +94,267 @@ function AnalyzeContent() {
           setFollowers(data.report.followersCount.toString());
           if (data.report.followingCount) setFollowing(data.report.followingCount.toString());
           if (data.report.postsCount) setPosts(data.report.postsCount.toString());
-          setLiveSuccessMsg(`Pulled live data for ${data.report.name}: ${data.report.followers}`);
+          setStatus({ tone: 'developed', text: `Pulled live numbers for ${data.report.name}: ${data.report.followers}.` });
         } else {
-          setLiveSuccessMsg(`Enter public follower count for @${clean} to compute authenticity score`);
+          setStatus({ tone: 'error', text: `The platform didn’t share @${clean}’s numbers. Type in what the profile shows and we’ll develop from those.` });
         }
+      } else {
+        setStatus({ tone: 'error', text: 'The platform didn’t answer. Type in the numbers from the profile and we’ll develop from those.' });
       }
-    } catch (e) {
-      console.error('Auto-fetch failed:', e);
+    } catch {
+      setStatus({ tone: 'error', text: 'Fogged: the request didn’t complete. Check your connection, or type the numbers in yourself.' });
     } finally {
-      setFetchingLive(false);
+      setFetching(false);
     }
   };
 
-  // Quick preset loader
-  const loadPreset = (presetKey: string) => {
-    const v = getVerifiedCreator(presetKey);
-    if (v) {
-      setHandle(v.handle);
-      setPlatform(v.platform.toLowerCase());
-      setFollowers(v.followers.toString());
-      setFollowing(v.following.toString());
-      setPosts(v.posts.toString());
-      setLiveSuccessMsg(`Loaded verified profile: ${v.name} (${v.followers.toLocaleString()} followers)`);
+  useEffect(() => {
+    if (!initialHandle) return;
+    const clean = stripHandle(initialHandle).toLowerCase();
+    if (!loadVerified(clean, (name, n) => `Loaded verified public numbers for ${name}: ${n.toLocaleString('en-US')} followers.`)) {
+      fetchNumbers(initialHandle);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialHandle]);
+
+  const loadPreset = (id: string) => {
+    if (loadVerified(id, (name, n) => `Loaded verified profile ${name}: ${n.toLocaleString('en-US')} followers.`)) return;
+    const rep = SAMPLE_REPORTS.find((r) => r.id === id);
+    if (!rep) return;
+    setHandle(rep.handle);
+    if (rep.id === 'mrbeast') {
+      setPlatform('youtube'); setFollowers('342000000'); setFollowing('240'); setPosts('820');
+    } else if (rep.id === 'lucamodels') {
+      setPlatform('instagram'); setFollowers('480000'); setFollowing('3400'); setPosts('65');
+    } else if (rep.id === 'maya') {
+      setPlatform('tiktok'); setFollowers('1200000'); setFollowing('410'); setPosts('340');
+    }
+    setStatus({ tone: 'developed', text: `Loaded the example ${rep.handle}. These numbers are fictional.` });
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = stripHandle(handle);
+    if (!clean) {
+      setHandleError('Paste a handle or a profile link first.');
+      document.getElementById('an-handle')?.focus();
       return;
     }
-
-    const rep = SAMPLE_REPORTS.find((r) => r.id === presetKey);
-    if (rep) {
-      setHandle(rep.handle);
-      if (rep.id === 'mrbeast') {
-        setPlatform('youtube');
-        setFollowers('342000000');
-        setFollowing('240');
-        setPosts('820');
-      } else if (rep.id === 'lucamodels') {
-        setPlatform('instagram');
-        setFollowers('480000');
-        setFollowing('3400');
-        setPosts('65');
-      } else if (rep.id === 'maya') {
-        setPlatform('tiktok');
-        setFollowers('1200000');
-        setFollowing('410');
-        setPosts('340');
-      }
-    }
-  };
-
-  const handleRunAudit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!handle.trim()) return;
-
-    const cleanHandle = handle
-      .replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com|youtube\.com\/@?)/i, '')
-      .replace(/^@/, '')
-      .split(/[/?#]/)[0]
-      .trim();
-
+    setBusy(true);
+    setStatus({ tone: 'info', text: `Developing @${clean}. Holding for fixer.` });
     try {
-      const numFollowers = followers.trim() ? parseFloat(followers.replace(/,/g, '')) : undefined;
-      const numFollowing = following.trim() ? parseFloat(following.replace(/,/g, '')) : undefined;
-      const numPosts = posts.trim() ? parseFloat(posts.replace(/,/g, '')) : undefined;
-      const numLikes = likes.trim() ? parseFloat(likes.replace(/,/g, '')) : undefined;
-      const numComments = comments.trim() ? parseFloat(comments.replace(/,/g, '')) : undefined;
-
       const res = await fetch('/api/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           platform,
-          handle: cleanHandle,
-          followers: numFollowers,
-          following: numFollowing,
-          posts: numPosts,
-          likes: numLikes,
-          comments: numComments,
+          handle: clean,
+          followers: num(followers),
+          following: num(following),
+          posts: num(posts),
+          likes: num(likes),
+          comments: num(comments),
         }),
       });
-
       if (res.ok) {
         const data = await res.json();
         if (data.report) {
-          if (typeof window !== 'undefined') {
+          try {
             localStorage.setItem(`audit_${data.report.id}`, JSON.stringify(data.report));
             localStorage.setItem('isshereal_last_report', JSON.stringify(data.report));
+          } catch {
+            /* storage blocked: the report page fetches again */
           }
           router.push(`/report/${data.report.id}`);
           return;
         }
       }
-    } catch (err) {
-      console.error('Audit submit error:', err);
-    } finally {
-      setLoading(false);
+    } catch {
+      /* fall through to the report page, which asks for numbers if needed */
     }
-
-    // Fallback navigation
-    router.push(`/report/ig_${cleanHandle}`);
+    setBusy(false);
+    router.push(`/report/ig_${clean}`);
   };
 
-  // Real-time live engagement rate estimation
-  const fNum = parseFloat(followers.replace(/,/g, '')) || 0;
-  const lNum = parseFloat(likes.replace(/,/g, '')) || 0;
-  const cNum = parseFloat(comments.replace(/,/g, '')) || 0;
-  const liveER = fNum > 0 ? (((lNum + cNum) / fNum) * 100).toFixed(2) : '0.00';
+  const f = num(followers) || 0;
+  const er = f > 0 ? (((num(likes) || 0) + (num(comments) || 0)) / f) * 100 : 0;
+  const ready = !!stripHandle(handle);
+  const platformLabel = PLATFORMS.find((p) => p.id === platform)?.label || platform;
 
   return (
-    <div className="pt-28 pb-20 container-x max-w-4xl">
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
-            <ShieldCheck size={14} />
-            <span>Profile Authenticity Auditor</span>
-          </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-xs">
-            <span className="text-emerald-400">⚡</span>
-            <span>Web-Use Browser Forensics Active</span>
-          </div>
+    <>
+      <section className="bench band band--contact page-grid" aria-labelledby="bench-title">
+        <Edge frame="00" label="Loading bench" />
+        <div className="bench__top">
+          <nav className="crumbs" aria-label="Breadcrumb">
+            <ol>
+              <li><Link href="/">Home</Link></li>
+              <li><span aria-current="page">Develop a profile</span></li>
+            </ol>
+          </nav>
+          <h1 id="bench-title" className="bench__title display-l">
+            The loading <span className="safe">bench</span>
+          </h1>
+          <p className="bench__lede lede">
+            Paste a profile. We pull the public numbers where the platform shares them; where it doesn’t, you type in what the
+            profile shows. Then it goes in the tray.
+          </p>
         </div>
-        <h1 className="font-extrabold text-3xl sm:text-4xl text-slate-900 tracking-tight">
-          Audit Any Profile
-        </h1>
-        <p className="text-slate-600 mt-2 text-sm sm:text-base">
-          Choose a platform and enter an @handle or URL. Live math + AI forensic verdict in seconds.
-        </p>
-      </div>
+      </section>
 
-      {/* Quick Demo Fill Buttons */}
-      <div className="mb-6 flex items-center justify-between flex-wrap gap-2 text-xs">
-        <span className="text-slate-500 font-medium">Quick load sample data:</span>
-        <div className="flex items-center gap-2">
-          {SAMPLE_REPORTS.slice(0, 3).map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => loadPreset(r.id)}
-              className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-emerald-700 font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-            >
-              <div className="relative w-4 h-4 rounded-full overflow-hidden">
-                <Image src={r.avatarImage} alt={r.name} fill className="object-cover" />
+      <section className="bench band band--flush page-grid" aria-label="Examination form">
+        <form className="bench__layout" onSubmit={onSubmit} noValidate>
+          <div className="bench__form">
+            <fieldset className="bench__group">
+              <legend className="bench__legend"><span className="label text-safe">A</span> What kind of profile</legend>
+              <div className="chips" role="group" aria-label="Profile type">
+                {CATEGORIES.map((c) => (
+                  <button key={c.id} type="button" className="chip" aria-pressed={category === c.id} onClick={() => setCategory(c.id)}>
+                    <Glyph name={CATEGORY_GLYPH[c.id] || 'social'} size={16} />
+                    {c.label}
+                  </button>
+                ))}
               </div>
-              <span>{r.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xl p-6 sm:p-8">
-        {/* Category Tabs */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-          {CATEGORIES.map((cat) => {
-            const isSelected = category === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setCategory(cat.id)}
-                className={`p-3.5 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                  isSelected
-                    ? 'border-emerald-600 bg-emerald-50/40 ring-2 ring-emerald-500/20 shadow-xs'
-                    : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
-                }`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${
-                    isSelected
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-white text-slate-600 border border-slate-200'
-                  }`}
-                >
-                  {CATEGORY_ICONS[cat.icon]}
+              <p className="field__hint">{CATEGORIES.find((c) => c.id === category)?.desc}</p>
+              {category === 'social' && (
+                <div className="chips bench__platforms" role="group" aria-label="Platform">
+                  {PLATFORMS.map((p) => (
+                    <button key={p.id} type="button" className="chip" aria-pressed={platform === p.id} onClick={() => setPlatform(p.id)}>
+                      <Glyph name={platformGlyph(p.label)} size={16} />
+                      {p.label}
+                    </button>
+                  ))}
                 </div>
-                <div className="font-bold text-xs sm:text-sm text-slate-900">
-                  {cat.label}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Platform Selection */}
-        {category === 'social' && (
-          <div className="mb-8">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-              Select Platform
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {PLATFORMS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setPlatform(p.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                    platform === p.id
-                      ? 'border-emerald-600 bg-emerald-600 text-white shadow-xs'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Audit Form */}
-        <form onSubmit={handleRunAudit} className="space-y-6">
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-semibold text-slate-900">
-                Profile Handle or URL
-              </label>
-              <button
-                type="button"
-                onClick={handleAutoFetch}
-                disabled={fetchingLive || !handle.trim()}
-                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer disabled:opacity-50"
-              >
-                {fetchingLive ? (
-                  <>
-                    <Loader2 size={12} className="animate-spin" />
-                    <span>Scraping public data...</span>
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw size={12} />
-                    <span>Auto-Fetch Public Numbers</span>
-                  </>
-                )}
-              </button>
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                value={handle}
-                onChange={(e) => setHandle(e.target.value)}
-                placeholder="@username or profile link"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm text-slate-900"
-                minLength={1}
-                maxLength={64}
-                pattern="[a-zA-Z0-9_.]+"
-              />
-              <span className="validation-error">Invalid handle format</span>
-            </div>
-            {liveSuccessMsg && (
-              <div className="mt-2 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-2 flex items-center gap-1.5">
-                <Check size={14} className="text-emerald-600 shrink-0" />
-                <span>{liveSuccessMsg}</span>
-              </div>
-            )}
-
-            {/* Quick Presets */}
-            <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs">
-              <span className="text-slate-400 font-medium">Try verified:</span>
-              {[
-                { label: '@nike', handle: 'nike', plat: 'instagram' },
-                { label: '@natgeo', handle: 'natgeo', plat: 'instagram' },
-                { label: '@mrbeast', handle: 'mrbeast', plat: 'youtube' },
-                { label: '@figma', handle: 'figma', plat: 'instagram' },
-                { label: '@cristiano', handle: 'cristiano', plat: 'instagram' },
-              ].map((c) => (
-                <button
-                  key={c.handle}
-                  type="button"
-                  onClick={() => {
-                    setHandle(c.label);
-                    setPlatform(c.plat);
-                    const v = getVerifiedCreator(c.handle);
-                    if (v) {
-                      setFollowers(v.followers.toString());
-                      setFollowing(v.following.toString());
-                      setPosts(v.posts.toString());
-                      setLiveSuccessMsg(`Loaded verified metrics for ${v.name}: ${v.followers.toLocaleString()} followers`);
-                    }
-                  }}
-                  className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-600 transition-colors font-mono cursor-pointer"
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Followers / Audience
-              </label>
-              <input
-                type="text"
-                value={followers}
-                onChange={(e) => setFollowers(e.target.value)}
-                placeholder="48,000"
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-mono"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Following Count
-              </label>
-              <input
-                type="text"
-                value={following}
-                onChange={(e) => setFollowing(e.target.value)}
-                placeholder="820"
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-mono"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Total Posts / Videos
-              </label>
-              <input
-                type="text"
-                value={posts}
-                onChange={(e) => setPosts(e.target.value)}
-                placeholder="140"
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-mono"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Avg. Likes / Reactions per post
-              </label>
-              <input
-                type="text"
-                value={likes}
-                onChange={(e) => setLikes(e.target.value)}
-                placeholder="1,200"
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-mono"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Avg. Comments per post
-              </label>
-              <input
-                type="text"
-                value={comments}
-                onChange={(e) => setComments(e.target.value)}
-                placeholder="45"
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-emerald-500 font-mono"
-              />
-            </div>
-          </div>
-
-          {/* Live Engagement Rate calculation chip */}
-          <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Zap size={16} className="text-emerald-600" />
-              <span className="text-xs font-semibold text-slate-700">
-                Live Computed Engagement Rate:
-              </span>
-            </div>
-            <div className="font-extrabold text-sm sm:text-base text-slate-900">
-              {liveER}%
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-            <div className="text-xs text-slate-500 flex items-center gap-1.5">
-              <Sparkles size={14} className="text-emerald-600" />
-              <span>Live forensic calculation · Zero logins or passwords</span>
-            </div>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-7 py-2.5 text-sm font-semibold shadow-md shadow-emerald-600/20"
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin mr-2" />
-                  Auditing Profile...
-                </>
-              ) : (
-                'Run Full Live Audit'
               )}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
+            </fieldset>
 
-export default function AnalyzePage() {
-  return (
-    <Suspense fallback={<div className="pt-32 text-center text-slate-400">Loading auditor...</div>}>
-      <AnalyzeContent />
-    </Suspense>
+            <fieldset className="bench__group">
+              <legend className="bench__legend"><span className="label text-safe">B</span> The specimen</legend>
+              <div className="filmfield">
+                <span className="filmfield__code" aria-hidden="true">
+                  <Glyph name={platformGlyph(platformLabel)} size={18} />
+                  {platformCode(platformLabel)}
+                </span>
+                <span className="filmfield__body">
+                  <label className="filmfield__label" htmlFor="an-handle">Handle or profile link <span className="text-safe">required</span></label>
+                  <input
+                    id="an-handle"
+                    className="filmfield__input"
+                    type="text"
+                    value={handle}
+                    onChange={(e) => {
+                      setHandle(e.target.value);
+                      setHandleError(null);
+                    }}
+                    placeholder="@handle or profile link"
+                    autoComplete="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    maxLength={120}
+                    aria-invalid={handleError ? true : undefined}
+                    aria-describedby="an-handle-msg"
+                  />
+                </span>
+                <button type="button" className="btn btn--line" onClick={() => fetchNumbers()} disabled={fetching || !ready}>
+                  <Glyph name="refresh" size={16} />
+                  {fetching ? 'Pulling' : 'Pull numbers'}
+                </button>
+                <p id="an-handle-msg" className="filmfield__status" data-tone={handleError ? 'error' : undefined} hidden={!handleError}>
+                  {handleError}
+                </p>
+              </div>
+              <div className="bench__quick">
+                <span className="label text-2">Verified examples</span>
+                <div className="chips">
+                  {QUICK.map((q) => (
+                    <button
+                      key={q.handle}
+                      type="button"
+                      className="chip"
+                      onClick={() => {
+                        setPlatform(q.plat);
+                        if (!loadVerified(q.handle, (name, n) => `Loaded verified numbers for ${name}: ${n.toLocaleString('en-US')} followers.`)) setHandle(q.label);
+                      }}
+                    >
+                      {q.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset className="bench__group">
+              <legend className="bench__legend"><span className="label text-safe">C</span> Public numbers <span className="text-2 bench__optional">optional if we can pull them</span></legend>
+              <div className="bench__numbers">
+                <div className="field">
+                  <label className="field__label" htmlFor="an-followers">Followers</label>
+                  <input id="an-followers" className="input" inputMode="numeric" value={followers} onChange={(e) => setFollowers(e.target.value)} placeholder="48,000" />
+                </div>
+                <div className="field">
+                  <label className="field__label" htmlFor="an-following">Following</label>
+                  <input id="an-following" className="input" inputMode="numeric" value={following} onChange={(e) => setFollowing(e.target.value)} placeholder="820" />
+                </div>
+                <div className="field">
+                  <label className="field__label" htmlFor="an-posts">Posts or videos</label>
+                  <input id="an-posts" className="input" inputMode="numeric" value={posts} onChange={(e) => setPosts(e.target.value)} placeholder="140" />
+                </div>
+                <div className="field">
+                  <label className="field__label" htmlFor="an-likes">Average likes per post</label>
+                  <input id="an-likes" className="input" inputMode="numeric" value={likes} onChange={(e) => setLikes(e.target.value)} placeholder="1,200" />
+                </div>
+                <div className="field">
+                  <label className="field__label" htmlFor="an-comments">Average comments per post</label>
+                  <input id="an-comments" className="input" inputMode="numeric" value={comments} onChange={(e) => setComments(e.target.value)} placeholder="45" />
+                </div>
+                <div className="bench__er">
+                  <Reading value={er.toFixed(2)} label="Engagement, live" size="m" tone={f > 0 && er > 0 ? 'developed' : 'neutral'} />
+                </div>
+              </div>
+            </fieldset>
+          </div>
+
+          <aside className="bench__side" aria-label="Tray">
+            <div className="bench__tray">
+              {status ? (
+                <div className={`state ${status.tone === 'error' ? 'state--fogged' : 'state--notice'}`} role="status">
+                  <span className="state__mark"><Glyph name={status.tone === 'error' ? 'fogged' : status.tone === 'developed' ? 'developed' : 'timer'} size={28} /></span>
+                  <div className="state__body">
+                    <p className="state__title">{status.tone === 'error' ? 'Fogged' : status.tone === 'developed' ? 'Numbers in' : 'In the tray'}</p>
+                    <p>{status.text}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="state" role="status">
+                  <span className="state__mark"><Glyph name="tray" size={28} /></span>
+                  <div className="state__body">
+                    <p className="state__title">Nothing in the tray yet</p>
+                    <p>Paste a handle or link to start. We never ask for a login, and we only read public numbers.</p>
+                  </div>
+                </div>
+              )}
+              <button type="submit" className="btn btn--safe btn--wide bench__go" disabled={busy}>
+                {busy ? 'Developing' : 'Develop'} <Glyph name="arrow-right" size={18} />
+              </button>
+              <p className="bench__fine">A score is evidence about an audience, not a verdict on a person.</p>
+            </div>
+
+            <div className="bench__examples contact" data-room="dark">
+              <p className="label text-2">Or load an example</p>
+              <div className="bench__frames">
+                {SAMPLE_REPORTS.slice(0, 3).map((r, i) => (
+                  <button key={r.id} type="button" className="frame" onClick={() => loadPreset(r.id)}>
+                    <span className="frame__img">
+                      <Image src={r.avatarImage} alt="" width={200} height={200} sizes="6rem" />
+                    </span>
+                    <span className="frame__code"><span>{String(i + 1).padStart(2, '0')} ▸ {platformCode(r.platform)}</span></span>
+                    <span className="frame__title">{r.handle}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
+        </form>
+      </section>
+    </>
   );
 }

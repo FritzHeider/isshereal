@@ -1,12 +1,23 @@
-
 'use client';
+
 import { useTheme } from './ThemeProvider';
-import { Sun, Moon } from 'lucide-react';
-export function ThemeToggle() {
+
+/** The darkroom light switch. Pressed means the lights are on. */
+export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
+  const lightsOn = theme === 'light';
   return (
-    <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-transform hover:scale-110 active:scale-95 duration-200">
-      {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-500 animate-in spin-in-180" /> : <Moon className="w-5 h-5 text-slate-700 animate-in spin-in-180" />}
+    <button
+      type="button"
+      className={['switch', className].filter(Boolean).join(' ')}
+      aria-pressed={lightsOn}
+      onClick={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        setTheme(lightsOn ? 'dark' : 'light', { x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      }}
+    >
+      <span className="switch__lamp" aria-hidden="true" />
+      <span className="switch__text">{lightsOn ? 'Lights off' : 'Lights on'}</span>
     </button>
   );
 }

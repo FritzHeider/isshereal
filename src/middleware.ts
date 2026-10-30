@@ -96,6 +96,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Match all routes except static files and _next internals
-    '/((?!_next/static|_next/image|images/|favicon.ico).*)',
+    '/((?!_next/static|_next/image|images/|fonts/|og/|favicon.ico).*)',
   ],
 };

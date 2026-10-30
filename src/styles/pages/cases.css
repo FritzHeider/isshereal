@@ -1,0 +1,573 @@
+/* cases pages. Darkroom composition for this route group; tokens only.
+
+   One shared case-file structure (src/components/cases/CaseFile.tsx),
+   composed differently per case through data-case:
+     dt  dating safety        headline left, lede offset right, tray left
+     mk  marketplace buyers   headline right-aligned, tray right, mirrored sheet
+     fl  hiring freelancers   headline with a job ticket pinned beside it
+     iv  influencer vetting   full-width headline over a large ghost reading
+
+   Mobile (below 56rem) is the base; the 12-column placements only apply
+   on wide screens, so each page re-composes rather than stacks. */
+
+@layer components {
+
+  /* ------------------------------------------------------------------------
+     Case file shell and body copy
+     ------------------------------------------------------------------------ */
+
+  .case {
+    --case-body: var(--step-0);
+    --case-lh: var(--lh-0);
+    --case-tilt: -1.2deg;
+  }
+  .case[data-gentle] {
+    --case-body: var(--step-1);
+    --case-lh: var(--lh-1);
+  }
+  .case[data-case="mk"],
+  .case[data-case="iv"] { --case-tilt: 1.4deg; }
+
+  .case-body {
+    display: grid;
+    gap: var(--space-s);
+    font-size: var(--case-body);
+    line-height: var(--case-lh);
+  }
+  .case-body p { max-width: var(--measure); }
+  .case-body a:hover { color: var(--c-amber); }
+
+  /* Every column-placed child spans the full track on narrow screens. */
+  .case-open__grid > *,
+  .case-example > *,
+  .case-flags > *,
+  .case-tool > *,
+  .case-intake > *,
+  .case-limits > *,
+  .case-others > * { grid-column: 1 / -1; }
+
+  /* ------------------------------------------------------------------------
+     01 Opening
+     ------------------------------------------------------------------------ */
+
+  .case-open { padding-block: var(--space-l) var(--section-tray); }
+
+  .case-open__grid { row-gap: var(--space-l); align-items: start; }
+
+  .case-open__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-xs) var(--space-m);
+    padding-bottom: var(--space-xs);
+    border-bottom: var(--bw-hair) dashed var(--c-line-strong);
+  }
+  .case-open__tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs) var(--space-s); }
+
+  .case-code {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 2.75rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tr-label);
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--c-text-2);
+  }
+  .case-code .glyph { color: var(--c-text); }
+  .case-code strong { font-weight: 600; color: var(--c-safe-text); }
+
+  .case-open__title {
+    font-size: var(--step-5);
+    line-height: var(--lh-5);
+    letter-spacing: var(--tr-5);
+  }
+  .case-open__title .safe { color: var(--c-safe); }
+
+  .case-open__lede { gap: var(--space-s); align-content: start; }
+  .case-open__lede > p:first-child { font-size: var(--step-1); line-height: var(--lh-1); }
+  .case-open__jump { margin-top: var(--space-2xs); }
+  .case-open__jump .btn { gap: 0.45rem; }
+
+  /* Opening asides, one per case */
+
+  .case-short {
+    display: grid;
+    gap: var(--space-xs);
+    padding-top: var(--space-s);
+    border-top: var(--bw-heavy) solid var(--c-amber);
+  }
+  .case-short__list { display: grid; gap: var(--space-2xs); }
+  .case-short__list li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: var(--step-2);
+    line-height: var(--lh-2);
+    letter-spacing: var(--tr-2);
+  }
+  .case-short__list .glyph { flex: none; color: var(--c-amber); }
+
+  .case-tag {
+    position: relative;
+    background: var(--c-tray);
+    border-top: var(--bw-heavy) solid var(--c-text);
+    border-radius: 0 0 var(--radius-1) var(--radius-1);
+    padding: var(--space-s) var(--space-m) var(--space-xs);
+    box-shadow: var(--shadow-2);
+  }
+  .case-tag dd { font-size: var(--case-body); line-height: var(--lh-1); }
+
+  .case-ticket {
+    background: var(--c-paper);
+    color: var(--c-silver);
+    padding: var(--space-s) var(--space-m) var(--space-xs);
+    border-radius: var(--radius-1);
+    box-shadow: var(--shadow-print);
+    transform: rotate(-2deg);
+    max-width: 26rem;
+  }
+  .case-ticket__head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-bottom: var(--space-2xs);
+    border-bottom: var(--bw-hair) dashed color-mix(in oklch, var(--c-silver) 35%, transparent);
+  }
+  .case-ticket .specs dt { color: color-mix(in oklch, var(--c-silver) 62%, var(--c-paper)); }
+  .case-ticket .specs dt,
+  .case-ticket .specs dd { border-bottom-color: color-mix(in oklch, var(--c-silver) 16%, transparent); }
+  .case-ticket .specs dd { font-family: var(--font-mono); font-size: var(--step--1); padding-top: 0.75rem; }
+  .case-ticket ::selection { background: var(--c-silver); color: var(--c-paper); }
+
+  .case-dial {
+    display: grid;
+    padding-inline-start: var(--space-m);
+    border-inline-start: var(--bw-rule) solid var(--c-cyan);
+  }
+  .case-dial .reading__note { max-width: 30ch; }
+
+  /* Narrow: each opening re-composes around its aside */
+  .case[data-case="dt"] .case-open__aside { order: 1; }
+  .case[data-case="dt"] .case-open__lede { order: 2; }
+  .case[data-case="dt"] .case-short__list { grid-auto-flow: row; }
+
+  .case[data-case="fl"] .case-open__aside { order: -1; justify-self: end; }
+  .case[data-case="fl"] .case-open__meta { order: -2; }
+
+  .case[data-case="iv"] .case-open__aside { order: -1; }
+  .case[data-case="iv"] .case-open__meta { order: -2; }
+
+  @media (max-width: 56rem) {
+    .case-open__tools { inline-size: 100%; justify-content: space-between; }
+    .case[data-case="fl"] .case-ticket { max-width: 18rem; transform: rotate(2deg); }
+    .case[data-case="iv"] .case-dial { padding-inline-start: var(--space-s); }
+  }
+
+  @media (min-width: 56.0625rem) {
+    .case-open__meta { grid-row: 1; }
+    .case-open__title { grid-row: 2; }
+    .case-open__lede,
+    .case-open__aside { grid-row: 3; }
+
+    /* dt: headline across ten columns, lede pushed right, short version left */
+    .case[data-case="dt"] .case-open__title { grid-column: 1 / span 10; }
+    .case[data-case="dt"] .case-open__aside { grid-column: 1 / span 3; margin-top: var(--space-2xs); }
+    .case[data-case="dt"] .case-open__lede { grid-column: 5 / span 6; }
+
+    /* mk: headline hung from the right edge, price-tag card under it */
+    .case[data-case="mk"] .case-open__title { grid-column: 3 / -1; text-align: end; }
+    .case[data-case="mk"] .case-open__lede { grid-column: 1 / span 6; }
+    .case[data-case="mk"] .case-open__aside { grid-column: 8 / -1; transform: rotate(var(--case-tilt)); }
+
+    /* fl: headline with the job ticket pinned beside its last line */
+    .case[data-case="fl"] .case-open__title { grid-column: 1 / span 8; }
+    .case[data-case="fl"] .case-open__aside { grid-column: 9 / -1; grid-row: 2; align-self: end; justify-self: end; }
+    .case[data-case="fl"] .case-open__lede { grid-column: 2 / span 6; }
+
+    /* iv: full-width headline, the ghost reading rising into it */
+    .case[data-case="iv"] .case-open__title { grid-column: 1 / -1; }
+    .case[data-case="iv"] .case-open__lede { grid-column: 1 / span 5; }
+    .case[data-case="iv"] .case-open__aside { grid-column: 8 / -1; justify-self: end; margin-top: calc(-1 * var(--space-m)); }
+  }
+
+  /* ------------------------------------------------------------------------
+     02 Worked example
+     ------------------------------------------------------------------------ */
+
+  .case-example { row-gap: var(--space-l); align-items: start; }
+
+  .case-example__tray { position: relative; }
+  .case-example__fiction { margin-top: var(--space-xs); }
+
+
+  .case-notes + .case-notes { margin-top: var(--space-l); }
+  .case-notes__title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-bottom: var(--space-2xs);
+    border-bottom: var(--bw-rule) solid var(--c-line-strong);
+    font-size: var(--step-2);
+    line-height: var(--lh-2);
+    letter-spacing: var(--tr-2);
+    font-weight: 700;
+  }
+  .case-notes__title .glyph { color: var(--c-cyan); flex: none; }
+  .case-notes__title--developed .glyph { color: var(--c-amber); }
+  .case-notes__pct {
+    margin-inline-start: auto;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--c-cyan);
+  }
+  .case-notes__title--developed .case-notes__pct { color: var(--c-amber); }
+
+  .case-notes .signals li { font-size: inherit; line-height: inherit; padding-block: var(--space-s); }
+  .case-note { display: grid; gap: var(--space-3xs); }
+  .case-note__log {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    line-height: var(--lh--2);
+    letter-spacing: 0.04em;
+    color: var(--c-text-2);
+  }
+  .case-note__text { font-size: var(--case-body); line-height: var(--case-lh); }
+
+  @media (max-width: 56rem) {
+    /* The tray runs edge to edge on phones, under the heading, above the notes. */
+    .case-example__tray { margin-inline: calc(-1 * var(--gutter-min)); }
+    .case-example__tray .tray { border-radius: 0; }
+    .case-example__fiction { padding-inline: var(--gutter-min); }
+  }
+
+  @media (min-width: 56.0625rem) {
+    .case-example__head { grid-row: 1; }
+    .case-example__notes { grid-row: 2; }
+    .case-example__tray { grid-row: 1 / span 2; position: sticky; top: var(--space-3xl); }
+
+    .case[data-case="dt"] .case-example__tray { grid-column: 1 / span 7; }
+    .case[data-case="dt"] .case-example__head,
+    .case[data-case="dt"] .case-example__notes { grid-column: 8 / -1; }
+
+    .case[data-case="mk"] .case-example__tray { grid-column: 6 / -1; }
+    .case[data-case="mk"] .case-example__head,
+    .case[data-case="mk"] .case-example__notes { grid-column: 1 / span 5; }
+
+    .case[data-case="fl"] .case-example__tray { grid-column: 1 / span 6; }
+    .case[data-case="fl"] .case-example__head,
+    .case[data-case="fl"] .case-example__notes { grid-column: 7 / -1; }
+
+    .case[data-case="iv"] .case-example__tray { grid-column: 5 / -1; }
+    .case[data-case="iv"] .case-example__head,
+    .case[data-case="iv"] .case-example__notes { grid-column: 1 / span 4; }
+  }
+
+  /* ------------------------------------------------------------------------
+     03 Red flags: data sheet and memo
+     ------------------------------------------------------------------------ */
+
+  .case-flags { row-gap: var(--space-l); align-items: start; }
+
+  .case-flaglist .case-flag {
+    font-size: var(--step-0);
+    line-height: var(--lh-0);
+    padding-block: var(--space-s);
+  }
+  .case-flaglist .case-flag > .glyph { margin-top: 0.35rem; }
+  .case-flag__row { display: grid; gap: var(--space-xs); }
+  .case-flag__what { font-weight: 560; }
+  .case-flag__no {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-weight: 500;
+    letter-spacing: var(--tr-label);
+    color: var(--c-safe-text);
+  }
+  .case-flag__do { color: var(--c-text); }
+  .case-flag__label { display: block; margin-bottom: 0.2rem; color: var(--c-amber); }
+  .case[data-gentle] .case-flaglist .case-flag { line-height: 1.65; }
+
+  @container (min-width: 38rem) {
+    .case-flag__row {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-m);
+    }
+    .case-flag__do {
+      padding-inline-start: var(--space-s);
+      border-inline-start: var(--bw-hair) dashed var(--c-line-strong);
+    }
+  }
+
+  .case-memo__title {
+    font-size: var(--step-2);
+    line-height: var(--lh-2);
+    letter-spacing: var(--tr-2);
+    font-weight: 700;
+    color: var(--c-silver);
+  }
+  .case-memo__steps { display: grid; gap: var(--space-xs); }
+  .case-memo__steps li {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: var(--space-2xs);
+    font-size: var(--step-0);
+    line-height: var(--lh-0);
+  }
+  .case-memo__no {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.1em;
+    padding-top: 0.3rem;
+    color: color-mix(in oklch, var(--c-silver) 60%, var(--c-paper));
+  }
+
+  /* Gentle pages put the practical memo ahead of the sheet on phones. */
+  .case-flags__head { order: -2; }
+  .case[data-gentle] .case-flags__memo { order: -1; }
+
+  @media (min-width: 56.0625rem) {
+    .case-flags__head { grid-row: 1; }
+    .case-flags__sheet { grid-row: 2; }
+    .case-flags__memo { grid-row: 2; position: sticky; top: var(--space-3xl); }
+    .case-flags__memo .memo { transform: rotate(var(--case-tilt)); }
+
+    .case[data-case="dt"] .case-flags__head,
+    .case[data-case="iv"] .case-flags__head { grid-column: 1 / span 7; }
+    .case[data-case="dt"] .case-flags__sheet,
+    .case[data-case="iv"] .case-flags__sheet { grid-column: 1 / span 8; }
+    .case[data-case="dt"] .case-flags__memo,
+    .case[data-case="iv"] .case-flags__memo { grid-column: 9 / -1; }
+
+    .case[data-case="mk"] .case-flags__head,
+    .case[data-case="fl"] .case-flags__head { grid-column: 5 / -1; }
+    .case[data-case="mk"] .case-flags__sheet,
+    .case[data-case="fl"] .case-flags__sheet { grid-column: 5 / -1; }
+    .case[data-case="mk"] .case-flags__memo,
+    .case[data-case="fl"] .case-flags__memo { grid-column: 1 / span 4; }
+  }
+
+  /* ------------------------------------------------------------------------
+     Extra: test-strip calculators (marketplace price check, influencer cost)
+     ------------------------------------------------------------------------ */
+
+  .case-tool { row-gap: var(--space-l); align-items: start; }
+  .case-tool__title {
+    font-size: var(--step-3);
+    line-height: var(--lh-3);
+    letter-spacing: var(--tr-3);
+  }
+
+  .case-tool__panel {
+    container-type: inline-size;
+    display: grid;
+    gap: var(--space-m);
+    padding: var(--space-m);
+    background: var(--c-room);
+    border-top: var(--bw-heavy) solid var(--c-text);
+    border-radius: 0 0 var(--radius-1) var(--radius-1);
+    box-shadow: var(--shadow-2);
+  }
+  .case-tool__fields { display: grid; gap: var(--space-s); }
+  @container (min-width: 30rem) {
+    .case-tool__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  }
+  @container (min-width: 42rem) {
+    .case-tool__fields--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  .case-tool__result {
+    display: grid;
+    gap: var(--space-xs);
+    padding-top: var(--space-s);
+    border-top: var(--bw-hair) solid var(--c-line);
+  }
+  .case-tool__strip {
+    position: relative;
+    display: block;
+    block-size: 0.75rem;
+    background: repeating-linear-gradient(90deg, var(--c-tray) 0 calc(10% - var(--bw-rule)), var(--c-line) calc(10% - var(--bw-rule)) 10%);
+    border-radius: var(--radius-1);
+    overflow: hidden;
+  }
+  .case-tool__strip-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--c-text-2);
+    transition: inline-size var(--dur-base) var(--ease-switch);
+  }
+  .case-tool__figure { display: flex; align-items: baseline; gap: 0.4rem; }
+  .case-tool__num {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--step-4);
+    line-height: 0.9;
+  }
+  .case-tool__unit {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tr-label);
+    text-transform: uppercase;
+    color: var(--c-text-2);
+  }
+  .case-tool__verdict { display: flex; align-items: center; gap: 0.5rem; font-size: var(--step-1); line-height: var(--lh-1); }
+  .case-tool__verdict strong { font-weight: 600; }
+  .case-tool__text { display: block; font-size: var(--case-body); line-height: var(--case-lh); max-width: var(--measure); }
+  .case-tool__sum { display: block; }
+
+  .case-tool__result[data-tone="ghost"] .case-tool__strip-fill { background: var(--c-cyan); }
+  .case-tool__result[data-tone="ghost"] .case-tool__num,
+  .case-tool__result[data-tone="ghost"] .case-tool__verdict .glyph { color: var(--c-cyan); }
+  .case-tool__result[data-tone="developed"] .case-tool__strip-fill { background: var(--c-amber); }
+  .case-tool__result[data-tone="developed"] .case-tool__num,
+  .case-tool__result[data-tone="developed"] .case-tool__verdict .glyph { color: var(--c-amber); }
+
+  .case-tool__readings { display: flex; flex-wrap: wrap; gap: var(--space-m) var(--space-xl); }
+  .case-tool__bar { margin-block: var(--space-2xs); }
+  .case-tool__bar .bar__fill { transition: inline-size var(--dur-base) var(--ease-switch); }
+  .case-tool__specs dd { padding-top: 0.7rem; }
+
+  @media (min-width: 56.0625rem) {
+    .case-tool__head { grid-column: 1 / span 5; }
+    .case-tool__panel { grid-column: 7 / -1; }
+    .case-tool--wide .case-tool__head { grid-column: 1 / span 4; }
+    .case-tool--wide .case-tool__panel { grid-column: 6 / -1; }
+  }
+
+  /* ------------------------------------------------------------------------
+     04 Intake
+     ------------------------------------------------------------------------ */
+
+  .case-intake { row-gap: var(--space-l); align-items: end; }
+  .case-intake__head .head__title {
+    font-size: var(--step-5);
+    line-height: var(--lh-5);
+    letter-spacing: var(--tr-5);
+  }
+  .case-intake__body { display: grid; gap: var(--space-m); }
+  .case-intake__body a { color: var(--c-text); }
+  .case-intake__hint {
+    margin-top: var(--space-xs);
+    font-size: var(--step--1);
+    line-height: var(--lh--1);
+    color: var(--c-text-2);
+  }
+
+  @media (min-width: 56.0625rem) {
+    .case-intake > * { grid-row: 1; }
+    .case[data-case="dt"] .case-intake__head,
+    .case[data-case="mk"] .case-intake__head { grid-column: 1 / span 5; }
+    .case[data-case="dt"] .case-intake__body,
+    .case[data-case="mk"] .case-intake__body { grid-column: 6 / -1; }
+
+    .case[data-case="fl"] .case-intake__head,
+    .case[data-case="iv"] .case-intake__head { grid-column: 8 / -1; text-align: end; justify-items: end; }
+    .case[data-case="fl"] .case-intake__body,
+    .case[data-case="iv"] .case-intake__body { grid-column: 1 / span 7; }
+  }
+
+  /* ------------------------------------------------------------------------
+     05 Limits
+     ------------------------------------------------------------------------ */
+
+  .case-limits { row-gap: var(--space-xl); align-items: start; }
+  .case-limits__lead { display: grid; gap: var(--space-s); align-content: start; }
+  .case-limits__lead .head__kicker { color: var(--c-safe-text); }
+  .case-limits__title {
+    font-size: var(--step-3);
+    line-height: var(--lh-3);
+    letter-spacing: var(--tr-3);
+  }
+  .case-limits__pull { max-width: 18ch; }
+
+  .case-limits__qs {
+    container-type: inline-size;
+    display: grid;
+    border-top: var(--bw-heavy) solid var(--c-text);
+  }
+  .case-q {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-m);
+    border-bottom: var(--bw-hair) solid var(--c-line);
+  }
+  .case-q__no { color: var(--c-safe-text); }
+  .case-q__title {
+    font-size: var(--step-2);
+    line-height: var(--lh-2);
+    letter-spacing: var(--tr-2);
+    font-weight: 700;
+  }
+  @container (min-width: 44rem) {
+    .case-q {
+      grid-template-columns: 4.5rem minmax(0, 17rem) minmax(0, 1fr);
+      gap: var(--space-m);
+      align-items: baseline;
+    }
+  }
+
+  @media (max-width: 56rem) {
+    /* The caveat leads on phones; the explanation follows it. */
+    .case-limits__pull { order: -1; font-size: var(--step-3); line-height: var(--lh-3); }
+  }
+
+  @media (min-width: 56.0625rem) {
+    .case-limits__lead,
+    .case-limits__pull { grid-row: 1; }
+    .case-limits__qs { grid-row: 2; }
+    .case-limits__pull { align-self: end; }
+
+    .case[data-case="dt"] .case-limits__lead,
+    .case[data-case="iv"] .case-limits__lead { grid-column: 1 / span 5; }
+    .case[data-case="dt"] .case-limits__pull,
+    .case[data-case="iv"] .case-limits__pull { grid-column: 7 / -1; }
+    .case[data-case="dt"] .case-limits__qs,
+    .case[data-case="iv"] .case-limits__qs { grid-column: 3 / -1; }
+
+    .case[data-case="mk"] .case-limits__lead,
+    .case[data-case="fl"] .case-limits__lead { grid-column: 8 / -1; }
+    .case[data-case="mk"] .case-limits__pull,
+    .case[data-case="fl"] .case-limits__pull { grid-column: 1 / span 6; }
+    .case[data-case="mk"] .case-limits__qs,
+    .case[data-case="fl"] .case-limits__qs { grid-column: 1 / span 10; }
+  }
+
+  /* ------------------------------------------------------------------------
+     06 Other case files
+     ------------------------------------------------------------------------ */
+
+  .case-others { display: grid; grid-template-columns: var(--grid-12); column-gap: var(--col-gap); row-gap: var(--space-s); }
+  .case-others__title { color: var(--c-text-2); }
+  .case-others__frames .frame { min-height: 2.75rem; }
+  .case-others__frames .frame__img { display: block; }
+
+  @media (max-width: 56rem) {
+    /* A strip you can swipe, like a length of negatives. */
+    .case-others__frames {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(9.5rem, 44%);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: var(--space-2xs);
+      scrollbar-width: thin;
+    }
+    .case-others__frames > li { scroll-snap-align: start; }
+  }
+
+  @media (min-width: 56.0625rem) {
+    .case-others__title { grid-column: 1 / span 3; padding-top: var(--space-l); }
+    .case-others .contact { grid-column: 4 / -1; }
+    .case-others__frames { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+}

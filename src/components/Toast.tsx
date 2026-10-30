@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
-import { CheckCircle2, X, AlertCircle, Info } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AnimatePresence, LazyMotion, MotionConfig, domAnimation, m } from 'motion/react';
+import { Glyph, type GlyphName } from './darkroom/Glyph';
+import { DUR, EASE } from '@/lib/motion-tokens';
 
 type ToastType = 'success' | 'error' | 'info';
 
@@ -11,16 +13,10 @@ interface ToastItem {
   type: ToastType;
 }
 
-const icons = {
-  success: CheckCircle2,
-  error: AlertCircle,
-  info: Info,
-};
-
-const colors = {
-  success: 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-200',
-  error: 'bg-red-50 border-red-200 text-red-800 dark:bg-red-950/50 dark:border-red-800 dark:text-red-200',
-  info: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/50 dark:border-blue-800 dark:text-blue-200',
+const GLYPH: Record<ToastType, GlyphName> = {
+  success: 'developed',
+  error: 'fogged',
+  info: 'timer',
 };
 
 let toastCounter = 0;
@@ -35,37 +31,44 @@ export function ToastContainer() {
 
   const addToast = useCallback((message: string, type: ToastType = 'success') => {
     const id = ++toastCounter;
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 4000);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000);
   }, []);
 
-  globalAddToast = addToast;
+  useEffect(() => {
+    globalAddToast = addToast;
+    return () => {
+      globalAddToast = null;
+    };
+  }, [addToast]);
 
-  const dismiss = (id: number) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
-
-  if (toasts.length === 0) return null;
+  const dismiss = (id: number) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
   return (
-    <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm" role="status" aria-live="polite">
-      {toasts.map(t => {
-        const Icon = icons[t.type];
-        return (
-          <div
-            key={t.id}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-layered animate-slide-up ${colors[t.type]}`}
-          >
-            <Icon className="w-5 h-5 shrink-0" />
-            <span className="text-sm font-medium flex-1">{t.message}</span>
-            <button onClick={() => dismiss(t.id)} className="shrink-0 opacity-60 hover:opacity-100 transition-opacity">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        );
-      })}
+    <div className="toasts" role="status" aria-live="polite">
+      <MotionConfig reducedMotion="user">
+        <LazyMotion features={domAnimation} strict>
+          <AnimatePresence initial={false}>
+            {toasts.map((t) => (
+              <m.div
+                key={t.id}
+                layout="position"
+                className={`toast toast--${t.type}`}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0, transition: { duration: DUR.enter, ease: EASE.enter } }}
+                exit={{ opacity: 0, x: 24, transition: { duration: DUR.base, ease: EASE.exit } }}
+              >
+                <Glyph name={GLYPH[t.type]} size={16} />
+                <span className="toast__msg">{t.message}</span>
+                <button type="button" className="toast__close" onClick={() => dismiss(t.id)}>
+                  <Glyph name="close" size={14} />
+                  <span className="sr-only">Dismiss</span>
+                </button>
+              </m.div>
+            ))}
+          </AnimatePresence>
+        </LazyMotion>
+      </MotionConfig>
     </div>
   );
 }

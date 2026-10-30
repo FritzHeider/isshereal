@@ -1,8 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return clsx(inputs);
 }
 
 export function formatNumber(num: number): string {
@@ -18,45 +17,18 @@ export function formatNumber(num: number): string {
   return num.toString();
 }
 
-export function getRiskColor(score: number): {
-  text: string;
-  bg: string;
-  border: string;
-  stroke: string;
-  verdict: string;
-} {
-  if (score >= 75) {
-    return {
-      text: 'text-emerald-700',
-      bg: 'bg-emerald-50',
-      border: 'border-emerald-200',
-      stroke: '#059669',
-      verdict: 'Likely authentic',
-    };
-  }
-  if (score >= 50) {
-    return {
-      text: 'text-amber-700',
-      bg: 'bg-amber-50',
-      border: 'border-amber-200',
-      stroke: '#d97706',
-      verdict: 'Mostly genuine, minor flags',
-    };
-  }
-  if (score >= 25) {
-    return {
-      text: 'text-rose-700',
-      bg: 'bg-rose-50',
-      border: 'border-rose-200',
-      stroke: '#e11d48',
-      verdict: 'High risk — likely fake',
-    };
-  }
-  return {
-    text: 'text-red-800',
-    bg: 'bg-red-50',
-    border: 'border-red-300',
-    stroke: '#dc2626',
-    verdict: 'High scam risk',
-  };
+/** Darkroom verdict tone for a score: developed (genuine), mixed, or ghost (fake). */
+export function scoreTone(score: number): 'developed' | 'mixed' | 'ghost' {
+  if (score >= 75) return 'developed';
+  if (score >= 50) return 'mixed';
+  return 'ghost';
+}
+
+/** The short grease-pencil verdict written on a print's border. */
+export function greaseVerdict(score: number): string {
+  if (score >= 85) return 'Came through clean';
+  if (score >= 75) return 'Mostly came through';
+  if (score >= 50) return 'Partly developed';
+  if (score >= 30) return 'Mostly ghost';
+  return 'Never came up';
 }

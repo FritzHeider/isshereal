@@ -1,0 +1,153 @@
+/* ==========================================================================
+   isshereal.com · Atmosphere (Stage 4)
+   Grain, light, and the single art-directed treatment for every image.
+   One light source for the whole site: the safelight, top right.
+   All textures are inline SVG data URIs (under 1 KB each).
+   ========================================================================== */
+
+@layer components {
+
+  /* ------------------------------------------------------------------------
+     Film grain over the whole page. Fixed, so it never scrolls with content
+     and costs one composited layer.
+     ------------------------------------------------------------------------ */
+
+  :root {
+    --tex-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 1.6 -0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    --tex-fiber: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.28' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.3 0 0 0 0.32 -0.06'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+    --tex-silver: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.35' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 2.2 -0.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+    --grain-blend: overlay;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) { --grain-blend: multiply; }
+  }
+  :root[data-theme="light"] { --grain-blend: multiply; }
+  :root[data-theme="dark"] { --grain-blend: overlay; }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: -50%;
+    z-index: var(--z-grain);
+    pointer-events: none;
+    background-image: var(--tex-grain);
+    background-size: 240px 240px;
+    opacity: var(--grain-opacity);
+    mix-blend-mode: var(--grain-blend);
+  }
+
+  /* Lights on: fiber-based print paper instead of the safelight glow */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) body { background: var(--tex-fiber), var(--atmos-glow), var(--c-room); background-size: 320px 320px, auto, auto; }
+  }
+  :root[data-theme="light"] body { background: var(--tex-fiber), var(--atmos-glow), var(--c-room); background-size: 320px 320px, auto, auto; }
+
+  /* ------------------------------------------------------------------------
+     The image treatment: every photograph is a silver-gelatin print.
+     Warm monochrome, pushed contrast, silver grain, a soft vignette from
+     the enlarger lens, and in the darkroom a faint safelight cast.
+     ------------------------------------------------------------------------ */
+
+  .print__emulsion::after,
+  .frame__img::after,
+  .filmstrip__img::after,
+  .tray__emulsion::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      var(--tex-silver),
+      radial-gradient(ellipse 75% 75% at 55% 45%, transparent 55%, var(--c-vignette) 100%);
+    background-size: 160px 160px, 100% 100%;
+    mix-blend-mode: multiply;
+    opacity: 0.55;
+    z-index: 1;
+  }
+  .frame__img, .filmstrip__img { position: relative; }
+  .tray__emulsion::before { z-index: 2; opacity: 0.35; }
+
+  /* Safelight cast on prints in the darkroom only */
+  .print::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(210deg, color-mix(in oklch, var(--c-safe) 16%, transparent), transparent 55%);
+    mix-blend-mode: multiply;
+    opacity: var(--safelight-cast, 1);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) { --safelight-cast: 0; }
+  }
+  :root[data-theme="light"], [data-room="light"] { --safelight-cast: 0; }
+  :root[data-theme="dark"], [data-room="dark"] { --safelight-cast: 1; }
+
+  /* Print paper carries a faint fiber texture */
+  .print, .memo, .tray__print {
+    background-image: var(--tex-fiber);
+    background-size: 320px 320px;
+    background-blend-mode: multiply;
+  }
+
+  /* ------------------------------------------------------------------------
+     Surfaces
+     ------------------------------------------------------------------------ */
+
+  /* Trays: wet enamel, lit from the top right */
+  .tray {
+    background:
+      radial-gradient(ellipse 80% 60% at 100% 0%, color-mix(in oklch, var(--c-safe) 10%, transparent), transparent 70%),
+      linear-gradient(180deg, var(--c-tray), color-mix(in oklch, var(--c-tray), var(--c-rebate) 55%));
+  }
+
+  /* Data sheets: a hairline baseline grid, like ruled technical paper */
+  .sheet {
+    background:
+      repeating-linear-gradient(180deg, transparent 0 calc(1.6rem - 1px), color-mix(in oklch, var(--c-text) 3.5%, transparent) calc(1.6rem - 1px) 1.6rem),
+      var(--c-tray);
+  }
+
+  /* Contact sheets: film base has a faint warm sheen and edge fogging */
+  .contact {
+    background:
+      linear-gradient(90deg, color-mix(in oklch, var(--c-safe) 9%, transparent), transparent 12%, transparent 88%, color-mix(in oklch, var(--c-safe) 9%, transparent)),
+      var(--c-rebate);
+  }
+
+  /* The enlarger band: a pool of light from the lens over the easel */
+  .enlarger {
+    background:
+      radial-gradient(ellipse 55% 70% at 62% 62%, color-mix(in oklch, var(--c-paper) 9%, transparent), transparent 70%),
+      radial-gradient(ellipse 90% 60% at 100% 0%, color-mix(in oklch, var(--c-safe) 18%, transparent), transparent 70%),
+      var(--c-rebate);
+  }
+  .enlarger__grid { filter: url(#silver-grain); }
+
+  /* Footer: the darkroom door, a thin line of safelight under it */
+  .site-footer {
+    background:
+      linear-gradient(180deg, color-mix(in oklch, var(--c-safe) 22%, transparent) 0, transparent 2px),
+      radial-gradient(ellipse 60% 50% at 100% 100%, color-mix(in oklch, var(--c-safe) 10%, transparent), transparent 70%),
+      var(--c-rebate);
+  }
+
+  /* Header glass picks up the glow behind it */
+  .site-header { box-shadow: 0 1px 0 color-mix(in oklch, var(--c-safe) 10%, transparent); }
+
+  /* Fogged states: light leaked in from one corner */
+  .state--fogged {
+    background:
+      radial-gradient(ellipse 70% 90% at 100% 0%, color-mix(in oklch, var(--c-safe) 20%, transparent), transparent 70%),
+      linear-gradient(135deg, color-mix(in oklch, var(--c-fog) 18%, transparent), color-mix(in oklch, var(--c-rebate) 60%, transparent));
+  }
+
+  /* Latent skeleton shimmer sits on silver grain */
+  .latent { background-image: var(--tex-silver), linear-gradient(100deg, var(--c-tray) 30%, color-mix(in oklch, var(--c-tray), var(--c-text) 6%) 50%, var(--c-tray) 70%); background-size: 160px 160px, 300% 100%; background-blend-mode: soft-light, normal; }
+
+  /* Grease pencil: waxy stroke edge */
+  .grease-stroke { filter: url(#grease-wax); }
+  .grease-note { filter: url(#grease-wax); }
+}

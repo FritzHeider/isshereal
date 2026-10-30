@@ -1,0 +1,624 @@
+/* ==========================================================================
+   isshereal.com · Darkroom design tokens
+   Stage 2 of 6. Source of truth for every color, size, curve and layer.
+   Concept: design/CONCEPT.md (Direction B, "The Darkroom").
+
+   Fonts are self-hosted from /public/fonts (latin subset, WOFF2).
+   Put these preload tags in the document head, before any stylesheet:
+
+   <link rel="preload" href="/fonts/big-shoulders-display-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+   <link rel="preload" href="/fonts/newsreader-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+   <link rel="preload" href="/fonts/ibm-plex-mono-500-latin.woff2" as="font" type="font/woff2" crossorigin>
+
+   Only the three faces used above the fold are preloaded. Newsreader italic
+   and the other Plex Mono weights load on demand.
+
+   Fallback metric overrides below were measured with fontTools against the
+   real system fallback files (Impact, Arial Narrow Bold, Georgia, Courier
+   New), at the weights and optical size the site actually uses.
+   ========================================================================== */
+
+@layer reset, tokens, base, components, utilities;
+
+/* --------------------------------------------------------------------------
+   Font faces
+   -------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "Big Shoulders Display";
+  src: url("/fonts/big-shoulders-display-var-latin.woff2") format("woff2-variations"),
+       url("/fonts/big-shoulders-display-var-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Newsreader";
+  src: url("/fonts/newsreader-var-latin.woff2") format("woff2-variations"),
+       url("/fonts/newsreader-var-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Newsreader";
+  src: url("/fonts/newsreader-italic-var-latin.woff2") format("woff2-variations"),
+       url("/fonts/newsreader-italic-var-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/ibm-plex-mono-400-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/ibm-plex-mono-500-latin.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/ibm-plex-mono-600-latin.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Size-adjusted fallbacks: the page lays out identically before and after
+   the web fonts arrive, so the swap causes no layout shift. */
+
+@font-face {
+  font-family: "Big Shoulders Fallback";
+  src: local("Impact"), local("Impact Regular");
+  size-adjust: 95.4%;
+  ascent-override: 103.2%;
+  descent-override: 22.3%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Big Shoulders Fallback Narrow";
+  src: local("Arial Narrow Bold"), local("ArialNarrow-Bold"), local("Arial Narrow");
+  font-weight: 700;
+  size-adjust: 85.8%;
+  ascent-override: 114.6%;
+  descent-override: 24.8%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia"), local("Georgia Regular");
+  size-adjust: 96.1%;
+  ascent-override: 76.5%;
+  descent-override: 27.6%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Plex Mono Fallback";
+  src: local("Courier New"), local("CourierNewPSMT");
+  size-adjust: 100%;
+  ascent-override: 102.5%;
+  descent-override: 27.5%;
+  line-gap-override: 0%;
+}
+
+/* --------------------------------------------------------------------------
+   Reset
+   -------------------------------------------------------------------------- */
+
+@layer reset {
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; }
+  html {
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+    hanging-punctuation: first last;
+    interpolate-size: allow-keywords;
+  }
+  body { min-height: 100svh; line-height: 1.5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  img, picture, video, canvas, svg { display: block; max-width: 100%; }
+  img, video { height: auto; }
+  input, button, textarea, select { font: inherit; color: inherit; letter-spacing: inherit; }
+  button { background: none; border: 0; padding: 0; cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+  textarea:not([rows]) { min-height: 6em; }
+  p, h1, h2, h3, h4, h5, h6, li, dd, figcaption, blockquote { overflow-wrap: break-word; }
+  ul[role="list"], ol[role="list"] { list-style: none; padding: 0; }
+  table { border-collapse: collapse; border-spacing: 0; }
+  fieldset { border: 0; padding: 0; min-width: 0; }
+  [hidden] { display: none !important; }
+  :target { scroll-margin-block: 6rem; }
+}
+
+/* --------------------------------------------------------------------------
+   Tokens
+   -------------------------------------------------------------------------- */
+
+@layer tokens {
+  :root {
+    /* ---- Font stacks ---- */
+    --font-display: "Big Shoulders Display", "Big Shoulders Fallback", "Big Shoulders Fallback Narrow", Impact, "Arial Narrow", sans-serif;
+    --font-text: "Newsreader", "Newsreader Fallback", Georgia, "Times New Roman", serif;
+    --font-mono: "IBM Plex Mono", "Plex Mono Fallback", "Courier New", ui-monospace, monospace;
+
+    /* ---- Fluid type scale ----
+       Text steps: modular ratio 1.333 (perfect fourth) from an 18px base,
+       interpolated between 360px and 1440px viewports.
+       Display steps break the ratio on purpose and scale with the viewport,
+       because headlines are set at tabloid size (8vw to 16vw). */
+    --step--2: clamp(0.6875rem, 0.6563rem + 0.1389vw, 0.78125rem); /* 11 → 12.5  mono labels, edge marks */
+    --step--1: clamp(0.8125rem, 0.7708rem + 0.1852vw, 0.9375rem);  /* 13 → 15    captions, meta */
+    --step-0:  clamp(1.0625rem, 1.0208rem + 0.1852vw, 1.1875rem);  /* 17 → 19    body */
+    --step-1:  clamp(1.3125rem, 1.2292rem + 0.3704vw, 1.5625rem);  /* 21 → 25    lede, large body */
+    --step-2:  clamp(1.6875rem, 1.5208rem + 0.7407vw, 2.1875rem);  /* 27 → 35    h4, readings */
+    --step-3:  clamp(2.25rem, 1.9583rem + 1.2963vw, 3.125rem);     /* 36 → 50    h3 */
+    --step-4:  clamp(3rem, 2.25rem + 3.3333vw, 5.25rem);           /* 48 → 84    h2 section heads */
+    --step-5:  clamp(3.75rem, 1.875rem + 8.3333vw, 9.375rem);      /* 60 → 150   page headlines, 8vw+ */
+    --step-6:  clamp(4.5rem, 1.25rem + 10.5vw, 12.5rem);          /* 72 → 200   hero headline, 11 to 13vw */
+    --step-numeral: clamp(4rem, 1.6rem + 10.6667vw, 11.2rem);      /* thin readings: 33%, 67% */
+
+    /* Leading per step */
+    --lh--2: 1.35;
+    --lh--1: 1.45;
+    --lh-0: 1.6;
+    --lh-1: 1.5;
+    --lh-2: 1.15;
+    --lh-3: 0.98;
+    --lh-4: 0.9;
+    --lh-5: 0.86;
+    --lh-6: 0.84;
+
+    /* Tracking per step (display tightens as it grows, labels open up) */
+    --tr-label: 0.16em;
+    --tr--2: 0.14em;
+    --tr--1: 0.01em;
+    --tr-0: 0;
+    --tr-1: -0.005em;
+    --tr-2: 0.02em;   /* Big Shoulders at small display sizes needs air */
+    --tr-3: 0.005em;
+    --tr-4: -0.005em;
+    --tr-5: -0.01em;
+    --tr-6: -0.015em;
+
+    /* Measure */
+    --measure: 64ch;
+    --measure-narrow: 44ch;
+    --measure-wide: 76ch;
+
+    /* ---- Color: Darkroom (default theme) ---- */
+    --c-room:      oklch(0.17 0.02 30);    /* page field */
+    --c-tray:      oklch(0.23 0.03 28);    /* raised surfaces: trays, panels, inputs */
+    --c-rebate:    oklch(0.12 0.015 30);   /* film rebate: contact sheets, code, footer */
+    --c-text:      oklch(0.9 0.035 50);    /* print white */
+    --c-text-2:    oklch(0.72 0.04 40);    /* wet print: secondary text */
+    --c-safe:      oklch(0.6 0.2 28);      /* safelight: ambient accent, large text only */
+    --c-safe-text: oklch(0.7 0.17 28);     /* safelight step for small text and focus */
+    --c-amber:     oklch(0.8 0.14 75);     /* fixer amber: developed, genuine */
+    --c-cyan:      oklch(0.78 0.09 210);   /* film cyan: ghost, fake, flagged */
+    --c-paper:     oklch(0.93 0.02 70);    /* print border and print highlights */
+    --c-silver:    oklch(0.2 0.015 40);    /* silver-gelatin ink on prints */
+    --c-on-safe:   oklch(0.14 0.02 30);    /* text on a filled safelight control */
+    --c-on-amber:  oklch(0.18 0.03 60);
+    /* Grease-pencil wax on paper: darker steps so pencil reads on print borders (AA large) */
+    --c-wax-amber: oklch(0.5 0.13 62);
+    --c-wax-cyan:  oklch(0.44 0.09 220);
+    /* Light and shade from the single source (top right) */
+    --c-sheen:     oklch(1 0 0 / 0.16);
+    --c-sheen-faint: oklch(1 0 0 / 0.07);
+    --c-shade:     oklch(0.04 0.02 30 / 0.55);
+    --c-shade-soft: oklch(0.05 0.02 30 / 0.35);
+    --c-vignette:  oklch(0.12 0.02 40 / 0.45);
+    --c-glow:       color-mix(in oklch, var(--c-safe) 34%, transparent);
+    --c-glow-faint: color-mix(in oklch, var(--c-safe) 14%, transparent);
+
+    /* Atmosphere: one light source, top right */
+    --atmos-glow:
+      radial-gradient(ellipse 70% 55% at 92% -6%, var(--c-glow), transparent 70%),
+      radial-gradient(ellipse 45% 40% at -4% 104%, var(--c-glow-faint), transparent 70%);
+    --grain-opacity: 0.07;
+
+    /* ---- Spacing (fluid, 360px → 1440px) ---- */
+    --space-3xs: clamp(0.25rem, 0.2292rem + 0.0926vw, 0.3125rem);
+    --space-2xs: clamp(0.5rem, 0.4583rem + 0.1852vw, 0.625rem);
+    --space-xs:  clamp(0.75rem, 0.6875rem + 0.2778vw, 0.9375rem);
+    --space-s:   clamp(1rem, 0.9167rem + 0.3704vw, 1.25rem);
+    --space-m:   clamp(1.5rem, 1.375rem + 0.5556vw, 1.875rem);
+    --space-l:   clamp(2rem, 1.8333rem + 0.7407vw, 2.5rem);
+    --space-xl:  clamp(3rem, 2.75rem + 1.1111vw, 3.75rem);
+    --space-2xl: clamp(4rem, 3.6667rem + 1.4815vw, 5rem);
+    --space-3xl: clamp(6rem, 5.5rem + 2.2222vw, 7.5rem);
+    --space-4xl: clamp(8rem, 6.6667rem + 5.9259vw, 12rem);
+    /* Section rhythm presets (deliberately unequal) */
+    --section-tray: var(--space-3xl);
+    --section-contact: var(--space-xl);
+    --section-sheet: var(--space-2xl);
+
+    /* ---- Page grid: 12 columns framed by film-rebate edge columns ---- */
+    --content-max: 82.5rem;                                   /* 1320px */
+    --gutter-min: max(16px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+    --edge: clamp(0px, -1.5rem + 4vw, 3.5rem);                /* film edge column, collapses on phones */
+    --col-gap: clamp(0.75rem, 0.45rem + 1.3333vw, 1.75rem);
+    --grid-page:
+      [bleed-start] minmax(var(--gutter-min), 1fr)
+      [edge-start] var(--edge)
+      [content-start] minmax(0, var(--content-max))
+      [content-end] var(--edge)
+      [edge-end] minmax(var(--gutter-min), 1fr)
+      [bleed-end];
+    --grid-12: repeat(12, [col] minmax(0, 1fr));
+
+    /* ---- Radii: darkroom objects are mostly square ---- */
+    --radius-0: 0;
+    --radius-1: 2px;    /* print corners, chips */
+    --radius-2: 4px;    /* trays, panels */
+    --radius-3: 8px;    /* sheets and drawers on mobile */
+    --radius-round: 999px; /* indicator lamps and sprocket holes only */
+
+    /* ---- Borders ---- */
+    --bw-hair: 1px;
+    --bw-rule: 1.5px;
+    --bw-heavy: 3px;
+    --print-border: clamp(8px, 0.4rem + 0.6vw, 16px); /* white border around prints */
+
+    /* ---- Shadows: light from the top right, shadows fall down and left ---- */
+    --shadow-1: -1px 2px 0 oklch(0.06 0.02 30 / 0.55);
+    --shadow-2: -3px 8px 18px -6px oklch(0.06 0.02 30 / 0.6), -1px 2px 0 oklch(0.06 0.02 30 / 0.4);
+    --shadow-print: -8px 20px 36px -12px oklch(0.05 0.02 30 / 0.7), -2px 4px 0 oklch(0.05 0.02 30 / 0.35);
+    --shadow-lift: -18px 40px 60px -18px oklch(0.04 0.02 30 / 0.75), -4px 8px 0 oklch(0.05 0.02 30 / 0.3);
+    --highlight-top: inset -1px 1px 0 color-mix(in oklch, var(--c-text) 9%, transparent);
+    --shadow-tray: var(--highlight-top), inset 0 -24px 48px oklch(0.05 0.02 30 / 0.45), var(--shadow-2);
+    --shadow-glow: 0 0 0 1px var(--c-line-safe), 0 0 24px -4px var(--c-glow);
+
+    /* ---- Z layers ---- */
+    --z-below: -1;
+    --z-base: 0;
+    --z-raised: 10;
+    --z-print-lift: 20;
+    --z-sticky: 100;
+    --z-nav: 200;
+    --z-sheet: 300;
+    --z-overlay: 400;
+    --z-grain: 500;
+    --z-toast: 600;
+    --z-skip: 900;
+
+    /* ---- Motion: easing vocabulary ---- */
+    --ease-develop: cubic-bezier(0.7, 0, 0.3, 1);   /* slow start, fast middle, gentle finish */
+    --ease-enter:   cubic-bezier(0.16, 1, 0.3, 1);  /* expo-out entrances */
+    --ease-switch:  cubic-bezier(0.2, 0, 0, 1);     /* detents, toggles, tabs */
+    --ease-lift:    cubic-bezier(0.33, 0, 0.15, 1); /* print out of tray, enlarger zoom */
+    --ease-grease:  cubic-bezier(0.45, 0, 0.2, 1);  /* grease pencil strokes */
+    --ease-slosh:   cubic-bezier(0.65, 0, 0.35, 1); /* tray liquid, alternating */
+    --ease-exit:    cubic-bezier(0.5, 0, 0.75, 0);  /* things leaving */
+
+    /* ---- Motion: durations ---- */
+    --dur-instant: 80ms;
+    --dur-fast: 160ms;
+    --dur-base: 220ms;
+    --dur-grease: 550ms;
+    --dur-enter: 760ms;
+    --dur-slow: 900ms;
+    --dur-lift: 850ms;
+    --dur-develop: 2800ms;
+    --dur-slosh: 4500ms;
+    --stagger: 80ms;
+    --dur-tick: 90ms;       /* darkroom-timer step for counters */
+    --dur-shimmer: 1600ms;  /* latent-image skeleton sweep */
+    --dur-grain: 700ms;     /* two-frame film grain flicker */
+    --dur-switch-light: 620ms; /* Lights on / off reveal */
+    --motion-travel: 1;   /* multiplier for translate distances; 0 under reduced motion */
+
+    color-scheme: dark;
+    accent-color: var(--c-safe);
+  }
+
+  /* ---- Lights on (light theme): finished prints in daylight ----
+     Applies when the OS asks for light and the visitor has not chosen dark,
+     or when the visitor turns the lights on. */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --c-room:      oklch(0.95 0.015 80);
+      --c-tray:      oklch(0.915 0.02 76);
+      --c-rebate:    oklch(0.875 0.022 74);
+      --c-text:      oklch(0.2 0.015 40);
+      --c-text-2:    oklch(0.42 0.025 40);
+      --c-safe:      oklch(0.56 0.2 28);
+      --c-safe-text: oklch(0.5 0.19 28);
+      --c-amber:     oklch(0.48 0.12 70);
+      --c-cyan:      oklch(0.46 0.09 215);
+      --c-paper:     oklch(0.985 0.008 80);
+      --c-silver:    oklch(0.2 0.015 40);
+      --c-on-safe:   oklch(0.985 0.008 80);
+      --c-on-amber:  oklch(0.985 0.008 80);
+      --c-glow:       transparent;
+      --c-glow-faint: transparent;
+      --atmos-glow: linear-gradient(200deg, oklch(1 0 0 / 0.5), transparent 40%);
+      --grain-opacity: 0.05;
+      --shadow-1: -1px 2px 0 oklch(0.3 0.02 40 / 0.12);
+      --shadow-2: -3px 8px 18px -8px oklch(0.3 0.02 40 / 0.25), -1px 2px 0 oklch(0.3 0.02 40 / 0.08);
+      --shadow-print: -8px 18px 32px -14px oklch(0.3 0.02 40 / 0.35), -1px 3px 0 oklch(0.3 0.02 40 / 0.1);
+      --shadow-lift: -16px 36px 54px -20px oklch(0.3 0.02 40 / 0.4), -3px 6px 0 oklch(0.3 0.02 40 / 0.1);
+      --shadow-tray: inset -1px 1px 0 oklch(1 0 0 / 0.6), inset 0 -16px 32px oklch(0.3 0.02 40 / 0.06), var(--shadow-2);
+      color-scheme: light;
+    }
+  }
+
+  :root[data-theme="light"],
+  [data-room="light"] {
+    --c-room:      oklch(0.95 0.015 80);
+    --c-tray:      oklch(0.915 0.02 76);
+    --c-rebate:    oklch(0.875 0.022 74);
+    --c-text:      oklch(0.2 0.015 40);
+    --c-text-2:    oklch(0.42 0.025 40);
+    --c-safe:      oklch(0.56 0.2 28);
+    --c-safe-text: oklch(0.5 0.19 28);
+    --c-amber:     oklch(0.48 0.12 70);
+    --c-cyan:      oklch(0.46 0.09 215);
+    --c-paper:     oklch(0.985 0.008 80);
+    --c-silver:    oklch(0.2 0.015 40);
+    --c-on-safe:   oklch(0.985 0.008 80);
+    --c-on-amber:  oklch(0.985 0.008 80);
+    --c-glow:       transparent;
+    --c-glow-faint: transparent;
+    --atmos-glow: linear-gradient(200deg, oklch(1 0 0 / 0.5), transparent 40%);
+    --grain-opacity: 0.05;
+    --shadow-1: -1px 2px 0 oklch(0.3 0.02 40 / 0.12);
+    --shadow-2: -3px 8px 18px -8px oklch(0.3 0.02 40 / 0.25), -1px 2px 0 oklch(0.3 0.02 40 / 0.08);
+    --shadow-print: -8px 18px 32px -14px oklch(0.3 0.02 40 / 0.35), -1px 3px 0 oklch(0.3 0.02 40 / 0.1);
+    --shadow-lift: -16px 36px 54px -20px oklch(0.3 0.02 40 / 0.4), -3px 6px 0 oklch(0.3 0.02 40 / 0.1);
+    --shadow-tray: inset -1px 1px 0 oklch(1 0 0 / 0.6), inset 0 -16px 32px oklch(0.3 0.02 40 / 0.06), var(--shadow-2);
+    color-scheme: light;
+  }
+
+  /* The darkroom stays dark where the concept says so (footer, film strips),
+     whatever the page theme. Re-declares the dark palette on a subtree. */
+  :root[data-theme="dark"],
+  [data-room="dark"] {
+    --c-room:      oklch(0.17 0.02 30);
+    --c-tray:      oklch(0.23 0.03 28);
+    --c-rebate:    oklch(0.12 0.015 30);
+    --c-text:      oklch(0.9 0.035 50);
+    --c-text-2:    oklch(0.72 0.04 40);
+    --c-safe:      oklch(0.6 0.2 28);
+    --c-safe-text: oklch(0.7 0.17 28);
+    --c-amber:     oklch(0.8 0.14 75);
+    --c-cyan:      oklch(0.78 0.09 210);
+    --c-paper:     oklch(0.93 0.02 70);
+    --c-silver:    oklch(0.2 0.015 40);
+    --c-on-safe:   oklch(0.14 0.02 30);
+    --c-on-amber:  oklch(0.18 0.03 60);
+    --c-glow:       color-mix(in oklch, var(--c-safe) 34%, transparent);
+    --c-glow-faint: color-mix(in oklch, var(--c-safe) 14%, transparent);
+    --atmos-glow:
+      radial-gradient(ellipse 70% 55% at 92% -6%, var(--c-glow), transparent 70%),
+      radial-gradient(ellipse 45% 40% at -4% 104%, var(--c-glow-faint), transparent 70%);
+    --grain-opacity: 0.07;
+    --shadow-1: -1px 2px 0 oklch(0.06 0.02 30 / 0.55);
+    --shadow-2: -3px 8px 18px -6px oklch(0.06 0.02 30 / 0.6), -1px 2px 0 oklch(0.06 0.02 30 / 0.4);
+    --shadow-print: -8px 20px 36px -12px oklch(0.05 0.02 30 / 0.7), -2px 4px 0 oklch(0.05 0.02 30 / 0.35);
+    --shadow-lift: -18px 40px 60px -18px oklch(0.04 0.02 30 / 0.75), -4px 8px 0 oklch(0.05 0.02 30 / 0.3);
+    --shadow-tray: var(--highlight-top), inset 0 -24px 48px oklch(0.05 0.02 30 / 0.45), var(--shadow-2);
+    color-scheme: dark;
+  }
+
+  /* Derived states. Declared on every theme scope so color-mix() resolves
+     against that scope's palette (custom properties resolve var() where
+     they are declared, then inherit the result). */
+  :root, [data-room="dark"], [data-room="light"] {
+    --c-safe-hover:   color-mix(in oklch, var(--c-safe), white 12%);
+    --c-safe-active:  color-mix(in oklch, var(--c-safe), black 18%);
+    --c-amber-hover:  color-mix(in oklch, var(--c-amber), white 14%);
+    --c-cyan-hover:   color-mix(in oklch, var(--c-cyan), white 14%);
+    --c-tray-hover:   color-mix(in oklch, var(--c-tray), var(--c-text) 6%);
+    --c-tray-active:  color-mix(in oklch, var(--c-tray), black 12%);
+    --c-text-muted:   color-mix(in oklch, var(--c-text-2) 88%, var(--c-room));
+    --c-text-disabled: color-mix(in oklch, var(--c-text-2) 48%, var(--c-room));
+    --c-line:         color-mix(in oklch, var(--c-text) 13%, transparent);
+    --c-line-strong:  color-mix(in oklch, var(--c-text) 28%, transparent);
+    --c-line-safe:    color-mix(in oklch, var(--c-safe) 55%, transparent);
+    --c-wash-safe:    color-mix(in oklch, var(--c-safe) 12%, transparent);
+    --c-wash-amber:   color-mix(in oklch, var(--c-amber) 12%, transparent);
+    --c-wash-cyan:    color-mix(in oklch, var(--c-cyan) 12%, transparent);
+    --c-veil:         color-mix(in oklch, var(--c-rebate) 72%, transparent); /* scrims */
+    --c-fog:          color-mix(in oklch, var(--c-safe) 18%, var(--c-text-2)); /* fogged print */
+    --highlight-top:  inset -1px 1px 0 color-mix(in oklch, var(--c-text) 9%, transparent);
+  }
+
+  /* Display P3: let the safelight and fixer genuinely glow */
+  @media (color-gamut: p3) {
+    :root, [data-room="dark"] {
+      --c-safe:  oklch(0.62 0.24 28);
+      --c-amber: oklch(0.82 0.17 75);
+    }
+    :root[data-theme="light"], [data-room="light"] {
+      --c-safe:  oklch(0.56 0.23 28);
+      --c-amber: oklch(0.48 0.14 70);
+    }
+  }
+  @media (color-gamut: p3) and (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --c-safe:  oklch(0.56 0.23 28);
+      --c-amber: oklch(0.48 0.14 70);
+    }
+  }
+
+  /* Reduced motion: keep the information, drop the travel */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --dur-instant: 1ms;
+      --dur-fast: 1ms;
+      --dur-base: 1ms;
+      --dur-grease: 1ms;
+      --dur-enter: 1ms;
+      --dur-slow: 1ms;
+      --dur-lift: 1ms;
+      --dur-develop: 1ms;
+      --dur-slosh: 0ms;
+      --stagger: 0ms;
+      --dur-tick: 0ms;
+      --dur-shimmer: 0ms;
+      --dur-grain: 0ms;
+      --dur-switch-light: 1ms;
+      --motion-travel: 0;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    background: var(--c-room);
+    color: var(--c-text);
+    scrollbar-color: color-mix(in oklch, var(--c-text) 26%, transparent) var(--c-rebate);
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background: var(--atmos-glow), var(--c-room);
+    background-attachment: fixed;
+    color: var(--c-text);
+    font-family: var(--font-text);
+    font-size: var(--step-0);
+    line-height: var(--lh-0);
+    font-optical-sizing: auto;
+    font-kerning: normal;
+    font-feature-settings: "kern", "liga", "calt";
+    font-variant-numeric: oldstyle-nums proportional-nums;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    text-wrap: balance;
+    font-feature-settings: "kern", "liga";
+    font-variant-numeric: lining-nums;
+  }
+  h1 { font-size: var(--step-5); line-height: var(--lh-5); letter-spacing: var(--tr-5); }
+  h2 { font-size: var(--step-4); line-height: var(--lh-4); letter-spacing: var(--tr-4); }
+  h3 { font-size: var(--step-3); line-height: var(--lh-3); letter-spacing: var(--tr-3); font-weight: 800; }
+  h4 { font-size: var(--step-2); line-height: var(--lh-2); letter-spacing: var(--tr-2); font-weight: 700; }
+  h5, h6 {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    line-height: var(--lh--2);
+    letter-spacing: var(--tr-label);
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--c-text-2);
+  }
+
+  p, li, dd, figcaption, blockquote { text-wrap: pretty; }
+  p { max-width: var(--measure); }
+  small { font-size: var(--step--1); line-height: var(--lh--1); }
+  strong, b { font-weight: 650; }
+  em, i { font-style: italic; }
+
+  code, kbd, samp, pre {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    font-variant-numeric: tabular-nums slashed-zero;
+    font-feature-settings: "zero", "tnum";
+  }
+
+  table, data, time, output { font-variant-numeric: tabular-nums lining-nums; }
+
+  a {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-color: var(--c-line-strong);
+    transition: color var(--dur-fast) var(--ease-switch), text-decoration-color var(--dur-fast) var(--ease-switch);
+  }
+  a:hover { color: var(--c-amber); text-decoration-color: currentColor; }
+  a:active { color: var(--c-amber-hover); }
+
+  hr { border: 0; border-top: var(--bw-hair) solid var(--c-line); }
+
+  ::selection { background: var(--c-safe); color: var(--c-on-safe); }
+
+  :focus { outline: none; }
+  :focus-visible {
+    outline: 2px solid var(--c-safe-text);
+    outline-offset: 3px;
+    border-radius: var(--radius-1);
+    box-shadow: 0 0 0 6px var(--c-wash-safe);
+  }
+
+  ::-webkit-scrollbar { width: 12px; height: 12px; }
+  ::-webkit-scrollbar-track { background: var(--c-rebate); }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--c-text) 22%, transparent);
+    border: 3px solid var(--c-rebate);
+    border-radius: var(--radius-round);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--c-line-safe); }
+
+  input::placeholder, textarea::placeholder { color: var(--c-text-muted); opacity: 1; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      animation-delay: 0ms !important;
+      transition-duration: 1ms !important;
+      transition-delay: 0ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Utilities that belong with the tokens
+   -------------------------------------------------------------------------- */
+
+@layer utilities {
+  .sr-only {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+    white-space: nowrap; border: 0;
+  }
+  .tabular { font-variant-numeric: tabular-nums lining-nums slashed-zero; font-feature-settings: "tnum", "zero"; }
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    line-height: var(--lh--2);
+    letter-spacing: var(--tr-label);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .measure { max-width: var(--measure); }
+  .measure-narrow { max-width: var(--measure-narrow); }
+  .text-2 { color: var(--c-text-2); }
+  .text-safe { color: var(--c-safe-text); }
+  .text-amber { color: var(--c-amber); }
+  .text-cyan { color: var(--c-cyan); }
+  .nowrap { white-space: nowrap; }
+}

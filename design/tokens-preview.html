@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Darkroom Tokens</title>
+<meta name="theme-color" content="#2a1a17">
+<link rel="preload" href="../public/fonts/big-shoulders-display-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../public/fonts/newsreader-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../public/fonts/ibm-plex-mono-500-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  /* When opened from disk, tokens.css's absolute /fonts/ URLs do not resolve.
+     These faces point at the same files relatively and win by source order. */
+  @font-face { font-family: "Big Shoulders Display"; src: url("../public/fonts/big-shoulders-display-var-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+  @font-face { font-family: "Newsreader"; src: url("../public/fonts/newsreader-var-latin.woff2") format("woff2"); font-weight: 200 800; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Newsreader"; src: url("../public/fonts/newsreader-italic-var-latin.woff2") format("woff2"); font-weight: 200 800; font-style: italic; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url("../public/fonts/ibm-plex-mono-400-latin.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url("../public/fonts/ibm-plex-mono-500-latin.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url("../public/fonts/ibm-plex-mono-600-latin.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+
+  @layer components {
+    .page { display: grid; grid-template-columns: var(--grid-page); padding-block: var(--space-xl) var(--space-3xl); }
+    .page > * { grid-column: content; }
+    .edge { grid-column: edge-start; grid-row: 1 / span 20; writing-mode: vertical-rl; transform: rotate(180deg); color: var(--c-safe-text); align-self: start; }
+    header.top { display: flex; justify-content: space-between; align-items: end; gap: var(--space-m); flex-wrap: wrap; border-bottom: var(--bw-hair) solid var(--c-line); padding-bottom: var(--space-m); }
+    header.top h1 { font-size: var(--step-5); }
+    header.top h1 span { color: var(--c-safe); display: block; }
+    .toggle { font-family: var(--font-mono); font-size: var(--step--2); letter-spacing: var(--tr-label); text-transform: uppercase; border: var(--bw-hair) solid var(--c-line-strong); padding: 0.8em 1.1em; border-radius: var(--radius-1); background: var(--c-tray); transition: background var(--dur-fast) var(--ease-switch); }
+    .toggle:hover { background: var(--c-tray-hover); }
+    .toggle:active { background: var(--c-tray-active); }
+    section { padding-block: var(--space-xl); border-bottom: var(--bw-hair) solid var(--c-line); }
+    section > h2 { font-size: var(--step-3); margin-bottom: var(--space-m); display: flex; gap: var(--space-s); align-items: baseline; }
+    section > h2 small { font-family: var(--font-mono); font-size: var(--step--2); letter-spacing: var(--tr-label); color: var(--c-text-2); font-weight: 500; }
+
+    .type-row { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: var(--space-s); align-items: baseline; padding-block: var(--space-2xs); border-top: var(--bw-hair) solid var(--c-line); }
+    .type-row .meta { color: var(--c-text-2); }
+    .type-row .sample { min-width: 0; overflow-wrap: anywhere; }
+    .d { font-family: var(--font-display); text-transform: uppercase; font-weight: 900; }
+    .numeral { font-family: var(--font-display); font-weight: 300; font-size: var(--step-numeral); line-height: 0.85; font-variant-numeric: tabular-nums; }
+
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: var(--space-s); }
+    .sw { border: var(--bw-hair) solid var(--c-line); border-radius: var(--radius-2); overflow: hidden; background: var(--c-tray); }
+    .sw i { display: block; height: 5.5rem; border-bottom: var(--bw-hair) solid var(--c-line); }
+    .sw div { padding: var(--space-2xs) var(--space-xs); }
+    .sw b { display: block; font-family: var(--font-mono); font-size: var(--step--1); font-weight: 600; }
+    .sw code { display: block; color: var(--c-text-2); font-size: var(--step--2); margin-top: 2px; }
+    .pairs { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: var(--space-xs); margin-top: var(--space-m); }
+    .pair { padding: var(--space-xs); border-radius: var(--radius-2); display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-xs); border: var(--bw-hair) solid var(--c-line); }
+    .pair span { font-size: var(--step-0); }
+    .pair output { font-family: var(--font-mono); font-size: var(--step--2); white-space: nowrap; }
+
+    .spacing { display: grid; gap: var(--space-2xs); }
+    .sp { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: center; gap: var(--space-s); }
+    .sp i { display: block; height: 10px; background: var(--c-safe); border-radius: var(--radius-1); }
+
+    .objects { display: flex; flex-wrap: wrap; gap: var(--space-l); align-items: end; }
+    .obj { display: grid; gap: var(--space-2xs); justify-items: start; }
+    .obj div { width: 8rem; height: 6rem; background: var(--c-tray); border: var(--bw-hair) solid var(--c-line); }
+    .obj.print div { background: var(--c-paper); border: 0; }
+
+    .curves { display: grid; gap: var(--space-xs); }
+    .curve { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: var(--space-s); align-items: center; }
+    .track { position: relative; height: 2.25rem; background: var(--c-rebate); border-radius: var(--radius-1); overflow: hidden; }
+    .dot { position: absolute; top: 50%; left: 0; width: 1.6rem; height: 1.6rem; margin-top: -0.8rem; background: var(--c-amber); border-radius: var(--radius-1); }
+    .run .dot { animation: travel var(--d) var(--e) forwards; }
+    @keyframes travel { to { left: calc(100% - 1.6rem); } }
+    .curve small { color: var(--c-text-2); display: block; }
+
+    .grid-demo { display: grid; grid-template-columns: var(--grid-12); gap: var(--col-gap); }
+    .grid-demo i { height: 4rem; background: var(--c-wash-safe); border: var(--bw-hair) solid var(--c-line-safe); }
+
+    .room-demo { padding: var(--space-m); border-radius: var(--radius-2); background: var(--c-room); color: var(--c-text); border: var(--bw-hair) solid var(--c-line); }
+    .room-demo p { color: var(--c-text-2); }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="edge label" aria-hidden="true">ISSHEREAL 5063 · TOKENS · FRAME 00</div>
+
+  <header class="top">
+    <div>
+      <p class="label text-2">Stage 2 · design/tokens.css</p>
+      <h1>Darkroom<span>tokens.</span></h1>
+    </div>
+    <button class="toggle" id="lights" type="button" aria-pressed="false">Lights on</button>
+  </header>
+
+  <section aria-labelledby="t-type">
+    <h2 id="t-type">Type scale <small>1.333 text ratio · display by viewport</small></h2>
+    <div class="type-row"><span class="label meta">step-6 · hero</span><span class="sample d" style="font-size:var(--step-6);line-height:var(--lh-6);letter-spacing:var(--tr-6)">What's real</span></div>
+    <div class="type-row"><span class="label meta">step-5 · h1</span><span class="sample d" style="font-size:var(--step-5);line-height:var(--lh-5);letter-spacing:var(--tr-5)">Comes through</span></div>
+    <div class="type-row"><span class="label meta">numeral · 300</span><span class="sample numeral">67%</span></div>
+    <div class="type-row"><span class="label meta">step-4 · h2</span><span class="sample d" style="font-size:var(--step-4);line-height:var(--lh-4)">Enlarge any gap</span></div>
+    <div class="type-row"><span class="label meta">step-3 · h3</span><span class="sample d" style="font-size:var(--step-3);line-height:var(--lh-3);font-weight:800">How a print comes up</span></div>
+    <div class="type-row"><span class="label meta">step-2 · h4</span><span class="sample d" style="font-size:var(--step-2);line-height:var(--lh-2);font-weight:700;letter-spacing:var(--tr-2)">Developed 33% · Ghost 67%</span></div>
+    <div class="type-row"><span class="label meta">step-1 · lede</span><span class="sample" style="font-size:var(--step-1);line-height:var(--lh-1)">Drop a profile in the tray. Real followers develop into solid grain. <em>Bought ones never come up.</em></span></div>
+    <div class="type-row"><span class="label meta">step-0 · body</span><span class="sample measure">48,210 followers declared. 2,184 sampled. 1,140 came in during the same nine days. This print shows an audience, not a person. Ghosts can be bots, bought followers, or accounts that simply went quiet.</span></div>
+    <div class="type-row"><span class="label meta">step--1 · caption</span><span class="sample" style="font-size:var(--step--1)">Frame 14 · examined 30 October 2026 at 01:47</span></div>
+    <div class="type-row"><span class="label meta">step--2 · label</span><span class="sample label">Frame 14A ▸ @lifestyle.luca ▸ 0.42% engagement</span></div>
+    <div class="type-row"><span class="label meta">mono · data</span><span class="sample tabular" style="font-family:var(--font-mono)">1,204,000 · 0O 1lI · 2026-10-30</span></div>
+  </section>
+
+  <section aria-labelledby="t-color">
+    <h2 id="t-color">Color <small>OKLCH · contrast computed live</small></h2>
+    <div class="swatches" id="swatches"></div>
+    <div class="pairs" id="pairs"></div>
+  </section>
+
+  <section aria-labelledby="t-grid">
+    <h2 id="t-grid">Grid <small>12 columns inside film-rebate edges</small></h2>
+    <div class="grid-demo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </section>
+
+  <section aria-labelledby="t-space">
+    <h2 id="t-space">Spacing <small>fluid, 360 → 1440px</small></h2>
+    <div class="spacing" id="spacing"></div>
+  </section>
+
+  <section aria-labelledby="t-obj">
+    <h2 id="t-obj">Radii and shadows <small>light from the top right</small></h2>
+    <div class="objects">
+      <div class="obj"><div style="border-radius:var(--radius-0)"></div><span class="label text-2">radius-0</span></div>
+      <div class="obj"><div style="border-radius:var(--radius-1)"></div><span class="label text-2">radius-1</span></div>
+      <div class="obj"><div style="border-radius:var(--radius-2)"></div><span class="label text-2">radius-2</span></div>
+      <div class="obj"><div style="border-radius:var(--radius-3)"></div><span class="label text-2">radius-3</span></div>
+      <div class="obj"><div style="box-shadow:var(--shadow-1)"></div><span class="label text-2">shadow-1</span></div>
+      <div class="obj"><div style="box-shadow:var(--shadow-2)"></div><span class="label text-2">shadow-2</span></div>
+      <div class="obj"><div style="box-shadow:var(--shadow-tray);border-radius:var(--radius-2)"></div><span class="label text-2">shadow-tray</span></div>
+      <div class="obj print"><div style="box-shadow:var(--shadow-print);border-radius:var(--radius-1)"></div><span class="label text-2">shadow-print</span></div>
+      <div class="obj print"><div style="box-shadow:var(--shadow-lift);border-radius:var(--radius-1);transform:rotate(-2deg)"></div><span class="label text-2">shadow-lift</span></div>
+      <div class="obj"><div style="box-shadow:var(--shadow-glow);border-radius:var(--radius-1)"></div><span class="label text-2">shadow-glow</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-motion">
+    <h2 id="t-motion">Motion <small>each runs on its own duration token</small></h2>
+    <div class="curves" id="curves"></div>
+    <p style="margin-top:var(--space-s)"><button class="toggle" id="replay" type="button">Run again</button></p>
+  </section>
+
+  <section aria-labelledby="t-scope">
+    <h2 id="t-scope">Scoped rooms <small>data-room overrides the page theme</small></h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:var(--space-s)">
+      <div class="room-demo" data-room="dark"><h4>Darkroom door</h4><p>The footer and film strips stay dark in either theme.</p></div>
+      <div class="room-demo" data-room="light"><h4>Lights on</h4><p>Privacy and terms open in daylight by default.</p></div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const lights = document.getElementById('lights');
+  const isLight = () => root.dataset.theme ? root.dataset.theme === 'light' : matchMedia('(prefers-color-scheme: light)').matches;
+  const sync = () => { const l = isLight(); lights.textContent = l ? 'Lights off' : 'Lights on'; lights.setAttribute('aria-pressed', String(l)); render(); };
+  lights.addEventListener('click', () => { root.dataset.theme = isLight() ? 'dark' : 'light'; sync(); });
+
+  // OKLCH → linear sRGB → relative luminance, for real WCAG ratios
+  function oklchToLum(str) {
+    const m = str.match(/oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+    if (!m) return null;
+    const L = +m[1], C = +m[2], h = +m[3] * Math.PI / 180;
+    const a = C * Math.cos(h), b = C * Math.sin(h);
+    const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+    const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+    const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+    const l = l_ ** 3, mm = m_ ** 3, s = s_ ** 3;
+    const clamp = v => Math.min(1, Math.max(0, v));
+    const r = clamp(4.0767416621 * l - 3.3077115913 * mm + 0.2309699292 * s);
+    const g = clamp(-1.2684380046 * l + 2.6097574011 * mm - 0.3413193965 * s);
+    const bl = clamp(-0.0041960863 * l - 0.7034186147 * mm + 1.7076147010 * s);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  }
+  const ratio = (a, b) => { const A = oklchToLum(a), B = oklchToLum(b); if (A == null || B == null) return null; const [hi, lo] = A > B ? [A, B] : [B, A]; return (hi + 0.05) / (lo + 0.05); };
+  const tok = n => getComputedStyle(root).getPropertyValue(n).trim();
+
+  const SW = [['--c-room','Darkroom'],['--c-tray','Tray'],['--c-rebate','Film rebate'],['--c-text','Print white'],['--c-text-2','Wet print'],['--c-safe','Safelight'],['--c-safe-text','Safelight text'],['--c-amber','Fixer amber'],['--c-cyan','Film cyan'],['--c-paper','Print paper'],['--c-silver','Silver ink']];
+  const PAIRS = [['--c-text','--c-room','Body text'],['--c-text-2','--c-room','Secondary text'],['--c-text-2','--c-tray','Secondary on tray'],['--c-safe','--c-room','Safelight (large only)'],['--c-safe-text','--c-room','Safelight small text'],['--c-amber','--c-room','Developed'],['--c-cyan','--c-room','Ghost'],['--c-amber','--c-tray','Developed on tray'],['--c-cyan','--c-rebate','Ghost on rebate'],['--c-on-safe','--c-safe','Text on safelight button'],['--c-silver','--c-paper','Ink on print']];
+
+  function render() {
+    document.getElementById('swatches').innerHTML = SW.map(([v, n]) => `<div class="sw"><i style="background:var(${v})"></i><div><b>${n}</b><code>${v}</code><code>${tok(v)}</code></div></div>`).join('');
+    document.getElementById('pairs').innerHTML = PAIRS.map(([f, b, n]) => {
+      const r = ratio(tok(f), tok(b)); const pass = r == null ? '' : r >= 4.5 ? 'AA' : r >= 3 ? 'AA large' : 'fail';
+      return `<div class="pair" style="background:var(${b});color:var(${f})"><span>${n}</span><output>${r ? r.toFixed(2) + ':1 · ' + pass : 'n/a'}</output></div>`;
+    }).join('');
+  }
+
+  const SP = ['3xs','2xs','xs','s','m','l','xl','2xl','3xl','4xl'];
+  document.getElementById('spacing').innerHTML = SP.map(s => `<div class="sp"><span class="label text-2">space-${s}</span><i style="width:var(--space-${s})"></i></div>`).join('');
+
+  const CURVES = [['develop','--ease-develop','--dur-develop'],['enter','--ease-enter','--dur-enter'],['switch','--ease-switch','--dur-base'],['lift','--ease-lift','--dur-lift'],['grease','--ease-grease','--dur-grease'],['slosh','--ease-slosh','--dur-slosh'],['exit','--ease-exit','--dur-base']];
+  const curvesEl = document.getElementById('curves');
+  curvesEl.innerHTML = CURVES.map(([n, e, d]) => `<div class="curve"><span><span class="label">${n}</span><small class="label">${d.replace('--','')}</small></span><div class="track" style="--e:var(${e});--d:var(${d})"><span class="dot"></span></div></div>`).join('');
+  const run = () => { curvesEl.classList.remove('run'); void curvesEl.offsetWidth; curvesEl.classList.add('run'); };
+  document.getElementById('replay').addEventListener('click', run);
+
+  sync(); requestAnimationFrame(run);
+})();
+</script>
+</body>
+</html>

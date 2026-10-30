@@ -1,0 +1,279 @@
+/* ==========================================================================
+   isshereal.com · Motion (Stage 5)
+   Slow, chemical, exact. Images come up like prints in developer; controls
+   click like darkroom equipment; nothing bounces, nothing idles except the
+   tray liquid while a print is wet and the film grain.
+   Only transform, opacity, filter and clip-path are animated.
+   Everything that moves is gated on prefers-reduced-motion: no-preference;
+   the reduced experience is the same content, already in place.
+   ========================================================================== */
+
+/* Cross-document navigations (full page loads) cross-fade where supported */
+@view-transition { navigation: auto; }
+
+@layer components {
+
+  /* ------------------------------------------------------------------------
+     Keyframes
+     ------------------------------------------------------------------------ */
+
+  /* A line of type surfaces from the bottom of the tray */
+  @keyframes rise-wipe {
+    from { clip-path: inset(100% -2% -10% -2%); transform: translateY(calc(0.28em * var(--motion-travel))); }
+    to   { clip-path: inset(-10% -2% -10% -2%); transform: none; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(calc(1.25rem * var(--motion-travel))); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  /* A print dropped on the bench settles to its tilt */
+  @keyframes settle {
+    from { opacity: 0.15; transform: rotate(calc(var(--tilt, 0deg) + 4deg)) translateY(calc(2.5rem * var(--motion-travel))); }
+    to   { opacity: 1; transform: rotate(var(--tilt, 0deg)); }
+  }
+  /* Grease pencil: the stroke is laid down left to right */
+  @keyframes pencil {
+    from { clip-path: inset(-20% 100% -20% -5%); }
+    to   { clip-path: inset(-20% -5% -20% -5%); }
+  }
+  /* The enlargement comes into focus as the easel slides under the lens */
+  @keyframes focus-pull {
+    from { transform: scale(1.35); filter: blur(3px); }
+    to   { transform: scale(1); filter: blur(0); }
+  }
+  /* Film advance indicator under the header */
+  @keyframes advance { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  /* Film grain: two frames, alternating */
+  @keyframes grain-flicker {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-3%, 2%); }
+  }
+  /* Latent image skeleton: a slow sweep of light */
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(100%); }
+  }
+  /* Tray liquid sheen while a print is wet */
+  @keyframes slosh {
+    from { transform: translateX(-12%) skewX(-4deg); }
+    to   { transform: translateX(12%) skewX(4deg); }
+  }
+
+  /* ------------------------------------------------------------------------
+     Interaction states that move (all durations are tokens, so they collapse
+     under reduced motion automatically)
+     ------------------------------------------------------------------------ */
+
+  .btn { transform: translateY(0); }
+  .btn:active:not(:disabled) {
+    transform: translateY(calc(2px * var(--motion-travel)));
+    box-shadow: inset 0 2px 0 var(--c-shade-soft);
+    transition-duration: var(--dur-instant);
+  }
+  .btn--safe:hover:not(:disabled) { transform: translateY(calc(-1px * var(--motion-travel))); }
+  .btn .glyph { transition: transform var(--dur-base) var(--ease-switch); }
+  .btn:hover:not(:disabled) .glyph[class] { transform: translateX(calc(3px * var(--motion-travel))); }
+  .btn:focus-visible { box-shadow: 0 0 0 6px var(--c-wash-safe), 0 0 1.5rem -0.25rem var(--c-glow); }
+
+  .chip { transform: translateY(0); transition-property: color, border-color, background-color, transform; }
+  .chip:active:not(:disabled) { transform: translateY(calc(1px * var(--motion-travel))); transition-duration: var(--dur-instant); }
+
+  .switch__lamp { transition: background var(--dur-base) var(--ease-switch), box-shadow var(--dur-base) var(--ease-switch), transform var(--dur-base) var(--ease-switch); }
+  .switch:active .switch__lamp { transform: scale(0.7); }
+
+  .frame__img img { will-change: auto; }
+  a.frame:active .frame__img, button.frame:active .frame__img { transform: scale(0.98); transition: transform var(--dur-instant) var(--ease-switch); }
+
+  /* Tray: verdict is written once the print is fixed */
+  .tray[data-engine="on"]:not([data-state="fixed"]) .tray__verdict { clip-path: inset(-20% 100% -20% -5%); }
+  .tray[data-state="fixed"] .tray__verdict { clip-path: inset(-20% -5% -20% -5%); transition: clip-path var(--dur-grease) var(--ease-grease) var(--dur-base); }
+  .tray[data-engine="on"] .tray__grain { transition-duration: var(--dur-fast); }
+
+  /* Readings settle with the timer rather than tweening */
+  .tray__readings .reading__value { font-variant-numeric: tabular-nums; }
+
+  /* ------------------------------------------------------------------------
+     Entry transitions (@starting-style, discrete display)
+     ------------------------------------------------------------------------ */
+
+
+  .site-sheet {
+    transition:
+      opacity var(--dur-base) var(--ease-switch),
+      transform var(--dur-base) var(--ease-enter),
+      display var(--dur-base) allow-discrete,
+      overlay var(--dur-base) allow-discrete;
+    @starting-style { opacity: 0; transform: translateY(calc(-0.75rem * var(--motion-travel))); }
+  }
+
+  .filmfield__status, .state, .report__adjust, .field__error {
+    transition: opacity var(--dur-base) var(--ease-enter), transform var(--dur-base) var(--ease-enter);
+    @starting-style { opacity: 0; transform: translateY(calc(0.4rem * var(--motion-travel))); }
+  }
+
+  .dialog-sheet {
+    transition: opacity var(--dur-base) var(--ease-enter), transform var(--dur-enter) var(--ease-enter), display var(--dur-base) allow-discrete, overlay var(--dur-base) allow-discrete;
+    @starting-style { opacity: 0; transform: translateY(calc(1rem * var(--motion-travel))) scale(0.98); }
+  }
+  .dialog-sheet::backdrop {
+    transition: opacity var(--dur-base) var(--ease-switch), display var(--dur-base) allow-discrete, overlay var(--dur-base) allow-discrete;
+    @starting-style { opacity: 0; }
+  }
+
+  /* Latent skeletons: light sweeps across a faint image */
+  .latent { position: relative; overflow: hidden; }
+  .latent::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, color-mix(in oklch, var(--c-text) 7%, transparent) 50%, transparent 70%);
+    transform: translateX(-100%);
+  }
+
+  /* ------------------------------------------------------------------------
+     Motion that only plays when the visitor has not asked for less
+     ------------------------------------------------------------------------ */
+
+  @media (prefers-reduced-motion: no-preference) {
+
+    /* Film grain flickers between two frames */
+    body::after { animation: grain-flicker var(--dur-grain) steps(1) infinite; }
+
+    .latent::after { animation: shimmer var(--dur-shimmer) var(--ease-slosh) infinite; }
+
+    /* Tray liquid only moves while the print is wet */
+    .tray__bath::before {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      z-index: 3;
+      pointer-events: none;
+      background: linear-gradient(100deg, transparent 40%, color-mix(in oklch, var(--c-paper) 10%, transparent) 50%, transparent 60%);
+      opacity: 0;
+      transition: opacity var(--dur-slow) var(--ease-develop);
+    }
+    .tray:is([data-state="developing"], [data-state="holding"]) .tray__bath::before {
+      opacity: 1;
+      animation: slosh var(--dur-slosh) var(--ease-slosh) infinite alternate;
+    }
+
+    /* ---- Page load: one staged entrance ----
+       The h1 surfaces line by line; supporting copy follows; edge marks last.
+       The LCP image (tray still) is never delayed. */
+    main h1 { animation: rise-wipe var(--dur-enter) var(--ease-enter) both; animation-delay: var(--stagger); }
+    main h1:has(.line) { animation: none; }
+    main h1 .line { display: block; animation: rise-wipe var(--dur-enter) var(--ease-enter) both; animation-delay: calc(var(--stagger) * (1 + var(--i, 0) * 1.6)); }
+
+    main > :first-child :is(.lede, .head__lede, .hero__lede, .hero__kicker, .crumbs, .filmfield, .hero__fineprint, .report__name, .report__specs, .report__actions, .bench__lede, .head__kicker),
+    main > :first-child .edgecode {
+      animation: fade-up var(--dur-enter) var(--ease-enter) both;
+      animation-delay: calc(var(--stagger) * 4);
+    }
+    main > :first-child :is(.filmfield, .report__specs, .hero__fineprint) { animation-delay: calc(var(--stagger) * 6); }
+    /* Ledes are often the LCP element on text-led pages: reveal them with a clip, never from zero opacity */
+    main > :first-child :is(.lede, .head__lede, .hero__lede, .bench__lede) { animation-name: rise-wipe; }
+    main > :first-child :is(.report__actions) { animation-delay: calc(var(--stagger) * 7); }
+    .edge-mark { animation: fade-in var(--dur-slow) var(--ease-enter) both; animation-delay: calc(var(--stagger) * 8); }
+
+    .hero__tray { animation: fade-in var(--dur-slow) var(--ease-enter) both; }
+
+    /* Hero contact-strip selection: the print swaps like a frame on the enlarger */
+    .hero__tray .tray__print { view-transition-name: hero-print; }
+    ::view-transition-old(hero-print) { animation: fade-in var(--dur-base) var(--ease-exit) reverse both; }
+    ::view-transition-new(hero-print) { animation: rise-wipe var(--dur-enter) var(--ease-enter) both; }
+
+    /* State transitions other than the light switch leave the page still */
+    html.vt-print::view-transition-old(root),
+    html.vt-print::view-transition-new(root) { animation: none; }
+
+    /* Lights on / off: light floods out from the switch */
+    html.vt-lights::view-transition-old(root) { animation: none; mix-blend-mode: normal; }
+    html.vt-lights::view-transition-new(root) {
+      animation: lights var(--dur-switch-light) var(--ease-lift) both;
+      mix-blend-mode: normal;
+    }
+    @keyframes lights {
+      from { clip-path: circle(0 at var(--vt-x, 90%) var(--vt-y, 2rem)); }
+      to   { clip-path: circle(150vmax at var(--vt-x, 90%) var(--vt-y, 2rem)); }
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     Scroll-driven scenes (CSS first; no JS, no scroll-jacking)
+     ------------------------------------------------------------------------ */
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+
+      /* Film advance under the header tracks the page */
+      .site-header::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 2px;
+        background: var(--c-safe);
+        transform-origin: left center;
+        animation: advance linear both;
+        animation-timeline: scroll(root block);
+      }
+
+      /* Section headlines surface as they enter */
+      main > * + * :is(h2, .display-m, .display-l, .head__title) {
+        animation: rise-wipe var(--ease-enter) backwards;
+        animation-timeline: view();
+        animation-range: entry 5% entry 70%;
+      }
+
+      /* Prints settle onto the bench */
+      main > * + * .print {
+        animation: settle var(--ease-enter) backwards;
+        animation-timeline: view();
+        animation-range: entry 0% entry 80%;
+      }
+
+      /* Contact-sheet frames come up one after another, left to right */
+      .contact :is(.frame, .contact__frames > *) {
+        animation: fade-up var(--ease-enter) backwards;
+        animation-timeline: view();
+        animation-range: entry 0% entry 60%;
+      }
+
+      /* Data-sheet rows print in sequence */
+      main > * + * :is(.datatable tbody tr, .signals li, .faq__item) {
+        animation: fade-up var(--ease-enter) backwards;
+        animation-timeline: view();
+        animation-range: entry 0% entry 55%;
+      }
+
+      /* Grease pencil is laid down when it comes into view */
+      .grease-stroke, main > * + * .grease-note {
+        animation: pencil var(--ease-grease) backwards;
+        animation-timeline: view();
+        animation-range: entry 20% cover 35%;
+      }
+
+      /* The enlarger: the easel slides under the lens and the grain comes into focus */
+      .enlarger__grid {
+        transform-origin: 70% 45%;
+        animation: focus-pull var(--ease-lift) backwards;
+        animation-timeline: view();
+        animation-range: entry 10% cover 45%;
+      }
+      .enlarger__flag {
+        animation: fade-up var(--ease-enter) backwards;
+        animation-timeline: view();
+        animation-range: cover 30% cover 45%;
+      }
+
+      /* Readings rise into place */
+      main > * + * .reading {
+        animation: fade-up var(--ease-enter) backwards;
+        animation-timeline: view();
+        animation-range: entry 0% entry 65%;
+      }
+    }
+  }
+}

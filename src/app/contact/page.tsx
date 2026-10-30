@@ -1,231 +1,425 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import {
-  Mail,
-  MessageSquare,
-  Building,
-  ShieldCheck,
-  Send,
-  CheckCircle2,
-  Clock,
-  Sparkles,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Edge } from '@/components/darkroom/Edge';
+import { Glyph, type GlyphName } from '@/components/darkroom/Glyph';
+import { Crumbs } from '@/components/library/Crumbs';
+
+type CategoryId = 'general' | 'api' | 'takedown' | 'support';
+type Field = 'name' | 'email' | 'message';
+type Phase = 'open' | 'sealing' | 'sealed';
+
+const CATEGORIES: { id: CategoryId; label: string; code: string; to: string; hint: string }[] = [
+  { id: 'general', label: 'General question', code: 'GN', to: 'support@isshereal.com', hint: 'Anything about a report or how the site works.' },
+  { id: 'api', label: 'API and limits', code: 'AP', to: 'enterprise@isshereal.com', hint: 'Higher limits or building on the API.' },
+  { id: 'takedown', label: 'Remove a cached report', code: 'RM', to: 'privacy@isshereal.com', hint: 'For profile owners. Include the handle below.' },
+  { id: 'support', label: 'Bug or technical fault', code: 'BG', to: 'support@isshereal.com', hint: 'What you did, what you expected, what happened.' },
+];
+
+const CHANNELS: { glyph: GlyphName; title: string; address: string; note: string }[] = [
+  { glyph: 'mail', title: 'General support', address: 'support@isshereal.com', note: 'Reports, results, bugs.' },
+  { glyph: 'code', title: 'API and partnerships', address: 'enterprise@isshereal.com', note: 'Limits and integrations.' },
+  { glyph: 'warning', title: 'Security disclosures', address: 'security@isshereal.com', note: 'Vulnerabilities, privately.' },
+  { glyph: 'file', title: 'Privacy and legal', address: 'privacy@isshereal.com', note: 'GDPR and CCPA requests.' },
+];
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const MIN_MESSAGE = 20;
+
+function validate(values: Record<Field, string>): Partial<Record<Field, string>> {
+  const errors: Partial<Record<Field, string>> = {};
+  if (!values.name.trim()) errors.name = 'Write a name, so we know what to call you.';
+  if (!values.email.trim()) errors.email = 'We need an address to reply to.';
+  else if (!EMAIL_RE.test(values.email.trim())) errors.email = 'That address is missing something. Check the part after the @.';
+  const len = values.message.trim().length;
+  if (len === 0) errors.message = 'The envelope is empty. Tell us what you need.';
+  else if (len < MIN_MESSAGE) errors.message = `A little more detail, please: at least ${MIN_MESSAGE} characters (${len} so far).`;
+  return errors;
+}
+
+function makeReference(): string {
+  const d = new Date();
+  const ymd = `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = new Uint8Array(4);
+  crypto.getRandomValues(bytes);
+  const tail = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join('');
+  return `ISR-${ymd}-${tail}`;
+}
 
 export default function ContactPage() {
-  const [category, setCategory] = useState('general');
+  const [category, setCategory] = useState<CategoryId>('general');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [handle, setHandle] = useState('');
   const [message, setMessage] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
+  const [attempted, setAttempted] = useState(false);
+  const [phase, setPhase] = useState<Phase>('open');
+  const [reference, setReference] = useState('');
+  const [sealedAt, setSealedAt] = useState<Date | null>(null);
+
+  const refs = {
+    name: useRef<HTMLInputElement>(null),
+    email: useRef<HTMLInputElement>(null),
+    message: useRef<HTMLTextAreaElement>(null),
+  };
+  const receiptRef = useRef<HTMLHeadingElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const values = { name, email, message };
+  const chosen = CATEGORIES.find((c) => c.id === category) ?? CATEGORIES[0];
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
+
+  useEffect(() => {
+    if (phase === 'sealed') receiptRef.current?.focus();
+  }, [phase]);
+
+  /** After the first attempt, re-check a field as soon as it changes. */
+  const recheck = (field: Field, value: string) => {
+    if (!attempted) return;
+    const next = validate({ ...values, [field]: value });
+    setErrors((prev) => ({ ...prev, [field]: next[field] }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    // Simulate submission
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
+    setAttempted(true);
+    const found = validate(values);
+    setErrors(found);
+    const first = (['name', 'email', 'message'] as Field[]).find((f) => found[f]);
+    if (first) {
+      refs[first].current?.focus();
+      return;
+    }
+    // The form has no server endpoint yet: sealing happens in the browser,
+    // and the receipt hands the letter to the visitor's mail app.
+    setPhase('sealing');
+    timer.current = setTimeout(() => {
+      setReference(makeReference());
+      setSealedAt(new Date());
+      setPhase('sealed');
     }, 600);
   };
 
-  return (
-    <div className="pt-28 pb-20">
-      <section className="container-x max-w-5xl">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 mb-4">
-          <Link href="/" className="hover:underline">Home</Link>
-          <span>/</span>
-          <span>Company</span>
-          <span>/</span>
-          <span className="text-slate-800">Contact</span>
-        </div>
+  const reset = () => {
+    setPhase('open');
+    setMessage('');
+    setErrors({});
+    setAttempted(false);
+    setReference('');
+    requestAnimationFrame(() => refs.message.current?.focus());
+  };
 
-        <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
-            <Clock size={13} />
-            Average Response Time: Under 2 Hours
+  const mailto = (() => {
+    const subject = `[${reference}] ${chosen.label}`;
+    const lines = [
+      `Reference: ${reference}`,
+      `Category: ${chosen.label}`,
+      `Name: ${name.trim()}`,
+      `Reply to: ${email.trim()}`,
+      handle.trim() ? `Profile: ${handle.trim()}` : null,
+      '',
+      message.trim(),
+    ].filter((l) => l !== null);
+    return `mailto:${chosen.to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`;
+  })();
+
+  const errorCount = Object.values(errors).filter(Boolean).length;
+  const busy = phase === 'sealing';
+
+  return (
+    <article className="envelope-page">
+      {/* 01 · Address */}
+      <section className="band page-grid envelope-head" aria-labelledby="contact-title">
+        <Edge frame="01" label="Envelope" />
+        <Crumbs trail={[{ label: 'Home', href: '/' }, { label: 'Contact' }]} />
+        <div className="cols envelope-head__grid">
+          <div className="head envelope-head__title">
+            <p className="head__kicker label">Contact · Prints and letters</p>
+            <h1 id="contact-title">
+              Write to the <span className="text-safe">darkroom</span>
+            </h1>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-            How can we help you?
-          </h1>
-          <p className="text-slate-600 text-base sm:text-lg">
-            Have questions about a forensic report, need high-volume enterprise API access, or want to submit feedback? Drop us a line.
+          <p className="head__lede envelope-head__lede">
+            Questions about a report, a cached report you want taken down, API limits or a fault you found. Fill in
+            the envelope and we’ll read every word. If the answer is in a report, the{' '}
+            <Link href="/analyze">tray</Link> is faster.
           </p>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Form */}
-          <div className="lg:col-span-7 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-xl">
-            {submitted ? (
-              <div className="text-center py-12 space-y-4">
-                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                  <CheckCircle2 size={36} />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900">Message Received!</h3>
-                <p className="text-slate-600 text-sm max-w-md mx-auto">
-                  Thank you for reaching out, <strong className="text-slate-900">{name}</strong>. A member of our forensic operations team has received your ticket and will respond to <strong className="text-slate-900">{email}</strong> shortly.
-                </p>
-                <Button
-                  onClick={() => {
-                    setSubmitted(false);
-                    setMessage('');
-                  }}
-                  className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-6"
-                >
-                  Send Another Inquiry
-                </Button>
+      {/* 02 · The envelope and the direct channels */}
+      <section className="band band--tray page-grid envelope-desk" aria-labelledby="envelope-title">
+        <Edge frame="02" label="Seal and post" />
+        <div className="cols envelope-desk__grid">
+          <div className="envelope" data-state={phase} data-room="light">
+            <div className="envelope__flap" aria-hidden="true">
+              <span className="envelope__seal">
+                <Glyph name="check" size={22} />
+              </span>
+            </div>
+            <div className="envelope__face">
+              <div className="envelope__printed" aria-hidden="true">
+                <span>Photographic prints</span>
+                <span>Do not bend · Do not open in light</span>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
-                    Inquiry Category
-                  </label>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    {[
-                      { id: 'general', label: 'General Inquiry' },
-                      { id: 'api', label: 'Enterprise / API' },
-                      { id: 'takedown', label: 'Cache Purge / Unlist' },
-                      { id: 'support', label: 'Bug / Technical' },
-                    ].map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setCategory(c.id)}
-                        className={`p-3 rounded-xl border font-semibold text-center transition-all cursor-pointer ${
-                          category === c.id
-                            ? 'border-emerald-600 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-500/20'
-                            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                        }`}
-                      >
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              <h2 id="envelope-title" className="envelope__title">
+                {phase === 'sealed' ? 'Sealed' : 'Contents'}
+              </h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
-                      Your Name
+              {phase !== 'sealed' ? (
+                <form className="envelope-form" onSubmit={handleSubmit} noValidate aria-describedby={attempted && errorCount ? 'envelope-errors' : undefined}>
+                  {attempted && errorCount > 0 ? (
+                    <p id="envelope-errors" className="envelope-form__summary" role="alert">
+                      <Glyph name="ghost" size={16} />
+                      {errorCount === 1 ? 'One field needs attention.' : `${errorCount} fields need attention.`}
+                    </p>
+                  ) : null}
+
+                  <fieldset className="envelope-form__kind" disabled={busy}>
+                    <legend className="field__label">Kind of letter</legend>
+                    <div className="envelope-kinds">
+                      {CATEGORIES.map((c) => (
+                        <label key={c.id} className="chip envelope-kind">
+                          <input
+                            type="radio"
+                            name="category"
+                            value={c.id}
+                            checked={category === c.id}
+                            onChange={() => setCategory(c.id)}
+                            className="sr-only"
+                          />
+                          <span className="envelope-kind__code">{c.code}</span>
+                          {c.label}
+                        </label>
+                      ))}
+                    </div>
+                    <p className="field__hint">
+                      {chosen.hint} Goes to <span className="envelope-form__to">{chosen.to}</span>.
+                    </p>
+                  </fieldset>
+
+                  <div className="envelope-form__row">
+                    <div className="field">
+                      <label className="field__label" htmlFor="c-name">
+                        Your name <span className="req">Required</span>
+                      </label>
+                      <input
+                        ref={refs.name}
+                        id="c-name"
+                        name="name"
+                        type="text"
+                        className="input"
+                        autoComplete="name"
+                        placeholder="Alex Morgan"
+                        value={name}
+                        disabled={busy}
+                        aria-invalid={errors.name ? true : undefined}
+                        aria-describedby={errors.name ? 'c-name-error' : undefined}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                          recheck('name', e.target.value);
+                        }}
+                      />
+                      {errors.name ? (
+                        <p className="field__error" id="c-name-error">
+                          <Glyph name="ghost" size={14} />
+                          {errors.name}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="field">
+                      <label className="field__label" htmlFor="c-email">
+                        Reply address <span className="req">Required</span>
+                      </label>
+                      <input
+                        ref={refs.email}
+                        id="c-email"
+                        name="email"
+                        type="email"
+                        inputMode="email"
+                        className="input"
+                        autoComplete="email"
+                        placeholder="alex@studio.com"
+                        value={email}
+                        disabled={busy}
+                        aria-invalid={errors.email ? true : undefined}
+                        aria-describedby={errors.email ? 'c-email-error' : undefined}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          recheck('email', e.target.value);
+                        }}
+                      />
+                      {errors.email ? (
+                        <p className="field__error" id="c-email-error">
+                          <Glyph name="ghost" size={14} />
+                          {errors.email}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="field">
+                    <label className="field__label" htmlFor="c-handle">
+                      Profile in question <span className="text-2">Optional</span>
                     </label>
                     <input
+                      id="c-handle"
+                      name="handle"
                       type="text"
-                      required
-                      placeholder="e.g. Alex Morgan"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      className="input"
+                      autoComplete="off"
+                      spellCheck={false}
+                      placeholder="@username or a profile link"
+                      value={handle}
+                      disabled={busy}
+                      aria-describedby="c-handle-hint"
+                      onChange={(e) => setHandle(e.target.value)}
                     />
+                    <p className="field__hint" id="c-handle-hint">
+                      Needed for removal requests, useful for everything else.
+                    </p>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
-                      Work Email
+
+                  <div className="field">
+                    <label className="field__label" htmlFor="c-message">
+                      The letter <span className="req">Required</span>
                     </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="alex@company.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    <textarea
+                      ref={refs.message}
+                      id="c-message"
+                      name="message"
+                      className="textarea envelope-form__letter"
+                      rows={6}
+                      placeholder="What happened, and what you’d like us to do."
+                      value={message}
+                      disabled={busy}
+                      aria-invalid={errors.message ? true : undefined}
+                      aria-describedby={errors.message ? 'c-message-error' : 'c-message-hint'}
+                      onChange={(e) => {
+                        setMessage(e.target.value);
+                        recheck('message', e.target.value);
+                      }}
                     />
+                    {errors.message ? (
+                      <p className="field__error" id="c-message-error">
+                        <Glyph name="ghost" size={14} />
+                        {errors.message}
+                      </p>
+                    ) : (
+                      <p className="field__hint" id="c-message-hint">
+                        At least {MIN_MESSAGE} characters. Links are fine.
+                      </p>
+                    )}
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
-                    Relevant Profile Handle / URL <span className="text-slate-400 font-normal">(optional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="@username or https://instagram.com/..."
-                    value={handle}
-                    onChange={(e) => setHandle(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-2">
-                    How can we help?
-                  </label>
-                  <textarea
-                    required
-                    rows={4}
-                    placeholder="Provide as much detail as possible..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-900 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2"
-                >
-                  {loading ? 'Sending message...' : 'Send Message'}
-                  {!loading && <Send size={16} />}
-                </Button>
-              </form>
-            )}
+                  <div className="envelope-form__actions">
+                    <button type="submit" className="btn btn--safe" disabled={busy} aria-disabled={busy || undefined}>
+                      {busy ? 'Sealing…' : 'Seal the envelope'}
+                      {!busy ? <Glyph name="mail" size={16} /> : null}
+                    </button>
+                    <p className="envelope-form__fine">
+                      Sealing happens in your browser. Nothing is sent until you post it from your mail app on the
+                      next step.
+                    </p>
+                  </div>
+                </form>
+              ) : (
+                <dl className="envelope__address">
+                  <dt>To</dt>
+                  <dd>{chosen.to}</dd>
+                  <dt>From</dt>
+                  <dd>
+                    {name.trim()} · {email.trim()}
+                  </dd>
+                  <dt>Ref</dt>
+                  <dd className="tabular">{reference}</dd>
+                </dl>
+              )}
+            </div>
           </div>
 
-          {/* Direct channels */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-slate-900 text-white rounded-3xl p-8 border border-slate-800 space-y-6">
-              <h3 className="text-xl font-bold">Direct Channels</h3>
-
-              <div className="space-y-4 text-sm">
-                <div className="flex items-start gap-3">
-                  <Mail size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-semibold text-white">General Support</div>
-                    <div className="text-slate-400 text-xs mt-0.5">support@isshereal.com</div>
-                  </div>
+          {phase === 'sealed' ? (
+            <section className="envelope-receipt" aria-labelledby="receipt-title" data-room="light">
+              <p className="envelope-receipt__code label">Receipt · keep this number</p>
+              <h2 id="receipt-title" className="envelope-receipt__ref tabular" ref={receiptRef} tabIndex={-1}>
+                {reference}
+              </h2>
+              <dl className="specs envelope-receipt__specs">
+                <dt>Kind</dt>
+                <dd>{chosen.label}</dd>
+                <dt>Addressed to</dt>
+                <dd>{chosen.to}</dd>
+                <dt>Sealed</dt>
+                <dd>
+                  {sealedAt ? (
+                    <time dateTime={sealedAt.toISOString()}>
+                      {sealedAt.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </time>
+                  ) : null}
+                </dd>
+                {handle.trim() ? (
+                  <>
+                    <dt>Profile</dt>
+                    <dd className="envelope-receipt__mono">{handle.trim()}</dd>
+                  </>
+                ) : null}
+              </dl>
+              <div className="state state--notice envelope-receipt__notice">
+                <div className="state__mark" aria-hidden="true">
+                  <Glyph name="mail" size={24} />
                 </div>
-
-                <div className="flex items-start gap-3">
-                  <Building size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-semibold text-white">Enterprise & API Partnerships</div>
-                    <div className="text-slate-400 text-xs mt-0.5">enterprise@isshereal.com</div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <ShieldCheck size={18} className="text-emerald-400 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-semibold text-white">Security & Privacy Disclosures</div>
-                    <div className="text-slate-400 text-xs mt-0.5">security@isshereal.com</div>
+                <div className="state__body">
+                  <p className="state__title">Sealed, not yet posted</p>
+                  <p>
+                    This page doesn’t transmit letters, so nothing has left your browser. Post it from your mail app
+                    and the reference goes with it; we’ll quote it when we reply.
+                  </p>
+                  <div className="envelope-receipt__actions">
+                    <a href={mailto} className="btn btn--safe">
+                      Post it from your mail app
+                      <Glyph name="arrow-up-right" size={16} />
+                    </a>
+                    <button type="button" className="btn btn--line btn--compact" onClick={reset}>
+                      Write another
+                    </button>
                   </div>
                 </div>
               </div>
+            </section>
+          ) : null}
 
-              <div className="pt-4 border-t border-slate-800 text-xs text-slate-400 flex items-center gap-2">
-                <Sparkles size={14} className="text-emerald-400" />
-                Hosted globally on Cloudflare Edge Infrastructure
-              </div>
-            </div>
-
-            {/* Quick Tips */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-xs text-slate-600 space-y-2 leading-relaxed">
-              <strong className="block text-slate-900 font-bold">Need instant answers?</strong>
-              <p>
-                Try running an automated audit first. Profiles are scanned dynamically in real-time through our free auditor.
-              </p>
-              <Link href="/analyze" className="inline-flex items-center text-emerald-600 font-bold hover:underline pt-1">
-                Go to Auditor &rarr;
-              </Link>
-            </div>
-          </div>
+          <aside className="envelope-channels" aria-labelledby="channels-title">
+            <h2 id="channels-title" className="envelope-channels__title label">
+              Direct addresses
+            </h2>
+            <ul className="envelope-channels__list">
+              {CHANNELS.map((c) => (
+                <li key={c.address}>
+                  <Glyph name={c.glyph} size={18} />
+                  <span>
+                    <span className="envelope-channels__name">{c.title}</span>
+                    <a href={`mailto:${c.address}`} className="envelope-channels__addr">
+                      {c.address}
+                    </a>
+                    <span className="envelope-channels__note">{c.note}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="envelope-channels__fine">
+              Removal requests for cached reports are handled within 48 business hours, as set out in the{' '}
+              <Link href="/privacy#pr-05">privacy policy</Link>.
+            </p>
+          </aside>
         </div>
       </section>
-    </div>
+    </article>
   );
 }

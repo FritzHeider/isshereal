@@ -1,80 +1,191 @@
-'use client';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Edge } from '@/components/darkroom/Edge';
+import { Glyph, type GlyphName } from '@/components/darkroom/Glyph';
+import { Crumbs } from '@/components/library/Crumbs';
 
-import { useState } from 'react';
-import { BookOpen, TrendingUp, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
+const DESCRIPTION =
+  'The darkroom shelf: short field guides on spotting fake followers, reading engagement rates, and recognising romance-scam profiles.';
+
+export const metadata: Metadata = {
+  title: 'Resources: the darkroom shelf',
+  description: DESCRIPTION,
+  alternates: { canonical: '/resources' },
+  openGraph: {
+    title: 'Resources: the darkroom shelf · isshereal.com',
+    description: DESCRIPTION,
+    url: 'https://isshereal.com/resources',
+    type: 'website',
+    images: [{ url: '/api/og', width: 1200, height: 630, alt: 'Labelled boxes of photo paper on a long shelf.' }],
+  },
+};
+
+interface Guide {
+  id: string;
+  code: string;
+  title: string;
+  topic: string;
+  grade: string;
+  glyph: GlyphName;
+  summary: string;
+  body: string[];
+  equipment: { href: string; label: string };
+}
+
+const GUIDES: Guide[] = [
+  {
+    id: 'spot-fake-followers',
+    code: 'PB-01',
+    title: 'How to spot fake followers in 2026',
+    topic: 'Detection',
+    grade: 'Grade 2 · Normal',
+    glyph: 'loupe',
+    summary: 'What bot accounts and inflated followings look like on the major platforms, and what to check first.',
+    body: [
+      'Fake accounts change as the platforms do, so a missing profile picture is no longer enough to go on. Look for comments that could sit under any post, follower-to-following ratios that lean heavily towards following, and sudden jumps in follower count with no viral post to explain them.',
+      'AI-generated avatars are common now. They often give themselves away in the lighting and the background: a shadow falling the wrong way, an ear that doesn’t match, text in the scenery that isn’t quite text.',
+      'An audience that is real responds to what is posted. When the comments, the timing and the numbers all point the same way, the audience is probably genuine. When they disagree, look closer.',
+    ],
+    equipment: { href: '/analyze', label: 'Develop a profile' },
+  },
+  {
+    id: 'good-engagement-rate',
+    code: 'PB-02',
+    title: 'What is a good engagement rate?',
+    topic: 'Metrics',
+    grade: 'Grade 3 · Contrast',
+    glyph: 'teststrip',
+    summary: 'Which numbers matter, and how a healthy rate changes with the platform and the size of the audience.',
+    body: [
+      'Engagement rate is the number most worth checking after the follower count, because it is harder to fake in a believable way. What counts as good depends on the platform and the niche.',
+      'As a rough guide, larger accounts usually land between 1% and 5%. Smaller creators often see 5% to 10% or more, because a small audience tends to know the person. Short video, such as Reels and TikToks, usually draws higher rates than still images.',
+      'Don’t stop at likes. Comments, saves and shares take more effort, so they say more about whether people actually care. A huge like count with almost no comments deserves a second look.',
+    ],
+    equipment: { href: '/tools/engagement-rate', label: 'Run the engagement test strip' },
+  },
+  {
+    id: 'romance-scam-red-flags',
+    code: 'PB-03',
+    title: 'Romance scam red flags: a complete guide',
+    topic: 'Safety',
+    grade: 'Grade 4 · Hard',
+    glyph: 'dating',
+    summary: 'The common signs of a romance scam and a fake dating profile, and how to protect yourself.',
+    body: [
+      'Romance scams often start with an unexpected message from someone who seems a little too perfect. Watch for declarations of love that arrive very fast, pressure to move the conversation off the original app, and, sooner or later, a request for money: an emergency, a travel cost, an investment that can’t wait.',
+      'Reverse image search their photos. Be careful with anyone who always has a reason not to video call.',
+      'Never send money to someone you haven’t met in person, however long you have been talking and however good the reason sounds.',
+    ],
+    equipment: { href: '/use-cases/dating-safety', label: 'Check a dating profile' },
+  },
+];
+
+function readingTime(body: string[]) {
+  const words = body.join(' ').split(/\s+/).filter(Boolean).length;
+  return { words, minutes: Math.max(1, Math.round(words / 220)) };
+}
 
 export default function ResourcesPage() {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-
-  const articles = [
-    {
-      title: "How to Spot Fake Followers in 2026",
-      summary: "A comprehensive guide to identifying bot accounts and inflated followings on major social platforms.",
-      icon: <BookOpen className="w-8 h-8 text-emerald-500" />,
-      content: "As social media platforms evolve, so do the tactics of fake accounts. In 2026, spotting a fake follower requires more than just checking for a profile picture. Look for highly generic comments, follower-to-following ratios that lean heavily towards following, and sudden spikes in follower count without corresponding viral content. AI-generated avatars are common, often identifiable by inconsistencies in lighting and background. Remember, an authentic audience engages meaningfully with content."
-    },
-    {
-      title: "What is a Good Engagement Rate?",
-      summary: "Understanding the metrics that matter and how they vary by platform and audience size.",
-      icon: <TrendingUp className="w-8 h-8 text-emerald-500" />,
-      content: "Engagement rate is the true currency of social media. While a 'good' rate depends on the platform and niche, generally, a rate between 1% to 5% is considered healthy for larger accounts, while micro-influencers often see rates of 5% to 10% or higher. Video content, particularly short-form like Reels and TikToks, tends to drive higher engagement. When evaluating an account, don't just look at likes; comments, saves, and shares indicate deeper audience investment."
-    },
-    {
-      title: "Romance Scam Red Flags: Complete Guide",
-      summary: "Protect yourself online by recognizing the common signs of romance scams and fake profiles.",
-      icon: <ShieldAlert className="w-8 h-8 text-emerald-500" />,
-      content: "Romance scams often begin with unexpected messages from seemingly perfect individuals. Key red flags include rapid declarations of love, requests to move conversations off the initial platform quickly, and eventual pleas for money (often citing emergencies, travel expenses, or investment opportunities). Always reverse image search profile pictures, be wary of individuals who refuse video calls, and never send money to someone you haven't met in person."
-    }
-  ];
-
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-4">Educational Resources</h1>
-          <p className="text-xl text-slate-600 dark:text-slate-400">Insights and guides to help you navigate digital authenticity.</p>
+    <article className="shelf">
+      {/* 01 · Shelf label */}
+      <section className="band band--tray page-grid shelf-head" aria-labelledby="shelf-title">
+        <Edge frame="01" label="Darkroom shelf" />
+        <Crumbs trail={[{ label: 'Home', href: '/' }, { label: 'Resources' }]} />
+        <div className="cols shelf-head__grid">
+          <div className="head shelf-head__title">
+            <p className="head__kicker label">Resources · {GUIDES.length} boxes on the shelf</p>
+            <h1 id="shelf-title">
+              The <span className="text-safe">shelf</span>
+            </h1>
+          </div>
+          <p className="head__lede shelf-head__lede">
+            Short field guides, boxed like photo paper and labelled by topic and length. Open a box to read it here;
+            each one ends with the piece of equipment that does the check for you.
+          </p>
         </div>
-        
-        <div className="space-y-6">
-          {articles.map((article, index) => (
-            <article 
-              key={index} 
-              className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden"
-            >
-              <div 
-                className="p-6 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl shrink-0">
-                    {article.icon}
+      </section>
+
+      {/* 02 · The shelf itself */}
+      <section className="band band--contact page-grid shelf-run" aria-labelledby="shelf-run-title">
+        <Edge frame="02" label="Paper stock" />
+        <h2 id="shelf-run-title" className="sr-only">
+          Guides
+        </h2>
+        <ol className="shelf-rows" role="list">
+          {GUIDES.map((g) => {
+            const t = readingTime(g.body);
+            return (
+              <li key={g.id} id={g.id} className="shelf-box">
+                <details className="shelf-box__details">
+                  <summary className="shelf-box__label">
+                    <span className="shelf-box__code">
+                      <Glyph name={g.glyph} size={22} />
+                      {g.code}
+                    </span>
+                    <h3 className="shelf-box__title">{g.title}</h3>
+                    <span className="shelf-box__summary">{g.summary}</span>
+                    <span className="shelf-box__specs">
+                      <span>
+                        <span className="label text-2">Topic</span>
+                        <span className="shelf-box__value">{g.topic}</span>
+                      </span>
+                      <span>
+                        <span className="label text-2">Length</span>
+                        <span className="shelf-box__value tabular">
+                          {t.minutes} min · {t.words} words
+                        </span>
+                      </span>
+                      <span className="shelf-box__grade label">{g.grade}</span>
+                    </span>
+                    <span className="shelf-box__toggle" aria-hidden="true">
+                      <Glyph name="plus" size={18} className="shelf-box__plus" />
+                      <Glyph name="minus" size={18} className="shelf-box__minus" />
+                    </span>
+                  </summary>
+                  <div className="shelf-box__sheet">
+                    <div className="prose shelf-box__prose">
+                      {g.body.map((para, i) => (
+                        <p key={i}>{para}</p>
+                      ))}
+                    </div>
+                    <p className="shelf-box__equipment">
+                      <span className="label text-2">Equipment</span>
+                      <Link href={g.equipment.href} className="btn btn--line btn--compact">
+                        {g.equipment.label}
+                        <Glyph name="arrow-right" size={16} />
+                      </Link>
+                    </p>
                   </div>
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{article.title}</h2>
-                    <p className="text-slate-600 dark:text-slate-400">{article.summary}</p>
-                  </div>
-                  <div className="shrink-0 text-slate-400">
-                    {expandedIndex === index ? (
-                      <ChevronUp className="w-6 h-6" />
-                    ) : (
-                      <ChevronDown className="w-6 h-6" />
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              {expandedIndex === index && (
-                <div className="p-6 pt-0 text-slate-700 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800">
-                  <div className="mt-4 prose dark:prose-invert max-w-none">
-                    <p>{article.content}</p>
-                  </div>
-                </div>
-              )}
-            </article>
-          ))}
+                </details>
+              </li>
+            );
+          })}
+        </ol>
+        <div className="shelf-board" aria-hidden="true">
+          <span className="label">Shelf A · Field guides</span>
+          <span className="label">Store cool and dry</span>
         </div>
-      </div>
-    </main>
+      </section>
+
+      {/* 03 · Empty space on the shelf */}
+      <section className="band band--rule page-grid shelf-more" aria-labelledby="shelf-more-title">
+        <Edge frame="03" label="Restock" />
+        <div className="cols">
+          <h2 id="shelf-more-title" className="display-s shelf-more__title">
+            Room on the shelf
+          </h2>
+          <div className="shelf-more__body">
+            <p>
+              We add a box when a question comes up often enough to deserve a proper answer. If there is a check you
+              keep doing by hand, tell us and it may end up here.
+            </p>
+            <Link href="/contact" className="btn btn--quiet">
+              Suggest a guide
+            </Link>
+          </div>
+        </div>
+      </section>
+    </article>
   );
 }

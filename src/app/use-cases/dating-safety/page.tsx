@@ -1,337 +1,214 @@
-'use client';
+import type { Metadata } from 'next';
+import React from 'react';
+import { CaseFile } from '@/components/cases/CaseFile';
+import { Glyph } from '@/components/darkroom/Glyph';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import {
-  HeartCrack,
-  ShieldCheck,
-  AlertOctagon,
-  Search,
-  ArrowRight,
-  Video,
-  Coins,
-  Camera,
-  Globe,
-  CheckCircle2,
-  Lock,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+const DESCRIPTION =
+  'How to check a dating match’s public footprint quietly, what tends to give a fake profile away, and how to meet someone safely either way.';
 
-interface CheckItem {
-  id: string;
-  label: string;
-  points: number;
-  icon: React.ReactNode;
-}
-
-const CHECKLIST_ITEMS: CheckItem[] = [
-  {
-    id: 'video',
-    label: 'Refuses or constantly cancels video calls (broken camera, poor connection excuses)',
-    points: 25,
-    icon: <Video size={18} className="text-red-500" />,
+export const metadata: Metadata = {
+  title: 'Dating safety',
+  description: DESCRIPTION,
+  alternates: { canonical: '/use-cases/dating-safety' },
+  openGraph: {
+    title: 'Dating safety · Is the person you’re meeting on Friday real?',
+    description: DESCRIPTION,
+    url: '/use-cases/dating-safety',
+    type: 'article',
   },
-  {
-    id: 'profession',
-    label: 'Claims an overseas job (military deployment, oil rig engineer, roving NGO physician)',
-    points: 20,
-    icon: <Globe size={18} className="text-amber-500" />,
-  },
-  {
-    id: 'crypto',
-    label: 'Brings up cryptocurrency, forex signals, or "passive investment mentors"',
-    points: 30,
-    icon: <Coins size={18} className="text-red-600" />,
-  },
-  {
-    id: 'photos',
-    label: 'Photos look like high-fashion studio catalog shoots or AI-generated models',
-    points: 15,
-    icon: <Camera size={18} className="text-amber-500" />,
-  },
-  {
-    id: 'moveoff',
-    label: 'Demands moving off the dating app to WhatsApp or Telegram immediately',
-    points: 15,
-    icon: <Lock size={18} className="text-purple-500" />,
-  },
-];
+};
 
 export default function DatingSafetyPage() {
-  const router = useRouter();
-  const [handle, setHandle] = useState('');
-  const [selectedChecks, setSelectedChecks] = useState<string[]>(['video', 'moveoff']);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!handle.trim()) return;
-    const clean = handle.replace(/^@/, '').trim();
-    router.push(`/analyze?handle=${encodeURIComponent(clean)}`);
-  };
-
-  const toggleCheck = (id: string) => {
-    setSelectedChecks((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const totalPoints = selectedChecks.reduce((acc, curr) => {
-    const item = CHECKLIST_ITEMS.find((c) => c.id === curr);
-    return acc + (item ? item.points : 0);
-  }, 0);
-
-  const getRiskLevel = (score: number) => {
-    if (score >= 50) {
-      return {
-        level: 'Extreme Risk — Likely Romance Scam or Catfish',
-        color: 'text-red-600 bg-red-50 border-red-200',
-        barColor: 'bg-red-500',
-        advice:
-          'DO NOT send funds, crypto, or private photos. Insist on immediate live video verification or cease communication.',
-      };
-    }
-    if (score >= 25) {
-      return {
-        level: 'Elevated Warning — Exercise Extreme Caution',
-        color: 'text-amber-600 bg-amber-50 border-amber-200',
-        barColor: 'bg-amber-500',
-        advice:
-          'Several suspicious behavioral anomalies match classic social engineering scripts. Verify their social footprint before meeting.',
-      };
-    }
-    return {
-      level: 'Low Risk Indicators Detected',
-      color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-      barColor: 'bg-emerald-500',
-      advice:
-        'Standard precautions still apply. Always meet in a public venue and let a trusted friend know your location.',
-    };
-  };
-
-  const risk = getRiskLevel(totalPoints);
-
   return (
-    <div className="pt-28 pb-20">
-      {/* Hero Section */}
-      <section className="container-x">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 mb-4">
-          <Link href="/" className="hover:underline">Home</Link>
-          <span>/</span>
-          <span>Use Cases</span>
-          <span>/</span>
-          <span className="text-slate-800">Dating Safety</span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
-              <HeartCrack size={14} className="text-rose-600" />
-              Romance Scam & Catfish Shield
-            </div>
-
-            <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
-              Verify Tinder & Hinge matches <span className="text-emerald-600">before you fall</span>.
-            </h1>
-
-            <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl">
-              Romance and pig-butchering scams caused over $1.3B in verified losses last year. Before investing your heart or your finances, verify their Instagram, TikTok, or social footprint to confirm they are who they claim to be.
+    <CaseFile
+      code="DT"
+      slug="dating-safety"
+      crumb="Dating safety"
+      glyph="dating"
+      gentle
+      opening={{
+        title: (
+          <>
+            Is the person you’re meeting on Friday <span className="safe">real?</span>
+          </>
+        ),
+        lede: (
+          <>
+            <p>
+              Almost always, yes. Most people on dating apps are exactly who they say they are, a little nervous and
+              hoping you’re real too.
             </p>
-
-            {/* Quick Audit Bar */}
-            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-lg pt-2">
-              <div className="relative flex-1">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Enter match's @handle to verify"
-                  value={handle}
-                  onChange={(e) => setHandle(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-xs"
-                />
-              </div>
-              <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-2xl shadow-md">
-                Verify Profile
-                <ArrowRight size={16} className="ml-1.5" />
-              </Button>
-            </form>
-
-            <div className="flex items-center gap-6 pt-2 text-xs text-slate-500">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-emerald-500" />
-                100% confidential — match never notified
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-emerald-500" />
-                Instant AI forensics
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 relative">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 aspect-square bg-slate-900 flex items-center justify-center">
-              <Image
-                src="/images/features/romance-shield.png"
-                alt="Romance scam protection shield 3D render"
-                fill
-                className="object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-transparent to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/60 shadow-lg text-slate-900">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Protection Guarantee</span>
-                  <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                    Active Defense
-                  </span>
-                </div>
-                <div className="mt-2 text-sm font-semibold">
-                  Zero login or app sync needed. We audit open public telemetry without touching your personal account.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Catfish Diagnostic Widget */}
-      <section className="container-x mt-24">
-        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-xl">
-          <div className="max-w-2xl mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-bold uppercase tracking-wider mb-3">
-              <AlertOctagon size={14} />
-              Live Diagnostic
-            </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Interactive Catfish & Scam Meter
-            </h2>
-            <p className="text-slate-600 text-sm sm:text-base mt-2">
-              Select any behavior you have noticed during your conversations. Our risk engine calculates probability metrics in real-time.
+            <p>
+              This page is for the few who aren’t. It shows how to look at a match’s public footprint without them
+              knowing, what tends to give a borrowed face away, and how to meet someone safely whatever the answer.
             </p>
+          </>
+        ),
+        aside: (
+          <div className="case-short">
+            <p className="label text-2">If you only read one thing</p>
+            <ul className="case-short__list" role="list">
+              <li>
+                <Glyph name="check" size={22} />
+                <span>Video call first.</span>
+              </li>
+              <li>
+                <Glyph name="check" size={22} />
+                <span>Meet somewhere public.</span>
+              </li>
+              <li>
+                <Glyph name="check" size={22} />
+                <span>Never send money.</span>
+              </li>
+            </ul>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-            {/* Checklist */}
-            <div className="lg:col-span-7 space-y-3">
-              {CHECKLIST_ITEMS.map((item) => {
-                const checked = selectedChecks.includes(item.id);
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => toggleCheck(item.id)}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
-                      checked
-                        ? 'bg-slate-50 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => {}}
-                      className="w-5 h-5 accent-emerald-600 rounded-md cursor-pointer"
-                    />
-                    <div className="p-2 rounded-xl bg-slate-100">{item.icon}</div>
-                    <span className="text-sm font-medium text-slate-800 flex-1">{item.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Live Risk Meter Output */}
-            <div className="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-6 border border-slate-800 space-y-6">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Forensic Threat Assessment
-                </span>
-                <div className="mt-3">
-                  <div className="flex justify-between items-baseline mb-2">
-                    <span className="text-sm text-slate-300">Catfish Probability</span>
-                    <span className="text-2xl font-black text-white">{Math.min(totalPoints, 100)}%</span>
-                  </div>
-                  <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-500 ${risk.barColor}`}
-                      style={{ width: `${Math.min(totalPoints, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className={`p-3 rounded-xl border text-xs font-semibold ${risk.color}`}>
-                {risk.level}
-              </div>
-
-              <div className="text-xs text-slate-300 leading-relaxed bg-slate-800/80 p-4 rounded-xl border border-slate-700">
-                <span className="text-white font-bold block mb-1">Recommended Action:</span>
-                {risk.advice}
-              </div>
-
-              <Link href="/analyze" className="block">
-                <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl">
-                  Run Forensic Scan on Match
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Modern Pig-Butchering Anatomy */}
-      <section className="container-x mt-24">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            How Modern Romance Scams Work
-          </h2>
-          <p className="text-slate-600 text-sm sm:text-base mt-3">
-            Syndicates deploy industrial scripts to build emotional dependency before initiating financial requests.
+        ),
+      }}
+      example={{
+        reportId: 'alex',
+        kicker: 'Worked example · DT-0412 · fictional',
+        title: (
+          <>
+            “Alex” came up <span className="ghost">mostly ghost.</span>
+          </>
+        ),
+        body: (
+          <>
+            <p>
+              Alex is made up, but built from a pattern that turns up often. The photographs were real photographs, of a
+              catalogue model rather than of Alex. The profile was twelve days old.
+            </p>
+            <p>
+              Here is what developed, what didn’t, and what each line actually means. None of these on its own proves
+              anything. Together they make a picture.
+            </p>
+          </>
+        ),
+        alt: 'Profile photo for “Alex”: a man in glasses and a leather jacket outside a café, lit like a catalogue shoot',
+        ghostNotes: [
+          'Apps can spot and stop scam scripts; a private chat can’t. Wanting to move off the app very early is the most common first sign. Plenty of honest people prefer WhatsApp, so it’s the speed that matters.',
+          'The photographs belong to someone else. This is the nearest thing to a clear answer you will get, and you can check it yourself in about a minute.',
+          'The job and the city changed between conversations. Everyone misremembers now and then. A story that shifts whenever a detail could be checked is different.',
+        ],
+        developedNotes: [
+          'A phone number was confirmed. That counts for something, but numbers are cheap to buy, so on its own it proves very little.',
+        ],
+      }}
+      flags={{
+        title: (
+          <>
+            Seven things that <span className="ghost">don’t develop</span>
+          </>
+        ),
+        lede: (
+          <p>
+            One flag is usually nothing. Two or three together are worth slowing down for. Every one of them has a calm,
+            ordinary response, and none of them requires you to accuse anybody.
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-xs relative">
-            <span className="text-3xl font-black text-emerald-600">01</span>
-            <h3 className="font-bold text-lg text-slate-900 mt-2 mb-3">The Hook & Isolation</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              They shower you with round-the-clock texting, calling you affectionate nicknames immediately. They urgently urge you off dating apps onto unmoderated encrypted chat platforms like WhatsApp.
-            </p>
-          </div>
-
-          <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-xs relative">
-            <span className="text-3xl font-black text-amber-500">02</span>
-            <h3 className="font-bold text-lg text-slate-900 mt-2 mb-3">The Fake Wealth Trap</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Casually mentioning huge profits in gold trading, crypto, or forex. They offer to “teach you” by having you deposit small sums on a convincing mock trading website that shows artificial returns.
-            </p>
-          </div>
-
-          <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-xs relative">
-            <span className="text-3xl font-black text-red-500">03</span>
-            <h3 className="font-bold text-lg text-slate-900 mt-2 mb-3">The Freeze & Vanish</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Once a substantial deposit is transferred, the mock platform demands impossible &ldquo;liquidity release taxes&rdquo;. When refused, the profile vanishes, blocking all contact.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="container-x mt-20">
-        <div className="rounded-3xl bg-slate-900 text-white p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
-          <div className="space-y-2 text-center md:text-left">
-            <h3 className="text-2xl sm:text-3xl font-bold">Have a gut feeling something isn&apos;t right?</h3>
-            <p className="text-slate-400 text-sm max-w-lg">
-              Trust your instincts. Run their social handles through our zero-login analyzer in seconds.
-            </p>
-          </div>
-          <Link href="/analyze">
-            <Button className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-8 py-3.5 rounded-full text-base shadow-lg">
-              Run Free Safety Check
-            </Button>
-          </Link>
-        </div>
-      </section>
-    </div>
+        ),
+        items: [
+          {
+            flag: 'Video calls keep falling through. The camera is broken, the signal is bad, maybe next week.',
+            action:
+              'Ask for a short video call before you meet. Two minutes is enough. Someone real will usually find a way within a few days.',
+          },
+          {
+            flag: 'Wants to move to WhatsApp or Telegram within the first few messages.',
+            action: 'Stay on the app until you’ve met. You can say it simply: “I keep chats here until we meet.”',
+          },
+          {
+            flag: 'A job that keeps them far away: deployed overseas, on an oil rig, a doctor with an aid agency.',
+            action:
+              'These jobs are real, and so are the people who borrow them. Ask small, ordinary questions and see whether the answers stay the same.',
+          },
+          {
+            flag: 'Brings up crypto, trading, or an investment “mentor” who has done wonders for them.',
+            action:
+              'Stop there. No genuine match needs you to open a trading account. Don’t move money and don’t install the app they recommend.',
+          },
+          {
+            flag: 'The photos look like a catalogue shoot, or too smooth to be a real face.',
+            action:
+              'Run a reverse image search with Google Lens, TinEye or Bing Visual Search. If the pictures belong to someone else, you have your answer.',
+          },
+          {
+            flag: 'Asks for money, gift cards or help with a fee, however small and however sad the reason.',
+            action:
+              'Don’t send it. Not gift cards, not crypto, not a transfer “just this once”. Report the profile in the app.',
+          },
+          {
+            flag: 'Affection that arrives very fast: pet names and “I’ve never felt this way” within days.',
+            action: 'Notice the pace. Being liked is lovely. Being rushed is something else, and it’s fine to slow things down.',
+          },
+        ],
+        memo: {
+          re: 'Meeting a match',
+          title: 'Before you meet',
+          steps: [
+            'Meet somewhere public and busy, and get there under your own steam.',
+            'Tell a friend where you’ll be and when you expect to be home. Share your location if you like.',
+            'Keep your own way home and keep an eye on your drink.',
+            'Video-call first. It is the simplest check there is.',
+            'You can leave at any point. You don’t owe anyone an explanation.',
+            'If something felt wrong, report it to the app, even if nothing happened.',
+          ],
+          sign: 'Filed under DT · keep for reference',
+        },
+      }}
+      intake={{
+        title: 'Check a match quietly',
+        lede: (
+          <p>
+            Paste the Instagram, TikTok or other social handle your match shared. We read what’s public, the same way a
+            browser would. Nobody is messaged or notified.
+          </p>
+        ),
+        label: 'Their handle or profile link',
+        placeholder: '@alex_travels',
+        hint: 'Dating app profiles usually sit behind a login, so use a social handle they gave you or a username you found.',
+      }}
+      limits={{
+        title: 'A thin print isn’t a lie',
+        body: (
+          <p>
+            The print shows how much of an account’s audience and history came through. It can’t see the person, their
+            intentions or their heart. Treat it as one piece of evidence next to a video call and your own sense of
+            things.
+          </p>
+        ),
+        questions: [
+          {
+            q: 'Will they know I checked?',
+            a: (
+              <p>
+                No. We only read the public profile. Nothing is sent to them, and you don’t log in to anything of theirs.
+              </p>
+            ),
+          },
+          {
+            q: 'Can a real person come up mostly ghost?',
+            a: (
+              <p>
+                Yes. New accounts, private people and those who hardly post leave very little to develop. A thin print
+                means there is less to go on, not that someone is lying. Pair it with a video call.
+              </p>
+            ),
+          },
+          {
+            q: 'What if I’ve already sent money?',
+            a: (
+              <p>
+                Stop sending more, keep every message, and call your bank straight away; transfers can sometimes be
+                recalled if you’re quick. Report it to the app and to your national fraud line (in the US,{' '}
+                <a href="https://reportfraud.ftc.gov" rel="noopener noreferrer" target="_blank">
+                  reportfraud.ftc.gov
+                </a>
+                ). Being taken in by a practised script is not a failing.
+              </p>
+            ),
+          },
+        ],
+      }}
+    />
   );
 }

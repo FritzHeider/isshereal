@@ -1,112 +1,163 @@
-import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { FileText, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Glyph } from '@/components/darkroom/Glyph';
+import { LegalSheet, type Clause } from '@/components/library/LegalSheet';
 
-export const metadata = {
-  title: 'Terms of Service — isshereal.com',
-  description: 'Terms and conditions governing the use of isshereal.com analytical forensics and audit tools.',
+const DESCRIPTION =
+  'Terms of service for isshereal.com: what the scores are, what they are not, acceptable use, and the limits of our liability.';
+
+export const metadata: Metadata = {
+  title: 'Terms of service',
+  description: DESCRIPTION,
+  alternates: { canonical: '/terms' },
+  openGraph: {
+    title: 'Terms of service · isshereal.com',
+    description: DESCRIPTION,
+    url: 'https://isshereal.com/terms',
+    type: 'article',
+    images: [{ url: '/api/og', width: 1200, height: 630, alt: 'The isshereal terms of service data sheet.' }],
+  },
 };
+
+const CLAUSES: Clause[] = [
+  {
+    id: 'tm-01',
+    code: 'TM-01',
+    title: 'Acceptance of terms',
+    body: (
+      <p>
+        By visiting, browsing or using isshereal.com (the “Service”, “we”, “us”), you confirm that you have read,
+        understood and agree to these Terms of Service and our <Link href="/privacy">Privacy Policy</Link>. If you
+        disagree with any part of these terms, you must stop using the Service.
+      </p>
+    ),
+  },
+  {
+    id: 'tm-02',
+    code: 'TM-02',
+    title: 'What the Service does, and its method',
+    body: (
+      <>
+        <p>
+          isshereal.com analyses publicly available social media profiles, public creator figures and online
+          listings by computer. You acknowledge that:
+        </p>
+        <ul>
+          <li>
+            Authenticity scores come from statistical estimates over public numbers and are subject to error. The
+            full method is published on the <Link href="/about#what-a-score-shows">About</Link> page.
+          </li>
+          <li>
+            Platform changes, platform access rules and the conditions for reading public pages can affect whether
+            current data is available.
+          </li>
+          <li>
+            You alone are responsible for any decision, contract, purchase or meeting you enter into with anyone you
+            examine using the Service.
+          </li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: 'tm-03',
+    code: 'TM-03',
+    title: 'Acceptable use',
+    body: (
+      <>
+        <p>You agree not to use the Service to:</p>
+        <ul>
+          <li>Harass, defame, bully, dox or direct hate speech at any person or creator.</li>
+          <li>
+            Run bots, spiders or scrapers against our API in a way that degrades the Service or breaks its rate
+            limits.
+          </li>
+          <li>Resell, white-label or redistribute reports without a written commercial agreement with us.</li>
+          <li>Present a score as an official finding of any government or law enforcement body.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: 'tm-04',
+    code: 'TM-04',
+    title: 'A free public tool, and its availability',
+    body: (
+      <>
+        <p>
+          isshereal.com is currently provided free of charge. No payment, card or subscription is needed to use the
+          core examination.
+        </p>
+        <ul>
+          <li>We may change, adjust or improve features and rate limits at our discretion.</li>
+          <li>Fair use rules apply, to prevent abusive automated traffic, scraping attacks or deliberate damage to the Service.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: 'tm-05',
+    code: 'TM-05',
+    title: 'Intellectual property',
+    body: (
+      <p>
+        All algorithms, interface code, visual identity, graphics and documentation are the exclusive intellectual
+        property of isshereal.com. All rights reserved.
+      </p>
+    ),
+  },
+  {
+    id: 'tm-06',
+    code: 'TM-06',
+    title: 'Limitation of liability',
+    body: (
+      <p>
+        To the fullest extent the law allows, isshereal.com and its affiliates are not liable for any direct,
+        indirect, incidental or consequential damages arising from business decisions, sponsorship spending, or
+        personal meetings arranged with people you examined.
+      </p>
+    ),
+  },
+  {
+    id: 'tm-07',
+    code: 'TM-07',
+    title: 'Changes to these terms',
+    body: (
+      <p>
+        We may revise these terms at any time. If you keep using the Service after revised terms are posted, you
+        accept the revised terms.
+      </p>
+    ),
+  },
+];
 
 export default function TermsPage() {
   return (
-    <div className="pt-28 pb-20">
-      <section className="container-x max-w-4xl">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 mb-4">
-          <Link href="/" className="hover:underline">Home</Link>
-          <span>/</span>
-          <span>Company</span>
-          <span>/</span>
-          <span className="text-slate-800">Terms of Service</span>
-        </div>
-
-        {/* Header */}
-        <div className="space-y-4 pb-8 border-b border-slate-200">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
-            <FileText size={13} className="text-slate-600" />
-            Effective Date: September 2026
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-            Terms of Service
-          </h1>
-          <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-            Please read these terms carefully before accessing or using the isshereal.com platform and related analytical services.
-          </p>
-        </div>
-
-        {/* Disclaimer Warning Callout */}
-        <div className="my-8 p-6 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-4">
-          <AlertCircle size={24} className="text-amber-600 shrink-0 mt-0.5" />
-          <div className="text-sm text-amber-900 leading-relaxed">
-            <strong className="block font-bold mb-1">Important Analytical Disclaimer:</strong>
-            Scores and verdicts produced by isshereal.com are probabilistic statistical estimations derived from public web metadata. They are intended for research, risk assessment, and entertainment purposes, and do not constitute formal legal proof or financial guarantees.
+    <LegalSheet
+      frame="TM"
+      publication="TM-1 Terms"
+      crumb="Terms"
+      titleId="terms-title"
+      title="Terms of service"
+      lede="Please read these terms before using isshereal.com and its examination tools."
+      effective="September 2026"
+      revision="October 2026, wording clarified. No obligation changed."
+      notice={
+        <div className="legal-caution" role="note" aria-labelledby="terms-caution-title">
+          <Glyph name="warning" size={22} />
+          <div>
+            <p id="terms-caution-title" className="legal-caution__title">
+              Read this first
+            </p>
+            <p>
+              Scores and verdicts from isshereal.com are statistical estimates made from public web data. They are
+              meant for research, risk assessment and entertainment. They are not legal proof and not a financial
+              guarantee. A score is evidence about an audience, not a verdict on a person.
+            </p>
           </div>
         </div>
-
-        {/* Terms Sections */}
-        <div className="prose prose-slate max-w-none space-y-8 text-sm sm:text-base text-slate-700 leading-relaxed">
-          <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">1. Acceptance of Terms</h2>
-            <p>
-              By accessing, browsing, or utilizing isshereal.com (&ldquo;Service&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;), you acknowledge that you have read, understood, and agree to be bound by these Terms of Service and our Privacy Policy. If you disagree with any portion of these terms, you must discontinue use immediately.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">2. Service Description & Methodology</h2>
-            <p>
-              isshereal.com provides algorithmic analysis of publicly available social media profiles, public creator metrics, and digital listings. You acknowledge that:
-            </p>
-            <ul className="list-disc pl-6 space-y-1 text-slate-600 text-sm">
-              <li>Authenticity scores reflect algorithmic probability models and are subject to statistical margins of error.</li>
-              <li>Public social media APIs, web scraping conditions, and platform changes may affect real-time data availability.</li>
-              <li>You remain solely responsible for any decisions, contracts, purchases, or interactions undertaken with third parties audited through our tools.</li>
-            </ul>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">3. Acceptable Use Policy</h2>
-            <p>You agree not to use the Service to:</p>
-            <ul className="list-disc pl-6 space-y-1 text-slate-600 text-sm">
-              <li>Engage in harassment, defamation, cyberbullying, doxxing, or hate speech against any individual or creator.</li>
-              <li>Deploy automated bots, spiders, or scrapers against our APIs in a manner that degrades system performance or violates rate limits.</li>
-              <li>Resell, white-label, or redistribute audit reports without an explicit commercial enterprise agreement.</li>
-              <li>Falsely represent our analytical score as an official government or law enforcement determination.</li>
-            </ul>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">4. Free Public Tool & Availability</h2>
-            <p>
-              isshereal.com is currently provided as a free public analytical forensic tool. No payment, credit card, or recurring subscription is required to access our core audit algorithms.
-            </p>
-            <ul className="list-disc pl-6 space-y-1 text-slate-600 text-sm">
-              <li>We reserve the right to modify, adjust, or optimize service features or rate limits at our discretion.</li>
-              <li>Fair use policies apply to prevent abusive automated traffic, scraping attacks, or intentional system degradation.</li>
-            </ul>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">5. Intellectual Property</h2>
-            <p>
-              All proprietary algorithms, user interface code, visual branding, graphics, and documentation are the exclusive intellectual property of isshereal.com. All rights reserved.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">6. Limitation of Liability</h2>
-            <p>
-              To the maximum extent permitted by applicable law, isshereal.com and its affiliates shall not be liable for any direct, indirect, incidental, or consequential damages resulting from business decisions, sponsorship expenditures, or personal meetings arranged with audited individuals.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">7. Changes to Terms</h2>
-            <p>
-              We reserve the right to revise or modify these Terms at any time. Continued use of the Service following the posting of revised terms constitutes your acceptance of such revisions.
-            </p>
-          </section>
-        </div>
-      </section>
-    </div>
+      }
+      clauses={CLAUSES}
+    />
   );
 }

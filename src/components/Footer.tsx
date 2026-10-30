@@ -1,153 +1,110 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShieldCheck, ArrowRight } from 'lucide-react';
-import { Button } from './ui/button';
+import { SAMPLE_REPORTS } from '@/data/content';
+import { Glyph, platformCode } from './darkroom/Glyph';
+import { Wordmark } from './Navbar';
+
+const INDEX = [
+  {
+    code: 'DR',
+    title: 'Darkroom',
+    links: [
+      { label: 'Develop a profile', href: '/analyze' },
+      { label: 'Contact sheet (bulk)', href: '/tools/bulk' },
+      { label: 'Light box (compare)', href: '/tools/compare' },
+      { label: 'Test strip (engagement)', href: '/tools/engagement-rate' },
+      { label: 'Negative sleeve (hashtags)', href: '/tools/hashtags' },
+    ],
+  },
+  {
+    code: 'CS',
+    title: 'Cases',
+    links: [
+      { label: 'Dating safety', href: '/use-cases/dating-safety' },
+      { label: 'Marketplace buyers', href: '/use-cases/marketplace-buyers' },
+      { label: 'Hiring freelancers', href: '/use-cases/hiring-freelancers' },
+      { label: 'Influencer vetting', href: '/use-cases/influencer-vetting' },
+    ],
+  },
+  {
+    code: 'AR',
+    title: 'Archive',
+    links: [
+      { label: 'Proof wall', href: '/top-creators' },
+      { label: 'Your negatives', href: '/history' },
+      { label: 'Darkroom shelf', href: '/resources' },
+      { label: 'Technical publication (API)', href: '/api-docs' },
+    ],
+  },
+  {
+    code: 'LB',
+    title: 'The lab',
+    links: [
+      { label: 'About', href: '/about' },
+      { label: 'Contact', href: '/contact' },
+      { label: 'Privacy', href: '/privacy' },
+      { label: 'Terms', href: '/terms' },
+    ],
+  },
+];
 
 export function Footer() {
+  const strip = SAMPLE_REPORTS.slice(0, 8);
+  const year = new Date().getFullYear();
   return (
-    <footer className="bg-slate-900 text-white pt-20 pb-12 border-t border-slate-800">
-      <div className="container-x">
-        {/* Pre-footer Call to Action Banner */}
-        <div className="rounded-3xl bg-linear-to-r from-emerald-900/50 to-slate-800 border border-emerald-500/20 p-8 sm:p-12 mb-20 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-          <div className="max-w-xl">
-            <h3 className="font-extrabold text-2xl sm:text-3xl text-white tracking-tight">
-              Stop guessing. Know who's real.
-            </h3>
-            <p className="text-slate-300 text-sm sm:text-base mt-2.5">
-              Run your first authenticity audit in seconds — free, no login, no password ever.
-            </p>
-          </div>
-          <Link href="/analyze">
-            <Button className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-7 py-3 rounded-full text-base shadow-lg shadow-emerald-500/20">
-              <span>Analyze a profile</span>
-              <ArrowRight size={18} className="ml-2" />
-            </Button>
+    <footer className="site-footer" data-room="dark">
+      <div className="site-footer__strip" aria-label="Recent example examinations">
+        <ol role="list" className="filmstrip">
+          {strip.map((r, i) => (
+            <li key={r.id} className="filmstrip__frame">
+              <Link href={`/report/${r.id}`} className="filmstrip__link">
+                <span className="filmstrip__img">
+                  <Image src={r.avatarImage} alt="" width={160} height={160} sizes="9rem" loading="lazy" />
+                </span>
+                <span className="filmstrip__code label">
+                  {String(21 + i).padStart(2, '0')} ▸ {platformCode(r.platform)} ▸ <span className={r.fakePct > 50 ? 'text-cyan' : 'text-amber'}>{r.fakePct}% ghost</span>
+                </span>
+                <span className="sr-only">{r.handle}, {100 - r.fakePct}% developed, {r.fakePct}% ghost</span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div className="site-footer__body">
+        <div className="site-footer__lead">
+          <Link href="/" className="site-footer__mark" aria-label="isshereal.com, home">
+            <Wordmark />
+          </Link>
+          <p className="site-footer__line">What’s real comes through. Everything else stays a ghost.</p>
+          <Link href="/analyze" className="btn btn--safe">
+            Develop a profile <Glyph name="arrow-right" size={18} />
           </Link>
         </div>
 
-        {/* Links Columns */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-10 pb-16 border-b border-slate-800">
-          {/* Brand Col */}
-          <div className="col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-emerald-500/30 shadow-md shadow-emerald-500/10 group-hover:scale-105 transition-transform duration-300">
-                <Image
-                  src="/images/logo.png"
-                  alt="isshereal logo"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <span className="font-extrabold text-lg text-white">
-                isshereal<span className="text-emerald-400">.com</span>
-              </span>
-            </Link>
-            <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
-              Know who is real. Detect fake followers, bots, catfish and scam profiles across every platform.
-            </p>
-          </div>
+        <nav className="site-footer__index" aria-label="Site index">
+          {INDEX.map((group) => (
+            <div key={group.code} className="index-group">
+              <h2 className="index-group__title">
+                <span className="label text-safe">{group.code}</span>
+                {group.title}
+              </h2>
+              <ul role="list">
+                {group.links.map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href}>{l.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+      </div>
 
-          {/* Product Col */}
-          <div>
-            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-300 mb-4">
-              Product
-            </h4>
-            <ul className="space-y-2.5 text-sm text-slate-400">
-              <li>
-                <Link href="/analyze" className="hover:text-emerald-400 transition-colors">
-                  Full audit
-                </Link>
-              </li>
-              <li>
-                <Link href="/tools/engagement-rate" className="hover:text-emerald-400 transition-colors">
-                  Engagement calculator
-                </Link>
-              </li>
-              <li>
-                <Link href="/tools/compare" className="hover:text-emerald-400 transition-colors">
-                  Profile comparison
-                </Link>
-              </li>
-              <li>
-                <Link href="/tools/hashtags" className="hover:text-emerald-400 transition-colors">
-                  Hashtag analyzer
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Use Cases Col */}
-          <div>
-            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-300 mb-4">
-              Use cases
-            </h4>
-            <ul className="space-y-2.5 text-sm text-slate-400">
-              <li>
-                <Link href="/use-cases/influencer-vetting" className="hover:text-emerald-400 transition-colors">
-                  Influencer vetting
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/dating-safety" className="hover:text-emerald-400 transition-colors">
-                  Dating safety
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/marketplace-buyers" className="hover:text-emerald-400 transition-colors">
-                  Marketplace buyers
-                </Link>
-              </li>
-              <li>
-                <Link href="/use-cases/hiring-freelancers" className="hover:text-emerald-400 transition-colors">
-                  Hiring freelancers
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Company Col */}
-          <div>
-            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-300 mb-4">
-              Company
-            </h4>
-            <ul className="space-y-2.5 text-sm text-slate-400">
-              <li>
-                <Link href="/about" className="hover:text-emerald-400 transition-colors">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="hover:text-emerald-400 transition-colors">
-                  Privacy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="hover:text-emerald-400 transition-colors">
-                  Terms
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-emerald-400 transition-colors">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom Copyright and Privacy Disclaimer */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
-          <div>
-            © 2026 isshereal.com — authenticity analytics for everyone.
-          </div>
-          <div className="text-slate-400 flex items-center gap-1.5 font-medium">
-            <ShieldCheck size={14} className="text-emerald-400" />
-            Built for trust. Never asks for passwords or private data.
-          </div>
-        </div>
+      <div className="site-footer__legal">
+        <p className="label">© {year} isshereal.com ▸ Emulsion 5063 ▸ Free, no login</p>
+        <p className="site-footer__caveat">A score is evidence about an audience, not a verdict on a person. We only read public numbers.</p>
       </div>
     </footer>
   );
