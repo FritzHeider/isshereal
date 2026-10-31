@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 /**
  * Social preview (1200×630): a print in the darkroom. With a handle it
@@ -36,8 +37,20 @@ function verdictFor(score: number) {
   return 'Never came up';
 }
 
+type AssetsBinding = { fetch: (input: Request | string | URL) => Promise<Response> };
+
+// On Cloudflare a worker fetching its own hostname hangs, so read the fonts
+// through the static-assets binding; plain fetch covers `next dev`.
 async function font(req: NextRequest, file: string) {
-  const res = await fetch(new URL(`/og/${file}`, req.url));
+  const url = new URL(`/og/${file}`, req.url);
+  let assets: AssetsBinding | undefined;
+  try {
+    assets = (getCloudflareContext().env as { ASSETS?: AssetsBinding }).ASSETS;
+  } catch {
+    assets = undefined;
+  }
+  const res = assets ? await assets.fetch(url) : await fetch(url);
+  if (!res.ok) throw new Error(`OG font ${file}: ${res.status}`);
   return res.arrayBuffer();
 }
 
