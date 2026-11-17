@@ -1,0 +1,4 @@
+# Files Wrangler must never upload as public assets (copied into .open-next/assets by the build).
+.DS_Store
+._*
+Thumbs.db

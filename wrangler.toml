@@ -24,7 +24,10 @@ cpu_ms = 30000
 PLATFORM_NAME = "isshereal.com"
 SUPPORT_EMAIL = "support@isshereal.com"
 WEB_USE_SERVICE_URL = "https://isshereal-scraper.fly.dev"
-WEB_USE_API_KEY = "isshereal-bridge-2026-Qx7nR"
+# WEB_USE_API_KEY is a secret, not a var: set it with
+#   npx wrangler secret put WEB_USE_API_KEY
+# (and the same value as API_KEY on the Fly app isshereal-scraper).
+# For local dev put it in .dev.vars, which git ignores.
 RAPIDAPI_HOST = "best-instagram-scraper-free-1000-calls.p.rapidapi.com"
 
 [observability]

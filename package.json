@@ -17,9 +17,9 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
-    "eslint-config-next": "^16.4.3",
+    "eslint-config-next": "^16.4.6",
     "motion": "^12.23.12",
-    "next": "^16.4.3",
+    "next": "^16.4.6",
     "path-scurry": "^2.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

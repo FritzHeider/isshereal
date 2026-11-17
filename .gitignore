@@ -69,3 +69,7 @@ ehthumbs.db
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Wrangler local secrets
+.dev.vars
+.dev.vars.*
