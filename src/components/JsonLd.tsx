@@ -36,6 +36,26 @@ export function HomePageJsonLd() {
   );
 }
 
+/** FAQPage structured data, so the homepage questions can show in search results. */
+export function FaqJsonLd({ items }: { items: { q: string; a: string }[] }) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
+    />
+  );
+}
+
 export function ReportPageJsonLd({ handle, score, verdict }: { handle: string; score: number; verdict: string }) {
   // Sanitize user-controlled inputs
   const safeHandle = handle.replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 64);
