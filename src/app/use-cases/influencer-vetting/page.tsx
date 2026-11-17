@@ -40,8 +40,8 @@ export default function InfluencerVettingPage() {
               engagement pods, and the follower count looks the same either way.
             </p>
             <p>
-              The print shows how much of an audience develops. Look before you send the brief, and price the deal on the
-              part that came through.
+              The report shows how much of an audience is real. Look before you send the brief, and price the deal on the
+              part that is real.
             </p>
           </>
         ),
@@ -49,10 +49,10 @@ export default function InfluencerVettingPage() {
           <div className="case-dial">
             <Reading
               value={67}
-              label="Ghost · example"
+              label="Fake · example"
               tone="ghost"
               size="l"
-              note="Of a 480,000-follower audience, about 158,000 developed. The rest never came up."
+              note="Of a 480,000-follower audience, about 158,000 look real. The rest look fake."
             />
           </div>
         ),
@@ -62,14 +62,14 @@ export default function InfluencerVettingPage() {
         kicker: 'Worked example · IV-0031 · fictional',
         title: (
           <>
-            Luca came up <span className="ghost">two-thirds ghost.</span>
+            Luca scored <span className="ghost">two-thirds fake.</span>
           </>
         ),
         body: (
           <>
             <p>
               Luca is fictional, but the shape is common: years of genuine work, good photographs, and a recent burst of
-              followers that never developed.
+              followers that look fake.
             </p>
             <p>
               Padded audiences often sit on top of real creators. That is why an account can look fine at a glance and
@@ -79,24 +79,24 @@ export default function InfluencerVettingPage() {
         ),
         alt: 'Profile photo for “Luca”: a young man in an olive jacket, backlit by a low evening sun',
         ghostNotes: [
-          'Likes and comments per post measured 0.42%, far lower than accounts this size usually see. Ghost followers don’t like anything, so a padded audience drags the rate down.',
+          'Likes and comments per post measured 0.42%, far lower than accounts this size usually see. Fake followers don’t like anything, so a padded audience drags the rate down.',
           'About 180,000 followers arrived within 48 hours, mostly accounts with no posts of their own. Audiences don’t grow like that without a viral post to explain it, and there wasn’t one.',
           'The same few emoji, a few minutes after each post. Pods trade comments to game the feed. The accounts are real; the audience isn’t.',
         ],
         developedNotes: [
-          'Three years of steady posting is real work, and it developed as such.',
+          'Three years of steady posting is real work, and it shows.',
           'The photographs are good and consistent. The quality of the work isn’t in question here. The audience is.',
         ],
       }}
       flags={{
         title: (
           <>
-            Six ways an audience <span className="ghost">stays ghost</span>
+            Six signs of a <span className="ghost">fake audience</span>
           </>
         ),
         lede: (
           <p>
-            Big accounts attract some bots without trying, so a little ghost is normal. What matters is the size of the
+            Big accounts attract some bots without trying, so a few fake followers are normal. What matters is the size of the
             gap and whether the creator will show you their numbers.
           </p>
         ),
@@ -143,7 +143,7 @@ export default function InfluencerVettingPage() {
       }}
       extra={<GhostCost slug="influencer-vetting" />}
       intake={{
-        title: 'Develop a creator',
+        title: 'Check a creator',
         lede: (
           <p>
             Paste an Instagram, TikTok or YouTube handle. The creator isn’t notified, and nothing is posted anywhere. If
@@ -155,17 +155,17 @@ export default function InfluencerVettingPage() {
         hint: 'Instagram, TikTok and YouTube handles or links all work.',
       }}
       limits={{
-        title: 'Ghosts aren’t always bought',
+        title: 'Fake followers aren’t always bought',
         body: (
           <p>
-            A ghost is a follower who never developed: no posts, no activity, no sign of a person watching. Some are
+            A fake follower is one with no posts, no activity, no sign of a person watching. Some are
             bought. Some are bots that follow large accounts on their own. Some are real people who stopped opening the
-            app years ago. The print shows how much of the audience is there, not how the rest got in.
+            app years ago. The report shows how much of the audience is real, not how the rest got in.
           </p>
         ),
         questions: [
           {
-            q: 'Does a high ghost share mean the creator bought followers?',
+            q: 'Does a high fake share mean the creator bought followers?',
             a: (
               <p>
                 Not necessarily. Bots follow big accounts without being asked, and old audiences go quiet. Ask the creator
@@ -174,7 +174,7 @@ export default function InfluencerVettingPage() {
             ),
           },
           {
-            q: 'How much ghost is normal?',
+            q: 'How many fake followers is normal?',
             a: (
               <p>
                 Some, always. Every large account picks up drifting bots and abandoned profiles. Compare creators of a
@@ -186,7 +186,7 @@ export default function InfluencerVettingPage() {
             q: 'What should I do with a mixed result?',
             a: (
               <p>
-                Talk to the creator. Price the deal on the developed audience and ask for their numbers. A creator who
+                Talk to the creator. Price the deal on the real audience and ask for their numbers. A creator who
                 won’t share them is telling you something too.
               </p>
             ),

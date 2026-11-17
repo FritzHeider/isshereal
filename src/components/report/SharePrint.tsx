@@ -5,7 +5,7 @@ import { Glyph } from '@/components/darkroom/Glyph';
 import { toast } from '@/components/Toast';
 
 /**
- * Share actions for a report. "Save the print" draws the print card the
+ * Share actions for a report. "Save as image" draws the print card the
  * same way the OG image does: dark room, white-bordered print, readings,
  * and the grease-pencil verdict.
  */
@@ -30,7 +30,7 @@ export function SharePrint({
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
-      toast('Link copied. Anyone with it sees the same print.', 'success');
+      toast('Link copied. Anyone with it sees the same report.', 'success');
       setTimeout(() => setCopied(false), 2400);
     } catch {
       toast('Your browser blocked the clipboard. Copy the address bar instead.', 'error');
@@ -104,9 +104,9 @@ export function SharePrint({
     ctx.fillText(`${fakePct}%`, 880, 420);
     ctx.font = `500 22px ${mono}`;
     ctx.fillStyle = amber;
-    ctx.fillText('DEVELOPED', 604, 460);
+    ctx.fillText('REAL', 604, 460);
     ctx.fillStyle = cyan;
-    ctx.fillText('GHOST', 884, 460);
+    ctx.fillText('FAKE', 884, 460);
     ctx.fillStyle = text;
     ctx.font = `500 22px ${mono}`;
     ctx.fillText('isshereal.com', 600, 560);
@@ -115,7 +115,7 @@ export function SharePrint({
     a.download = `${handle.replace('@', '')}-print.png`;
     a.href = canvas.toDataURL('image/png');
     a.click();
-    toast('Print saved as an image.', 'success');
+    toast('Report saved as an image.', 'success');
   };
 
   return (
@@ -126,7 +126,7 @@ export function SharePrint({
       </button>
       <button type="button" className="btn btn--line btn--compact" onClick={save}>
         <Glyph name="export" size={16} />
-        Save the print
+        Save as image
       </button>
     </div>
   );

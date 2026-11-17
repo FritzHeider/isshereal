@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Develop a profile',
+  title: 'Check a profile',
   description:
-    'Paste any Instagram, TikTok, YouTube, dating, marketplace or freelance profile. We pull the public numbers and develop the audience: genuine followers come through, bought ones stay as ghosts.',
+    'Paste any Instagram, TikTok, YouTube, dating, marketplace or freelance profile. We pull the public numbers and estimate how much of the audience is real: genuine followers count, bought ones stay as ghosts.',
   openGraph: {
-    title: 'Develop a profile · isshereal.com',
-    description: 'Paste a profile and see what comes through.',
+    title: 'Check a profile · isshereal.com',
+    description: 'Paste a profile and see how much of its audience is real.',
     url: 'https://isshereal.com/analyze',
   },
 };

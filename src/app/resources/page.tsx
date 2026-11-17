@@ -5,14 +5,14 @@ import { Glyph, type GlyphName } from '@/components/darkroom/Glyph';
 import { Crumbs } from '@/components/library/Crumbs';
 
 const DESCRIPTION =
-  'The darkroom shelf: short field guides on spotting fake followers, reading engagement rates, and recognising romance-scam profiles.';
+  'Short guides on spotting fake followers, reading engagement rates, and recognising romance-scam profiles.';
 
 export const metadata: Metadata = {
-  title: 'Resources: the darkroom shelf',
+  title: 'Resources',
   description: DESCRIPTION,
   alternates: { canonical: '/resources' },
   openGraph: {
-    title: 'Resources: the darkroom shelf · isshereal.com',
+    title: 'Resources · isshereal.com',
     description: DESCRIPTION,
     url: 'https://isshereal.com/resources',
     type: 'website',
@@ -46,7 +46,7 @@ const GUIDES: Guide[] = [
       'AI-generated avatars are common now. They often give themselves away in the lighting and the background: a shadow falling the wrong way, an ear that doesn’t match, text in the scenery that isn’t quite text.',
       'An audience that is real responds to what is posted. When the comments, the timing and the numbers all point the same way, the audience is probably genuine. When they disagree, look closer.',
     ],
-    equipment: { href: '/analyze', label: 'Develop a profile' },
+    equipment: { href: '/analyze', label: 'Check a profile' },
   },
   {
     id: 'good-engagement-rate',
@@ -61,7 +61,7 @@ const GUIDES: Guide[] = [
       'As a rough guide, larger accounts usually land between 1% and 5%. Smaller creators often see 5% to 10% or more, because a small audience tends to know the person. Short video, such as Reels and TikToks, usually draws higher rates than still images.',
       'Don’t stop at likes. Comments, saves and shares take more effort, so they say more about whether people actually care. A huge like count with almost no comments deserves a second look.',
     ],
-    equipment: { href: '/tools/engagement-rate', label: 'Run the engagement test strip' },
+    equipment: { href: '/tools/engagement-rate', label: 'Check an engagement rate' },
   },
   {
     id: 'romance-scam-red-flags',
@@ -96,7 +96,7 @@ export default function ResourcesPage() {
           <div className="head shelf-head__title">
             <p className="head__kicker label">Resources · {GUIDES.length} boxes on the shelf</p>
             <h1 id="shelf-title">
-              The <span className="text-safe">shelf</span>
+              <span className="text-safe">Resources</span>
             </h1>
           </div>
           <p className="head__lede shelf-head__lede">
@@ -150,7 +150,7 @@ export default function ResourcesPage() {
                       ))}
                     </div>
                     <p className="shelf-box__equipment">
-                      <span className="label text-2">Equipment</span>
+                      <span className="label text-2">Tool</span>
                       <Link href={g.equipment.href} className="btn btn--line btn--compact">
                         {g.equipment.label}
                         <Glyph name="arrow-right" size={16} />

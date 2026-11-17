@@ -92,7 +92,7 @@ export function DevelopTray({
       engine?.render(1, clock);
       setShown(null);
       setState('fixed');
-      setAnnounce(`Print fixed. ${realPct}% developed, ${fakePct}% ghost.`);
+      setAnnounce(`Done. ${realPct}% real, ${fakePct}% fake.`);
       root.style.removeProperty('will-change');
     };
 
@@ -131,7 +131,7 @@ export function DevelopTray({
       }
       if (!started) {
         started = true;
-        setAnnounce('Developing the print.');
+        setAnnounce('Checking the profile…');
       }
       setState(holdRef.current ? 'holding' : 'developing');
       root.style.setProperty('will-change', 'transform');
@@ -240,7 +240,7 @@ export function DevelopTray({
               width={720}
               height={720}
               role="img"
-              aria-label={`${alt}. Developed print: an estimated ${realPct}% of the audience came through as genuine, ${fakePct}% stayed as ghosts.`}
+              aria-label={`${alt}. Result: an estimated ${realPct}% of the audience is genuine, ${fakePct}% looks as ghosts.`}
             />
           </div>
           <div className="tray__border">
@@ -256,8 +256,8 @@ export function DevelopTray({
           <span className="label text-2">{followersLabel}</span>
         </span>
         <span className="tray__readings" aria-hidden={shown != null ? true : undefined}>
-          <Reading value={real} label="Developed" tone="developed" size="s" />
-          <Reading value={fake} label="Ghost" tone="ghost" size="s" />
+          <Reading value={real} label="Real" tone="developed" size="s" />
+          <Reading value={fake} label="Fake" tone="ghost" size="s" />
         </span>
         {caption ? <span className="tray__caption">{caption}</span> : null}
       </figcaption>

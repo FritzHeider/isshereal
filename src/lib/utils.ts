@@ -26,9 +26,9 @@ export function scoreTone(score: number): 'developed' | 'mixed' | 'ghost' {
 
 /** The short grease-pencil verdict written on a print's border. */
 export function greaseVerdict(score: number): string {
-  if (score >= 85) return 'Came through clean';
-  if (score >= 75) return 'Mostly came through';
-  if (score >= 50) return 'Partly developed';
-  if (score >= 30) return 'Mostly ghost';
-  return 'Never came up';
+  if (score >= 85) return 'Looks real';
+  if (score >= 75) return 'Mostly real';
+  if (score >= 50) return 'Partly real';
+  if (score >= 30) return 'Mostly fake';
+  return 'Almost all fake';
 }

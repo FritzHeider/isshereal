@@ -96,13 +96,13 @@ export default function AnalyzePage() {
           if (data.report.postsCount) setPosts(data.report.postsCount.toString());
           setStatus({ tone: 'developed', text: `Pulled live numbers for ${data.report.name}: ${data.report.followers}.` });
         } else {
-          setStatus({ tone: 'error', text: `The platform didn’t share @${clean}’s numbers. Type in what the profile shows and we’ll develop from those.` });
+          setStatus({ tone: 'error', text: `The platform didn’t share @${clean}’s numbers. Type in what the profile shows and we’ll check those.` });
         }
       } else {
-        setStatus({ tone: 'error', text: 'The platform didn’t answer. Type in the numbers from the profile and we’ll develop from those.' });
+        setStatus({ tone: 'error', text: 'The platform didn’t answer. Type in the numbers from the profile and we’ll check those.' });
       }
     } catch {
-      setStatus({ tone: 'error', text: 'Fogged: the request didn’t complete. Check your connection, or type the numbers in yourself.' });
+      setStatus({ tone: 'error', text: 'The request didn’t complete. Check your connection, or type the numbers in yourself.' });
     } finally {
       setFetching(false);
     }
@@ -141,7 +141,7 @@ export default function AnalyzePage() {
       return;
     }
     setBusy(true);
-    setStatus({ tone: 'info', text: `Developing @${clean}. Holding for fixer.` });
+    setStatus({ tone: 'info', text: `Checking @${clean}…` });
     try {
       const res = await fetch('/api/audit', {
         method: 'POST',
@@ -189,15 +189,15 @@ export default function AnalyzePage() {
           <nav className="crumbs" aria-label="Breadcrumb">
             <ol>
               <li><Link href="/">Home</Link></li>
-              <li><span aria-current="page">Develop a profile</span></li>
+              <li><span aria-current="page">Check a profile</span></li>
             </ol>
           </nav>
           <h1 id="bench-title" className="bench__title display-l">
-            The loading <span className="safe">bench</span>
+            Check a <span className="safe">profile</span>
           </h1>
           <p className="bench__lede lede">
             Paste a profile. We pull the public numbers where the platform shares them; where it doesn’t, you type in what the
-            profile shows. Then it goes in the tray.
+            profile shows. Then we score it.
           </p>
         </div>
       </section>
@@ -229,7 +229,7 @@ export default function AnalyzePage() {
             </fieldset>
 
             <fieldset className="bench__group">
-              <legend className="bench__legend"><span className="label text-safe">B</span> The specimen</legend>
+              <legend className="bench__legend"><span className="label text-safe">B</span> The profile</legend>
               <div className="filmfield">
                 <span className="filmfield__code" aria-hidden="true">
                   <Glyph name={platformGlyph(platformLabel)} size={18} />
@@ -313,13 +313,13 @@ export default function AnalyzePage() {
             </fieldset>
           </div>
 
-          <aside className="bench__side" aria-label="Tray">
+          <aside className="bench__side" aria-label="Result">
             <div className="bench__tray">
               {status ? (
                 <div className={`state ${status.tone === 'error' ? 'state--fogged' : 'state--notice'}`} role="status">
                   <span className="state__mark"><Glyph name={status.tone === 'error' ? 'fogged' : status.tone === 'developed' ? 'developed' : 'timer'} size={28} /></span>
                   <div className="state__body">
-                    <p className="state__title">{status.tone === 'error' ? 'Fogged' : status.tone === 'developed' ? 'Numbers in' : 'In the tray'}</p>
+                    <p className="state__title">{status.tone === 'error' ? 'Something went wrong' : status.tone === 'developed' ? 'Numbers in' : 'Checking'}</p>
                     <p>{status.text}</p>
                   </div>
                 </div>
@@ -327,13 +327,13 @@ export default function AnalyzePage() {
                 <div className="state" role="status">
                   <span className="state__mark"><Glyph name="tray" size={28} /></span>
                   <div className="state__body">
-                    <p className="state__title">Nothing in the tray yet</p>
+                    <p className="state__title">Nothing checked yet</p>
                     <p>Paste a handle or link to start. We never ask for a login, and we only read public numbers.</p>
                   </div>
                 </div>
               )}
               <button type="submit" className="btn btn--safe btn--wide bench__go" disabled={busy}>
-                {busy ? 'Developing' : 'Develop'} <Glyph name="arrow-right" size={18} />
+                {busy ? 'Checking…' : 'Check profile'} <Glyph name="arrow-right" size={18} />
               </button>
               <p className="bench__fine">A score is evidence about an audience, not a verdict on a person.</p>
             </div>

@@ -38,7 +38,7 @@ export function ToolOpening({
               <Link href="/">Home</Link>
             </li>
             <li>
-              <Link href="/#equipment">Darkroom</Link>
+              <Link href="/#tools">Free tools</Link>
             </li>
             <li>
               <span aria-current="page">{tool}</span>
@@ -52,7 +52,7 @@ export function ToolOpening({
         <div className="tool-open__label">
           <p className="tool-open__code label">
             <Glyph name={glyph} size={22} />
-            <span>Equipment {frame}</span>
+            <span>{tool}</span>
           </p>
           <dl className="tool-open__specs">
             {specs.map(([k, v]) => (

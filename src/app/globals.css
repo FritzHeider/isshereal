@@ -11,3 +11,5 @@
 @import "../styles/pages/cases.css";
 @import "../styles/pages/library.css";
 @import "../styles/motion.css";
+/* Site-wide direct theme. Unlayered and last on purpose: see the file header. */
+@import "../styles/direct-theme.css";

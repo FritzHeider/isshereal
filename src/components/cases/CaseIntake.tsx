@@ -75,11 +75,11 @@ export function CaseIntake({
           />
         </div>
         <button type="submit" className="btn btn--safe" disabled={sending}>
-          {sending ? 'Loading the tray' : 'Develop'}
+          {sending ? 'Checking…' : 'Check profile'}
           <Glyph name="arrow-right" size={18} />
         </button>
         <p id={statusId} className="filmfield__status" data-tone="error" role="alert" hidden={!error}>
-          Nothing in the tray yet. Paste a handle or link to start.
+          Nothing checked yet. Paste a handle or link to start.
         </p>
       </form>
       <p id={hintId} className="case-intake__hint">

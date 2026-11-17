@@ -1,23 +1,23 @@
 import type { Metadata, Viewport } from 'next';
 import { ThemeProvider, THEME_BOOT_SCRIPT } from '@/components/ThemeProvider';
 import './globals.css';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
+import { DirectHeader, DirectFooter } from '@/components/direct/DirectChrome';
 import { ToastContainer } from '@/components/Toast';
 
 const DESCRIPTION =
-  'Drop any Instagram, TikTok, YouTube, dating, marketplace or freelance profile in the tray. Real followers develop into solid grain; bought and bot followers stay as ghosts.';
+  'Free fake follower and fake profile checker for Instagram, TikTok, YouTube, X, dating apps, marketplaces and freelancers. No sign-up, nothing locked.';
+const DEFAULT_TITLE = 'isshereal.com · Free fake follower checker';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://isshereal.com'),
   title: {
-    default: 'isshereal.com · What’s real comes through',
+    default: DEFAULT_TITLE,
     template: '%s · isshereal.com',
   },
   description: DESCRIPTION,
   applicationName: 'isshereal.com',
   openGraph: {
-    title: 'isshereal.com · What’s real comes through',
+    title: DEFAULT_TITLE,
     description: DESCRIPTION,
     url: 'https://isshereal.com',
     siteName: 'isshereal.com',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
         url: '/api/og',
         width: 1200,
         height: 630,
-        alt: 'A portrait developing in a darkroom tray. Developed 33%, ghost 67%.',
+        alt: 'isshereal.com fake follower check: 33% real, 67% fake.',
       },
     ],
     locale: 'en_US',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'isshereal.com · What’s real comes through',
+    title: DEFAULT_TITLE,
     description: DESCRIPTION,
     images: ['/api/og'],
   },
@@ -44,11 +44,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  colorScheme: 'dark light',
-  themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#170c0a' },
-    { media: '(prefers-color-scheme: light)', color: '#f4eee4' },
-  ],
+  colorScheme: 'light',
+  themeColor: '#ffffff',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -56,9 +53,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
-        <link rel="preload" href="/fonts/big-shoulders-display-var-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/newsreader-var-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/ibm-plex-mono-500-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body>
         <a href="#main" className="skip-link">Skip to main content</a>
@@ -81,9 +75,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </defs>
         </svg>
         <ThemeProvider>
-          <Navbar />
+          <DirectHeader />
           <main id="main" tabIndex={-1}>{children}</main>
-          <Footer />
+          <DirectFooter />
           <ToastContainer />
         </ThemeProvider>
       </body>

@@ -15,10 +15,10 @@ import {
 } from '@/components/tools/hashtag-reader';
 
 const CLASS_WORD: Record<TagClass, string> = {
-  ghost: 'Ghost',
+  ghost: 'Bait',
   broken: 'Won’t link',
   saturated: 'Saturated',
-  specific: 'Developed',
+  specific: 'Specific',
 };
 
 const CLASS_GLYPH: Record<TagClass, GlyphName> = {
@@ -55,18 +55,18 @@ export default function HashtagPage() {
       <ToolOpening
         id="sleeve-title"
         frame="H0"
-        tool="Negative sleeve"
+        tool="Hashtag checker"
         glyph="sleeve"
         variant="sleeve"
         title={
           <>
-            File the <span className="safe">tags</span>
+            Hashtag <span className="safe">checker</span>
           </>
         }
         lede={
           <>
-            Each hashtag goes into the sleeve as its own strip, with its readings printed along the edge.
-            Tags that trade follows for follows come up as <em>ghosts</em>.
+            Each hashtag is checked on its own, with its readings next to it.
+            Tags that trade follows for follows are flagged as <em>bait</em>.
           </>
         }
         specs={[
@@ -116,7 +116,7 @@ export default function HashtagPage() {
             </div>
             <button type="submit" className="btn btn--safe">
               <Glyph name="sleeve" size={18} />
-              File in the sleeve
+              Check hashtags
             </button>
           </form>
 
@@ -125,8 +125,8 @@ export default function HashtagPage() {
               <>
                 <div className="sleeve-tally__readings">
                   <Reading value={reading.total} unit="" label="Filed" size="m" />
-                  <Reading value={reading.counts.specific} unit="" label="Developed" tone="developed" size="m" />
-                  <Reading value={reading.counts.ghost} unit="" label="Ghost" tone="ghost" size="m" />
+                  <Reading value={reading.counts.specific} unit="" label="Specific" tone="developed" size="m" />
+                  <Reading value={reading.counts.ghost} unit="" label="Bait" tone="ghost" size="m" />
                   <Reading value={reading.counts.saturated + reading.counts.broken} unit="" label="Weak" size="m" note="Saturated or won’t link" />
                 </div>
                 {over > 0 ? (
@@ -146,7 +146,7 @@ export default function HashtagPage() {
               <div className="sleeve-tally__idle">
                 <p className="label">Tally</p>
                 <p>
-                  Counts appear here once the strips are filed: how many developed, how many stayed ghost, and how
+                  Counts appear here once the tags are checked: how many are specific, how many are bait, and how
                   many are too broad to help.
                 </p>
               </div>
@@ -156,14 +156,14 @@ export default function HashtagPage() {
       </section>
 
       <section className="band band--tray sleeve-band page-grid" aria-labelledby="sleeve-box-title">
-        <Edge frame="H2" label={reading ? `${pad(reading.total)} strips` : 'Empty sleeve'} />
+        <Edge frame="H2" label={reading ? `${pad(reading.total)} strips` : 'No hashtags yet'} />
         <div className="sleeve-band__inner">
           <h2 id="sleeve-box-title" className="sleeve-band__title">
-            The <span className="safe">sleeve</span>
+            Your <span className="safe">hashtags</span>
           </h2>
-          <div className="sleeve" data-room="dark">
+          <div className="sleeve">
             <p className="sleeve__label label" aria-hidden="true">
-              <span>Archival sleeve · polypropylene</span>
+              <span>Hashtag results</span>
               <span>ISSHEREAL 5063</span>
             </p>
             {reading ? (
@@ -186,7 +186,7 @@ export default function HashtagPage() {
                     <Glyph name="sleeve" size={28} />
                   </span>
                   <div className="state__body">
-                    <p className="state__title">The sleeve is empty</p>
+                    <p className="state__title">No hashtags yet</p>
                     <p>File the tags above. Each one takes a pocket, in the order it appears in the caption.</p>
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export default function HashtagPage() {
             <div>
               <dt>
                 <Glyph name="ghost" size={18} className="text-cyan" />
-                Ghost
+                Bait
               </dt>
               <dd>
                 The tag matches a known engagement-bait tag or the x-for-x pattern behind them, like
@@ -232,13 +232,13 @@ export default function HashtagPage() {
             <div>
               <dt>
                 <Glyph name="developed" size={18} className="text-amber" />
-                Developed
+                Specific
               </dt>
               <dd>None of the above. Specific tags are the ones people actually search.</dd>
             </div>
           </dl>
           <p className="sleeve-notes__caveat">
-            The sleeve reads the text of each tag and nothing else. It does not ask any platform, so it cannot see
+            The checker reads the text of each tag and nothing else. It does not ask any platform, so it cannot see
             how far a tag reaches today or whether one has been restricted. Reach is printed as “not measured” for
             that reason.
           </p>
@@ -269,7 +269,7 @@ function Strip({ t }: { t: TagReading }) {
         )}
         {t.cls === 'ghost' ? (
           <GreaseNote tone="cyan" tilt={-6} className="sleeve-strip__mark">
-            Ghost
+            Bait
           </GreaseNote>
         ) : null}
       </p>

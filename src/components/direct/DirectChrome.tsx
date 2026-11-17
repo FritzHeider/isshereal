@@ -16,7 +16,7 @@ const NAV = [
 
 export function DirectHeader() {
   return (
-    <header className="dh-header">
+    <header className="dh dh-header">
       <div className="dh-wrap dh-header__bar">
         <Link href="/" className="dh-logo" aria-label="isshereal.com, home">
           isshereal
@@ -100,7 +100,7 @@ const FOOTER_LINKS = [
 export function DirectFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer className="dh-footer">
+    <footer className="dh dh-footer">
       <div className="dh-wrap dh-footer__grid">
         <div className="dh-footer__lead">
           <Link href="/" className="dh-logo">isshereal</Link>

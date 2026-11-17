@@ -169,13 +169,13 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
             <nav className="crumbs" aria-label="Breadcrumb">
               <ol>
                 <li><Link href="/">Home</Link></li>
-                <li><Link href="/analyze">Develop</Link></li>
+                <li><Link href="/analyze">Check a profile</Link></li>
                 <li><span aria-current="page">@{cleanHandle}</span></li>
               </ol>
             </nav>
             <h1 id="latent-title" className="report__handle display-l">@{cleanHandle}</h1>
             <p className="lede" role="status">
-              In the tray. Pulling the public numbers for this profile; if the platform won’t share them, you can type them
+              Checking. Pulling the public numbers for this profile; if the platform won’t share them, you can type them
               in here.
             </p>
           </div>
@@ -204,9 +204,9 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
           <div className="state state--fogged">
             <span className="state__mark"><Glyph name="fogged" size={32} /></span>
             <div className="state__body">
-              <h1 className="state__title">Fogged</h1>
-              <p>There was no handle in this address, so nothing was developed and nothing was guessed.</p>
-              <Link href="/analyze" className="btn btn--safe">Develop a profile <Glyph name="arrow-right" size={18} /></Link>
+              <h1 className="state__title">No profile to check</h1>
+              <p>There was no handle in this address, so nothing was checked and nothing was guessed.</p>
+              <Link href="/analyze" className="btn btn--safe">Check a profile <Glyph name="arrow-right" size={18} /></Link>
             </div>
           </div>
         </div>
@@ -224,14 +224,14 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
             <nav className="crumbs" aria-label="Breadcrumb">
               <ol>
                 <li><Link href="/">Home</Link></li>
-                <li><Link href="/analyze">Develop</Link></li>
+                <li><Link href="/analyze">Check a profile</Link></li>
                 <li><span aria-current="page">@{cleanHandle}</span></li>
               </ol>
             </nav>
             <h1 id="latent-title" className="report__handle display-l">@{cleanHandle}</h1>
             <p className="lede">
-              The platform didn’t share this profile’s numbers, so the print is still a latent image. Type in what the profile
-              shows and it will develop from those. <em>We won’t guess.</em>
+              The platform didn’t share this profile’s numbers, so there is no result yet. Type in what the profile
+              shows and we’ll check those. <em>We won’t guess.</em>
             </p>
           </div>
           <div className="report__latent-form sheet">
@@ -282,7 +282,7 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
     <article className={`report report--${tone}`} aria-labelledby="report-title">
       {/* 01 · The print */}
       <section className="band band--contact page-grid">
-        <Edge frame={frame} label={`${platformCode(platform)} ▸ examined print`} />
+        <Edge frame={frame} label={`${platformCode(platform)} ▸ report`} />
         <div className="report__top">
           <div className="report__print">
             <DevelopTray
@@ -291,7 +291,7 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
               realPct={realPct}
               fakePct={fakePct}
               avatar={avatar}
-              alt={hasAvatar ? `Profile photo of ${handle}` : `Placeholder print for ${handle}`}
+              alt={hasAvatar ? `Profile photo of ${handle}` : `Placeholder image for ${handle}`}
               frame={frame}
               priority
               verdict={
@@ -306,7 +306,7 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
             <nav className="crumbs" aria-label="Breadcrumb">
               <ol>
                 <li><Link href="/">Home</Link></li>
-                <li><Link href="/analyze">Develop</Link></li>
+                <li><Link href="/analyze">Check a profile</Link></li>
                 <li><span aria-current="page">{handle}</span></li>
               </ol>
             </nav>
@@ -353,7 +353,7 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
               onPosts={setEditPosts}
               onSubmit={develop}
               error={error}
-              submitLabel="Develop again"
+              submitLabel="Check again"
               onCancel={() => setAdjusting(false)}
             />
           </div>
@@ -365,8 +365,8 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
         <Edge frame="02" label="Densitometer readings" />
         <h2 id="readings-title" className="sr-only">Readings</h2>
         <div className="readings">
-          <Reading value={realPct} label="Developed" tone="developed" note="Estimated share of the audience that behaves like genuine accounts." />
-          <Reading value={fakePct} label="Ghost" tone="ghost" note="Estimated share that doesn’t: bots, bought accounts, or people who went quiet." />
+          <Reading value={realPct} label="Real" tone="developed" note="Estimated share of the audience that behaves like genuine accounts." />
+          <Reading value={fakePct} label="Fake" tone="ghost" note="Estimated share that doesn’t: bots, bought accounts, or people who went quiet." />
           <Reading value={report.score} unit="/100" label="Score" size="m" note={report.suspiciousSpike} />
         </div>
       </section>
@@ -376,8 +376,8 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
         <Edge frame="03" label="Enlargements" />
         <div className="enlargements">
           <div className="enlargements__head">
-            <h2 id="enlarge-title" className="display-s">Enlargements</h2>
-            <p className="text-2">Each pale patch in the print, blown up with what caused it.</p>
+            <h2 id="enlarge-title" className="display-s">Why it was flagged</h2>
+            <p className="text-2">Each risk signal, with what caused it.</p>
           </div>
           <ol className="enlargements__row" role="list">
             {(report.riskSignals || []).map((s, i) => (
@@ -396,18 +396,18 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
         <Edge frame="04" label="Technical data" />
         <div className="report__sheet sheet">
           <div className="sheet__head">
-            <h2 id="sheet-title" className="sheet__title">Data sheet</h2>
+            <h2 id="sheet-title" className="sheet__title">Details</h2>
             <span className="sheet__code">Publication R-{frame} · {platform}</span>
           </div>
           <div className="report__sheet-grid">
             <div className="report__signals">
-              <h3 className="report__sheet-h">What stayed a ghost</h3>
+              <h3 className="report__sheet-h">What looks fake</h3>
               <ul className="signals signals--ghost" role="list">
                 {(report.riskSignals || []).map((s, i) => (
                   <li key={i}><Glyph name="ghost" size={16} /><span>{s}</span></li>
                 ))}
               </ul>
-              <h3 className="report__sheet-h">What came through</h3>
+              <h3 className="report__sheet-h">What looks real</h3>
               <ul className="signals signals--developed" role="list">
                 {(report.verifiedSignals || []).map((s, i) => (
                   <li key={i}><Glyph name="developed" size={16} /><span>{s}</span></li>
@@ -415,7 +415,7 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
               </ul>
             </div>
             <div className="report__measures">
-              <h3 className="report__sheet-h">Engagement test strip</h3>
+              <h3 className="report__sheet-h">Engagement vs. normal range</h3>
               <TestStrip followers={report.followersCount} rate={rateKnown ? rate : null} />
               <dl className="specs">
                 <dt>Engagement</dt>
@@ -465,7 +465,7 @@ export function ReportView({ rawId, cleanHandle, initial }: { rawId: string; cle
         <section className="band band--contact band--rule page-grid" aria-labelledby="related-title">
           <Edge frame="06" label="Related prints" />
           <div className="report__related">
-            <h2 id="related-title" className="display-s">Related prints</h2>
+            <h2 id="related-title" className="display-s">Related reports</h2>
             <div className="contact" data-room="dark">
               <div className="contact__frames">
                 {related.map((r, i) => (

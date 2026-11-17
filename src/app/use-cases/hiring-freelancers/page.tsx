@@ -55,8 +55,8 @@ export default function HiringFreelancersPage() {
               <dd className="tabular">pixel_pro_dev</dd>
               <dt>Platform</dt>
               <dd>Fiverr / Upwork</dd>
-              <dt>Print</dt>
-              <dd>Partly developed</dd>
+              <dt>Result</dt>
+              <dd>Partly real</dd>
               <dt>Next step</dt>
               <dd>Paid trial, live call</dd>
             </dl>
@@ -68,14 +68,14 @@ export default function HiringFreelancersPage() {
         kicker: 'Worked example · FL-0071 · fictional',
         title: (
           <>
-            Pixel Pro came through, <span className="amber">mostly.</span>
+            Pixel Pro is real, <span className="amber">mostly.</span>
           </>
         ),
         body: (
           <>
             <p>
-              A mixed print, which is the most common kind. The account has a real working history behind it, and a few
-              patches that didn’t develop.
+              A mixed result, which is the most common kind. The account has a real working history behind it, and a few
+              patches that don’t check out.
             </p>
             <p>
               Mixed doesn’t mean dishonest. It tells you where to ask questions before you sign, and which questions to
@@ -97,7 +97,7 @@ export default function HiringFreelancersPage() {
       flags={{
         title: (
           <>
-            Seven marks <span className="ghost">left in the record</span>
+            Seven <span className="ghost">red flags</span>
           </>
         ),
         lede: (
@@ -168,21 +168,21 @@ export default function HiringFreelancersPage() {
         hint: 'For freelance platform profiles that need a login, the next page lets you type in the numbers you can see: orders, reviews, member since.',
       }}
       limits={{
-        title: 'A print can’t see the keyboard',
+        title: 'A report can’t see the keyboard',
         body: (
           <p>
-            A print shows an account’s history and audience. It cannot tell you who is typing, how good their code is,
-            or whether they’ll hit a deadline. The live call and a paired task do that work; the print tells you where to
+            A report shows an account’s history and audience. It cannot tell you who is typing, how good their code is,
+            or whether they’ll hit a deadline. The live call and a paired task do that work; the report tells you where to
             look first.
           </p>
         ),
         questions: [
           {
-            q: 'Is a mixed print a reason not to hire?',
+            q: 'Is a mixed result a reason not to hire?',
             a: (
               <p>
-                Not on its own. Most people with years of work behind them have a patch or two that didn’t develop. Read
-                the ghost lines and ask about them.
+                Not on its own. Most people with years of work behind them have a patch or two that doesn’t check out. Read
+                the flagged lines and ask about them.
               </p>
             ),
           },
@@ -199,7 +199,7 @@ export default function HiringFreelancersPage() {
             q: 'I’m checking a whole agency’s team. Is there a faster way?',
             a: (
               <p>
-                The <Link href="/tools/bulk">bulk tool</Link> takes a list of handles and develops each one in turn, then lets
+                The <Link href="/tools/bulk">bulk tool</Link> takes a list of handles and checks each one in turn, then lets
                 you export the results.
               </p>
             ),

@@ -7,18 +7,18 @@ import { Glyph } from '@/components/darkroom/Glyph';
 import { Crumbs } from '@/components/library/Crumbs';
 
 const DESCRIPTION =
-  'Why isshereal exists, how a print comes up from public numbers, and an exact account of what a score can and cannot show.';
+  'Why isshereal exists, how a score is worked out from public numbers, and an exact account of what a score can and cannot show.';
 
 export const metadata: Metadata = {
-  title: 'About: a darkroom for the social internet',
+  title: 'About isshereal: a free fake follower checker',
   description: DESCRIPTION,
   alternates: { canonical: '/about' },
   openGraph: {
-    title: 'About: a darkroom for the social internet · isshereal.com',
+    title: 'About isshereal: a free fake follower checker · isshereal.com',
     description: DESCRIPTION,
     url: 'https://isshereal.com/about',
     type: 'article',
-    images: [{ url: '/api/og', width: 1200, height: 630, alt: 'A print developing under safelight.' }],
+    images: [{ url: '/api/og', width: 1200, height: 630, alt: 'isshereal.com fake follower check.' }],
   },
 };
 
@@ -38,13 +38,13 @@ export default function AboutPage() {
         <Edge frame="01" label="About" />
         <Crumbs trail={[{ label: 'Home', href: '/' }, { label: 'About' }]} />
         <div className="cols about-mast__grid">
-          <p className="head__kicker label about-mast__kicker">About isshereal · A note from the darkroom</p>
+          <p className="head__kicker label about-mast__kicker">About isshereal</p>
           <h1 id="about-title" className="about-mast__title">
-            A darkroom for the <span className="text-safe">social internet</span>
+            A free, honest <span className="text-safe">fake follower checker</span>
           </h1>
           <p className="lede about-mast__lede">
-            Follower counts are cheap to buy and easy to believe. We take a public profile, put its numbers in the
-            tray, and show you how much of the audience <em>comes through</em>.
+            Follower counts are cheap to buy and easy to believe. We take a public profile, check its numbers,
+            and show you how much of the audience <em>is real</em>.
           </p>
         </div>
       </section>
@@ -64,7 +64,7 @@ export default function AboutPage() {
             <p>
               isshereal reads the parts of a profile anyone can see: followers, accounts followed, posts, and, when
               you have them, likes and comments. It compares those numbers with what genuine accounts of the same
-              size usually look like. Where they agree, the print develops. Where they don’t, it stays pale.
+              size usually look like. Where they agree, the score goes up. Where they don’t, it goes down.
             </p>
             <p>
               We never ask you to log in, connect an account or type a password, and we never touch private
@@ -82,7 +82,7 @@ export default function AboutPage() {
               tilt={-2}
               sizes="(max-width: 56rem) 92vw, 40vw"
               frame="Example · @lucamodels"
-              caption={<GreaseNote tilt={-6}>Mostly ghost</GreaseNote>}
+              caption={<GreaseNote tilt={-6}>Mostly fake</GreaseNote>}
             />
             <p className="about-essay__caption">
               <span className="label text-2">Plate 1</span> A fictional example profile from our sample reports.
@@ -198,11 +198,11 @@ export default function AboutPage() {
               </li>
               <li>
                 <Glyph name="ghost" size={16} />
-                <span>Which particular followers are fake. The ghost share is derived from the score; it is not a head count.</span>
+                <span>Which particular followers are fake. The fake share is derived from the score; it is not a head count.</span>
               </li>
               <li>
                 <Glyph name="ghost" size={16} />
-                <span>Intent. Ghosts can be bots, bought followers, or accounts that simply went quiet.</span>
+                <span>Intent. Fake followers can be bots, bought followers, or accounts that simply went quiet.</span>
               </li>
               <li>
                 <Glyph name="ghost" size={16} />
@@ -280,8 +280,8 @@ export default function AboutPage() {
               <li>
                 <span className="about-method__no">06</span>
                 <p>
-                  <strong>Ghost</strong> = 100 − score + 5, held between 4% and 88%.{' '}
-                  <strong>Developed</strong> = 100 − ghost.
+                  <strong>Fake</strong> = 100 − score + 5, held between 4% and 88%.{' '}
+                  <strong>Real</strong> = 100 − fake.
                 </p>
               </li>
             </ol>
@@ -296,7 +296,7 @@ export default function AboutPage() {
       <section className="band band--flush page-grid about-pull-band" aria-label="Pull quote">
         <blockquote className="pull about-pull about-pull--2">
           <p>
-            Nobody can pay to <span className="safe">develop better.</span>
+            Nobody can pay for a <span className="safe">better score.</span>
           </p>
         </blockquote>
       </section>
@@ -351,12 +351,12 @@ export default function AboutPage() {
         <Edge frame="06" label="Into the tray" />
         <div className="cols about-close__grid">
           <h2 id="about-close-title" className="display-m about-close__title">
-            See what <span className="text-amber">comes through</span>
+            See what <span className="text-amber">is real</span>
           </h2>
           <div className="about-close__body">
-            <p>Paste a handle or a profile link. Instagram, TikTok, YouTube, X, Reddit, dating, marketplace and freelance profiles all go in the same tray.</p>
+            <p>Paste a handle or a profile link. Instagram, TikTok, YouTube, X, Reddit, dating, marketplace and freelance profiles all work in the same search.</p>
             <Link href="/analyze" className="btn btn--safe">
-              Develop a profile
+              Check a profile
               <Glyph name="arrow-right" size={16} />
             </Link>
           </div>

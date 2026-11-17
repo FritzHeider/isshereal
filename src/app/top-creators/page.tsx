@@ -11,18 +11,18 @@ import { Crumbs } from '@/components/library/Crumbs';
 import { CreatorRegister, type RegisterEntry } from '@/components/library/CreatorRegister';
 
 const DESCRIPTION =
-  'The exhibition: every public profile isshereal keeps on file, ranked by how completely its audience developed. Top three as framed prints, then the full register.';
+  'Example reports: every public profile isshereal keeps on file, ranked by how much of its audience is real. Top three first, then the full list.';
 
 export const metadata: Metadata = {
-  title: 'Top creators: the exhibition',
+  title: 'Example reports',
   description: DESCRIPTION,
   alternates: { canonical: '/top-creators' },
   openGraph: {
-    title: 'Top creators: the exhibition · isshereal.com',
+    title: 'Example reports · isshereal.com',
     description: DESCRIPTION,
     url: 'https://isshereal.com/top-creators',
     type: 'website',
-    images: [{ url: '/api/og', width: 1200, height: 630, alt: 'Framed prints of the highest-scoring profiles on file.' }],
+    images: [{ url: '/api/og', width: 1200, height: 630, alt: 'The highest-scoring profiles on file.' }],
   },
 };
 
@@ -64,11 +64,11 @@ export default function TopCreatorsPage() {
           <div className="head exhibit-wall__title">
             <p className="head__kicker label">Top creators · {total} prints on file</p>
             <h1 id="exhibit-title">
-              The prints that <span className="text-amber">came through</span>
+              Profiles with the most <span className="text-amber">real followers</span>
             </h1>
           </div>
           <p className="head__lede exhibit-wall__lede">
-            Every public profile we keep on file, hung in order of how completely its audience developed. A high
+            Every public profile we keep on file, ranked by how much of its audience is real. A high
             score is evidence about an audience, <em>not an endorsement of the person</em>.
           </p>
         </div>
@@ -106,8 +106,8 @@ export default function TopCreatorsPage() {
                     <span className="text-2">{formatNumber(p.followers)} followers</span>
                   </p>
                   <div className="exhibit-plate__readings">
-                    <Reading value={p.realPct} label="Developed" tone="developed" size="s" />
-                    <Reading value={p.fakePct} label="Ghost" tone="ghost" size="s" />
+                    <Reading value={p.realPct} label="Real" tone="developed" size="s" />
+                    <Reading value={p.fakePct} label="Fake" tone="ghost" size="s" />
                     <Reading value={p.score} unit="" label="Score" size="s" />
                   </div>
                 </div>
@@ -123,11 +123,11 @@ export default function TopCreatorsPage() {
         <div className="cols exhibit-ledger__head">
           <div className="head exhibit-ledger__title">
             <p className="head__kicker label">Register · {total} entries · {platforms.length} platforms</p>
-            <h2 id="register-title">Every print on file</h2>
+            <h2 id="register-title">Every profile on file</h2>
           </div>
           <p className="exhibit-ledger__note">
-            Sorted by score to start. Every column header sorts. Developed is the share of the audience that came
-            through as genuine; ghost is the share that never came up.
+            Sorted by score to start. Every column header sorts. Real is the share of the audience that came
+            through as genuine; fake is the share that looks fake.
           </p>
         </div>
         <CreatorRegister entries={entries} />
@@ -152,7 +152,7 @@ export default function TopCreatorsPage() {
               nobody can pay to be hung higher.
               {lowest ? (
                 <>
-                  {' '}The lowest print on file, <Link href={lowest.href}>{lowest.handle}</Link>, still scored{' '}
+                  {' '}The lowest-scoring profile on file, <Link href={lowest.href}>{lowest.handle}</Link>, still scored{' '}
                   <span className="tabular">{lowest.score}</span>.
                 </>
               ) : null}
@@ -163,7 +163,7 @@ export default function TopCreatorsPage() {
                 <Glyph name="arrow-right" size={16} />
               </Link>
               <Link href="/analyze" className="btn btn--quiet">
-                Develop a profile that isn’t on file
+                Check a profile that isn’t on file
               </Link>
             </p>
           </div>

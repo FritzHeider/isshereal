@@ -34,8 +34,8 @@ interface Metric {
 }
 
 const METRICS: Metric[] = [
-  { key: 'developed', label: 'Developed', unit: '%', higherIsBetter: true, decimals: 0, get: (r) => r.realPct },
-  { key: 'ghost', label: 'Ghost', unit: '%', higherIsBetter: false, decimals: 0, get: (r) => r.fakePct },
+  { key: 'developed', label: 'Real', unit: '%', higherIsBetter: true, decimals: 0, get: (r) => r.realPct },
+  { key: 'ghost', label: 'Fake', unit: '%', higherIsBetter: false, decimals: 0, get: (r) => r.fakePct },
   { key: 'score', label: 'Score', unit: '', higherIsBetter: true, decimals: 0, get: (r) => r.score },
   { key: 'er', label: 'Engagement rate', unit: '%', higherIsBetter: true, decimals: 2, get: (r) => rateNumber(r.engagementRate) },
   { key: 'followers', label: 'Followers', unit: '', higherIsBetter: null, decimals: 0, get: (r) => r.followersCount },
@@ -64,13 +64,13 @@ export default function ComparePage() {
     const a = cleanHandle(handleA);
     const b = cleanHandle(handleB);
     if (!a && !b) {
-      setError({ field: 'both', text: 'The light box needs two specimens. Enter both handles.' });
+      setError({ field: 'both', text: 'Enter both handles to compare.' });
       aRef.current?.focus();
       return;
     }
     if (!a || !b) {
       const field: Side = !a ? 'a' : 'b';
-      setError({ field, text: `Specimen ${field.toUpperCase()} is empty. Enter a handle for it.` });
+      setError({ field, text: `Profile ${field.toUpperCase()} is empty. Enter a handle for it.` });
       (field === 'a' ? aRef : bRef).current?.focus();
       return;
     }
@@ -89,7 +89,7 @@ export default function ComparePage() {
       setResults({ a: outA, b: outB });
     } catch {
       setResults(null);
-      setRequestError('Fogged. The platform didn’t answer, so nothing was developed and nothing was guessed.');
+      setRequestError('The platform didn’t answer, so nothing was checked and nothing was guessed.');
     } finally {
       setLoading(false);
     }
@@ -99,11 +99,11 @@ export default function ComparePage() {
   const rb = results?.b.kind === 'developed' ? results.b.report : null;
   const both = Boolean(ra && rb);
   const statusLine = loading
-    ? 'Developing both specimens.'
+    ? 'Checking both profiles…'
     : results
       ? both
-        ? `Both specimens are on the light box. ${ra!.handle} reads ${ra!.realPct}% developed, ${rb!.handle} reads ${rb!.realPct}% developed.`
-        : 'One or both specimens could not be developed.'
+        ? `Both profiles checked. ${ra!.handle} is ${ra!.realPct}% real, ${rb!.handle} is ${rb!.realPct}% real.`
+        : 'One or both profiles could not be checked.'
       : '';
 
   const errA = error && (error.field === 'a' || error.field === 'both');
@@ -114,23 +114,23 @@ export default function ComparePage() {
       <ToolOpening
         id="lightbox-title"
         frame="C0"
-        tool="Light box"
+        tool="Compare profiles"
         glyph="lightbox"
         variant="lightbox"
         title={
           <>
-            Two prints, <span className="safe">one light</span>
+            Compare two <span className="safe">profiles</span>
           </>
         }
         lede={
           <>
-            Lay two profiles side by side on the same backlit glass. The readings run down the middle, and
-            the difference between them is marked in grease pencil.
+            Put two profiles side by side. The numbers line up in the middle, and the difference between
+            them is marked on each one.
           </>
         }
         specs={[
           ['Takes', 'Two handles on one platform'],
-          ['Reads', 'Developed, ghost, score, engagement'],
+          ['Reads', 'Real, fake, score, engagement'],
           ['Marks', 'The gap on every reading'],
         ]}
       />
@@ -139,11 +139,11 @@ export default function ComparePage() {
         <Edge frame="C1" label="Specimens" />
         <form className="lightbox-form cols" onSubmit={handleCompare} noValidate>
           <h2 id="lightbox-bench-title" className="sr-only">
-            Choose two specimens
+            Choose two profiles
           </h2>
           <div className="field lightbox-form__a">
             <label className="field__label" htmlFor="specimen-a">
-              <span>Specimen A</span>
+              <span>Profile A</span>
               <span className="req" aria-hidden="true">Required</span>
             </label>
             <div className="lightbox-form__handle">
@@ -172,7 +172,7 @@ export default function ComparePage() {
 
           <div className="field lightbox-form__b">
             <label className="field__label" htmlFor="specimen-b">
-              <span>Specimen B</span>
+              <span>Profile B</span>
               <span className="req" aria-hidden="true">Required</span>
             </label>
             <div className="lightbox-form__handle">
@@ -216,7 +216,7 @@ export default function ComparePage() {
           <div className="lightbox-form__go">
             <button type="submit" className="btn btn--safe" disabled={loading}>
               <Glyph name="lightbox" size={18} />
-              {loading ? 'Developing' : 'Develop both'}
+              {loading ? 'Developing' : 'Compare'}
             </button>
           </div>
 
@@ -268,14 +268,14 @@ export default function ComparePage() {
                   <div className="lightbox__note">
                     <p className="lightbox__note-title">No readings to compare</p>
                     <p>
-                      A difference needs two developed prints. Add the missing figures by hand, then put the
+                      A comparison needs two checked profiles. Add the missing figures by hand, then put the
                       pair back on the glass.
                     </p>
                   </div>
                 ) : (
                   <div className="lightbox__note">
-                    <p className="lightbox__note-title">The light box is on</p>
-                    <p>Nothing on it yet. Enter two handles above and develop both.</p>
+                    <p className="lightbox__note-title">Ready to compare</p>
+                    <p>Nothing on it yet. Enter two handles above and compare.</p>
                   </div>
                 )}
               </div>
@@ -305,7 +305,7 @@ export default function ComparePage() {
               more genuine one.
             </p>
             <p>
-              Two prints can be close and still both mostly ghost. Look at the numbers before the marks.
+              Two profiles can be close and still both mostly fake. Look at the numbers before the marks.
               A score is evidence about an audience, not a verdict on a person.
             </p>
           </div>
@@ -333,7 +333,7 @@ function Specimen({
       <div className="lightbox__slot lightbox__slot--latent" aria-hidden="true">
         <span className="latent latent--block lightbox__slot-img" />
         <span className="latent latent--line" />
-        <span className="label">Specimen {letter} · in the tray</span>
+        <span className="label">Profile {letter} · checking</span>
       </div>
     );
   }
@@ -403,7 +403,7 @@ function Specimen({
       </span>
       <p className="lightbox__who">
         <span className="lightbox__name">@{outcome.handle}</span>
-        <span>Fogged. The platform didn’t answer, so nothing was developed and nothing was guessed.</span>
+        <span>The platform didn’t answer, so nothing was checked and nothing was guessed.</span>
       </p>
     </div>
   );

@@ -13,11 +13,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const profile = verified || sample;
 
   const title = profile
-    ? `Is @${cleanHandle} real? Developed ${100 - profile.fakePct}%, ghost ${profile.fakePct}%`
+    ? `Is @${cleanHandle} real? Real ${100 - profile.fakePct}%, fake ${profile.fakePct}%`
     : `Is @${cleanHandle} real?`;
   const description = profile
-    ? `${profile.name}: ${100 - profile.fakePct}% of the audience is estimated as genuine and ${profile.fakePct}% stayed as ghosts. Score ${profile.score}/100. A score is evidence about an audience, not a verdict on a person.`
-    : `Develop @${cleanHandle}’s audience from public numbers: see how much comes through as genuine and how much stays a ghost.`;
+    ? `${profile.name}: ${100 - profile.fakePct}% of the audience is estimated as genuine and ${profile.fakePct}% look fake. Score ${profile.score}/100. A score is evidence about an audience, not a verdict on a person.`
+    : `Check @${cleanHandle}’s audience from public numbers: see how much is genuine and how much looks fake.`;
   const og = profile
     ? `/api/og?handle=${cleanHandle}&score=${profile.score}&ghost=${profile.fakePct}`
     : `/api/og?handle=${cleanHandle}`;
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: `https://isshereal.com/report/${id}`,
       siteName: 'isshereal.com',
-      images: [{ url: og, width: 1200, height: 630, alt: `A developed print of @${cleanHandle}` }],
+      images: [{ url: og, width: 1200, height: 630, alt: `Fake follower report for @${cleanHandle}` }],
       type: 'article',
     },
     twitter: {

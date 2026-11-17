@@ -17,9 +17,9 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
         <div className="state state--fogged">
           <span className="state__mark"><Glyph name="fogged" size={32} /></span>
           <div className="state__body">
-            <h1 id="err-title" className="state__title">Fogged</h1>
+            <h1 id="err-title" className="state__title">Something went wrong</h1>
             <p>
-              Light got into this page and it didn’t develop. Nothing you entered was lost; try again, and if it keeps happening,
+              This page didn’t load properly. Nothing you entered was lost; try again, and if it keeps happening,
               tell us what you were doing.
             </p>
             {error.digest ? <p className="label text-2">Reference {error.digest}</p> : null}

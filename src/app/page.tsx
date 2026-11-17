@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { HomePageJsonLd, FaqJsonLd } from '@/components/JsonLd';
 import { SearchHero } from '@/components/direct/SearchHero';
-import { DirectHeader, DirectFooter } from '@/components/direct/DirectChrome';
 import { FAQS, SAMPLE_REPORTS } from '@/data/content';
 
 const TITLE = 'Free Fake Follower Checker — Check if any profile is real';
@@ -65,7 +64,6 @@ export default function Home() {
     <div className="dh">
       <HomePageJsonLd />
       <FaqJsonLd items={FAQS} />
-      <DirectHeader />
 
       <div id="check">
         <SearchHero />
@@ -235,7 +233,6 @@ export default function Home() {
         </div>
       </section>
 
-      <DirectFooter />
     </div>
   );
 }

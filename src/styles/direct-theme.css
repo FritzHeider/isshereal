@@ -1,0 +1,246 @@
+/* ==========================================================================
+   isshereal.com · Direct theme (site-wide)
+   Re-skins every darkroom page to match the search-first homepage:
+   white field, slate ink, one blue accent, green = real, red = fake,
+   system sans type, sentence-case headings, no grain or safelight glow.
+
+   This file is imported UNLAYERED and last, so it wins over every
+   @layer in tokens.css and the component sheets without !important.
+   Keep it to token overrides plus a few blanket rules; page-specific
+   fixes live with each page's own stylesheet.
+   ========================================================================== */
+
+/* ---- Palette and type: one light theme for every scope ---- */
+:root,
+:root[data-theme="dark"],
+:root[data-theme="light"],
+[data-room="dark"],
+[data-room="light"] {
+  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-text: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  /* Labels, chips and numbers used the mono face for the darkroom look;
+     they now use the sans. Real code keeps a monospace (see code/pre below). */
+  --font-mono: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --c-room: #ffffff;
+  --c-tray: #f8fafc;
+  --c-rebate: #f1f5f9;
+  --c-text: #0f172a;
+  --c-text-2: #475569;
+  --c-safe: #2457d6;
+  --c-safe-text: #2457d6;
+  --c-amber: #0e7a53;
+  --c-cyan: #b91c1c;
+  --c-paper: #ffffff;
+  --c-silver: #0f172a;
+  --c-on-safe: #ffffff;
+  --c-on-amber: #ffffff;
+  --c-wax-amber: #0e7a53;
+  --c-wax-cyan: #b91c1c;
+  --c-sheen: transparent;
+  --c-sheen-faint: transparent;
+  --c-shade: rgba(15, 23, 42, 0.12);
+  --c-shade-soft: rgba(15, 23, 42, 0.06);
+  --c-vignette: transparent;
+  --c-glow: transparent;
+  --c-glow-faint: transparent;
+  --atmos-glow: linear-gradient(transparent, transparent);
+  --grain-opacity: 0;
+  --safelight-cast: 0;
+
+  --c-safe-hover: #163a99;
+  --c-safe-active: #10307f;
+  --c-amber-hover: #0a5c3e;
+  --c-cyan-hover: #991b1b;
+  --c-tray-hover: #f1f5f9;
+  --c-tray-active: #e2e8f0;
+  --c-text-muted: #64748b;
+  --c-text-disabled: #94a3b8;
+  --c-line: #e5e7eb;
+  --c-line-strong: #cbd5e1;
+  --c-line-safe: #9db6f0;
+  --c-wash-safe: #e8efff;
+  --c-wash-amber: #dcfce7;
+  --c-wash-cyan: #fee2e2;
+  --c-veil: rgba(15, 23, 42, 0.45);
+  --c-fog: #94a3b8;
+  --highlight-top: inset 0 0 0 0 transparent;
+
+  /* Shadows: soft, neutral, from above */
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-2: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --shadow-print: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lift: 0 16px 40px rgba(15, 23, 42, 0.12);
+  --shadow-tray: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-glow: 0 0 0 4px #e8efff;
+
+  /* Rounder, modern radii */
+  --radius-1: 6px;
+  --radius-2: 12px;
+  --radius-3: 16px;
+
+  /* Practical type scale: no tabloid display sizes */
+  --step-2: clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem);
+  --step-3: clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem);
+  --step-4: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem);
+  --step-5: clamp(2.25rem, 1.6rem + 2.9vw, 3.5rem);
+  --step-6: clamp(2.375rem, 1.5rem + 3.9vw, 3.75rem);
+  --step-numeral: clamp(2.25rem, 1.7rem + 2.4vw, 3.5rem);
+  --lh-2: 1.25;
+  --lh-3: 1.2;
+  --lh-4: 1.15;
+  --lh-5: 1.08;
+  --lh-6: 1.05;
+  --tr-2: -0.01em;
+  --tr-3: -0.015em;
+  --tr-4: -0.02em;
+  --tr-5: -0.03em;
+  --tr-6: -0.035em;
+  --tr-label: 0.06em;
+  --tr--2: 0.04em;
+  --bw-rule: 1px;
+  --bw-heavy: 1px;
+
+  /* No film-rebate edge columns */
+  --edge: 0px;
+  --content-max: 73.75rem; /* 1180px, same as the homepage */
+
+  color-scheme: light;
+  accent-color: #2457d6;
+}
+
+html { background: #ffffff; color-scheme: light; }
+body {
+  background: #ffffff;
+  color: #0f172a;
+  font-family: var(--font-text);
+  font-variant-numeric: lining-nums proportional-nums;
+  font-feature-settings: normal;
+}
+body::after { content: none; }
+
+/* ---- Headings: sentence case, heavy sans, tight tracking ---- */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  text-transform: none;
+  font-weight: 800;
+  font-stretch: normal;
+  font-variation-settings: normal;
+}
+h3 { font-weight: 700; }
+h4 { font-weight: 700; }
+
+/* Small mono labels become sans eyebrows */
+.label, h5, h6 {
+  font-family: var(--font-text);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--c-text-2);
+}
+
+/* ---- Links ---- */
+a { text-decoration-color: var(--c-line-strong); }
+a:hover { color: var(--c-safe); }
+a:active { color: var(--c-safe-hover); }
+
+::selection { background: #c7d7fb; color: #0f172a; }
+
+:focus-visible {
+  outline: 3px solid #2457d6;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-color: #f1f5f9; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ---- Strip darkroom surfaces down to flat cards ---- */
+.tray,
+.sheet,
+.contact,
+.enlarger,
+.state--fogged {
+  background: var(--c-tray);
+}
+.print, .memo, .tray__print { background-image: none; }
+.print::after,
+.print__emulsion::after,
+.frame__img::after,
+.filmstrip__img::after,
+.tray__emulsion::before { content: none; }
+.enlarger__grid,
+.grease-stroke,
+.grease-note { filter: none; }
+.latent {
+  background-image: linear-gradient(100deg, #f1f5f9 30%, #e2e8f0 50%, #f1f5f9 70%);
+  background-size: 300% 100%;
+}
+
+/* Photos in natural colour */
+.frame__img img,
+.filmstrip__img img,
+.tray__still,
+.about-essay__print .print__img,
+a.frame:hover .frame__img img,
+button.frame:hover .frame__img img,
+.filmstrip__link:hover .filmstrip__img img,
+.archive-sleeve__thumb img {
+  filter: none;
+}
+
+/* ---- Code keeps a real monospace ---- */
+code, kbd, samp, pre, pre * { font-family: var(--font-code); }
+td, th, data, output, .tabular { font-variant-numeric: tabular-nums lining-nums; }
+
+/* ---- Controls read in normal case ---- */
+button, .btn, .chip, .sort-btn, .switch__text,
+label, legend, .field__label, .filmfield__label,
+input, textarea, select,
+th, dt, dd, a, strong, time, .req, .tag, .method {
+  text-transform: none;
+  letter-spacing: normal;
+}
+.btn, .chip, button { font-weight: 600; }
+
+/* ---- Film-edge captions and rebate marks are decoration only ---- */
+.edge-mark { display: none; }
+.edgecode { letter-spacing: 0.04em; }
+
+/* ---- Keep the big readings and titles at a sensible size ---- */
+.report__handle { font-size: clamp(2rem, 1.2rem + 3vw, 3.25rem); }
+.exhibit-plate__rank,
+.exhibit-method__numeral { font-size: var(--step-numeral); }
+
+/* About page pull quotes: sentence case at heading size */
+.about-pull, .about-pull * { text-transform: none; font-size: var(--step-4); line-height: var(--lh-4); }
+.about-pull p { max-width: 28ch; }
+
+/* Compare tool: a plain panel instead of a backlit light box */
+.lightbox {
+  background: var(--c-tray);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-3);
+  box-shadow: none;
+  color: var(--c-text);
+}
+
+/* Print photos: light placeholder behind avatars, natural colour */
+.print__emulsion { background: var(--c-rebate); }
+.print__img { filter: none; }
+
+/* Grease-pencil verdicts become flat status tags */
+.grease-note {
+  --tilt: 0deg;
+  font-family: var(--font-text);
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--c-wash-amber);
+}
+.grease-note--cyan { background: var(--c-wash-cyan); }
+.grease-note--safe { background: var(--c-wash-safe); }

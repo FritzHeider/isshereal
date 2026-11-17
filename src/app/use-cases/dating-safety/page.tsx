@@ -69,7 +69,7 @@ export default function DatingSafetyPage() {
         kicker: 'Worked example · DT-0412 · fictional',
         title: (
           <>
-            “Alex” came up <span className="ghost">mostly ghost.</span>
+            “Alex” scored <span className="ghost">mostly fake.</span>
           </>
         ),
         body: (
@@ -79,7 +79,7 @@ export default function DatingSafetyPage() {
               catalogue model rather than of Alex. The profile was twelve days old.
             </p>
             <p>
-              Here is what developed, what didn’t, and what each line actually means. None of these on its own proves
+              Here is what checked out, what didn’t, and what each line actually means. None of these on its own proves
               anything. Together they make a picture.
             </p>
           </>
@@ -97,7 +97,7 @@ export default function DatingSafetyPage() {
       flags={{
         title: (
           <>
-            Seven things that <span className="ghost">don’t develop</span>
+            Seven <span className="ghost">red flags</span>
           </>
         ),
         lede: (
@@ -168,10 +168,10 @@ export default function DatingSafetyPage() {
         hint: 'Dating app profiles usually sit behind a login, so use a social handle they gave you or a username you found.',
       }}
       limits={{
-        title: 'A thin print isn’t a lie',
+        title: 'A thin profile isn’t a lie',
         body: (
           <p>
-            The print shows how much of an account’s audience and history came through. It can’t see the person, their
+            The report shows how much of an account’s audience and history looks real. It can’t see the person, their
             intentions or their heart. Treat it as one piece of evidence next to a video call and your own sense of
             things.
           </p>
@@ -186,10 +186,10 @@ export default function DatingSafetyPage() {
             ),
           },
           {
-            q: 'Can a real person come up mostly ghost?',
+            q: 'Can a real person score mostly fake?',
             a: (
               <p>
-                Yes. New accounts, private people and those who hardly post leave very little to develop. A thin print
+                Yes. New accounts, private people and those who hardly post leave very little to check. A thin profile
                 means there is less to go on, not that someone is lying. Pair it with a video call.
               </p>
             ),

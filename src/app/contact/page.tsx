@@ -33,7 +33,7 @@ function validate(values: Record<Field, string>): Partial<Record<Field, string>>
   if (!values.email.trim()) errors.email = 'We need an address to reply to.';
   else if (!EMAIL_RE.test(values.email.trim())) errors.email = 'That address is missing something. Check the part after the @.';
   const len = values.message.trim().length;
-  if (len === 0) errors.message = 'The envelope is empty. Tell us what you need.';
+  if (len === 0) errors.message = 'The message is empty. Tell us what you need.';
   else if (len < MIN_MESSAGE) errors.message = `A little more detail, please: at least ${MIN_MESSAGE} characters (${len} so far).`;
   return errors;
 }
@@ -140,9 +140,9 @@ export default function ContactPage() {
         <Crumbs trail={[{ label: 'Home', href: '/' }, { label: 'Contact' }]} />
         <div className="cols envelope-head__grid">
           <div className="head envelope-head__title">
-            <p className="head__kicker label">Contact · Prints and letters</p>
+            <p className="head__kicker label">Contact</p>
             <h1 id="contact-title">
-              Write to the <span className="text-safe">darkroom</span>
+              Contact <span className="text-safe">us</span>
             </h1>
           </div>
           <p className="head__lede envelope-head__lede">
@@ -165,7 +165,7 @@ export default function ContactPage() {
             </div>
             <div className="envelope__face">
               <div className="envelope__printed" aria-hidden="true">
-                <span>Photographic prints</span>
+                <span>Send a message</span>
                 <span>Do not bend · Do not open in light</span>
               </div>
               <h2 id="envelope-title" className="envelope__title">
@@ -321,7 +321,7 @@ export default function ContactPage() {
 
                   <div className="envelope-form__actions">
                     <button type="submit" className="btn btn--safe" disabled={busy} aria-disabled={busy || undefined}>
-                      {busy ? 'Sealing…' : 'Seal the envelope'}
+                      {busy ? 'Sealing…' : 'Send message'}
                       {!busy ? <Glyph name="mail" size={16} /> : null}
                     </button>
                     <p className="envelope-form__fine">

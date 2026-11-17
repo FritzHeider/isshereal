@@ -185,19 +185,19 @@ export default function EngagementRatePage() {
       <ToolOpening
         id="strip-title"
         frame="E0"
-        tool="Test strip"
+        tool="Engagement rate"
         glyph="teststrip"
         variant="strip"
         title={
           <>
-            Engagement <span className="safe">test strip</span>
+            Engagement rate <span className="safe">calculator</span>
           </>
         }
         lede={
           <>
-            Three figures make one exposure. The strip is stepped into the bands
-            an audience of that size usually falls in, and the profile’s own
-            rate is marked where it lands.
+            Enter followers, average likes and average comments. We show the
+            normal range for an audience that size and mark where this
+            profile’s rate falls.
           </>
         }
         specs={[
@@ -215,7 +215,7 @@ export default function EngagementRatePage() {
         <div className="strip-bench__inner cols">
           <form className="strip-form" onSubmit={calculate} noValidate>
             <h2 id="strip-bench-title" className="strip-form__title">
-              Expose
+              Your numbers
             </h2>
             <p className="strip-form__intro">
               Use averages from the last ten to twelve posts. Pinned posts and
@@ -250,7 +250,7 @@ export default function EngagementRatePage() {
             </div>
             <button type="submit" className="btn btn--safe btn--wide">
               <Glyph name="teststrip" size={18} />
-              Expose the strip
+              Calculate
             </button>
           </form>
 
@@ -347,9 +347,9 @@ export default function EngagementRatePage() {
                     <Glyph name="teststrip" size={28} />
                   </span>
                   <div className="state__body">
-                    <p className="state__title">Nothing exposed yet</p>
+                    <p className="state__title">Nothing calculated yet</p>
                     <p>
-                      Enter the three figures and expose. The strip comes up
+                      Enter the three figures and calculate. The result shows
                       here, stepped for that audience size.
                     </p>
                   </div>
@@ -382,7 +382,7 @@ export default function EngagementRatePage() {
             </p>
             <p className="text-2">
               Want the whole picture, not just one ratio?{" "}
-              <Link href="/analyze">Put the profile in the tray</Link>.
+              <Link href="/analyze">Run a full fake follower check</Link>.
             </p>
           </div>
           <div className="sheet strip-tiers__sheet">

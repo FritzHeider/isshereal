@@ -36,18 +36,18 @@ export function GhostCost({ slug }: { slug: string }) {
 
   return (
     <section className="band band--contact band--tray-surface page-grid" aria-labelledby={`${slug}-cost`}>
-      <Edge frame="IV 03B" label="Fee against the print" />
+      <Edge frame="IV 03B" label="Fee against the real audience" />
       <div className="case-tool case-tool--wide cols">
         <div className="case-tool__head head">
-          <p className="head__kicker label">Test strip · fee per developed follower</p>
+          <p className="head__kicker label">Fee per real follower</p>
           <h2 id={`${slug}-cost`} className="case-tool__title">
-            What the ghosts cost you
+            What the fake followers cost you
           </h2>
           <div className="case-body">
             <p>
-              Put in the creator’s follower count, the fee they quoted, and the ghost share from their print. The
-              arithmetic shows how much of the fee is aimed at followers who never developed. A fair counter-offer starts
-              from the developed audience, not the follower count.
+              Put in the creator’s follower count, the fee they quoted, and the fake share from their report. The
+              arithmetic shows how much of the fee is aimed at fake followers. A fair counter-offer starts
+              from the real audience, not the follower count.
             </p>
           </div>
         </div>
@@ -84,7 +84,7 @@ export function GhostCost({ slug }: { slug: string }) {
             </div>
             <div className="field">
               <label className="field__label" htmlFor={`${id}-ghost`}>
-                Ghost share (%)
+                Fake share (%)
               </label>
               <input
                 id={`${id}-ghost`}
@@ -116,7 +116,7 @@ export function GhostCost({ slug }: { slug: string }) {
                   <dt>Per 1,000 followers</dt>
                   <dd className="tabular">{money2.format(statedCpm)} as quoted</dd>
                   <dt>Per 1,000 developed</dt>
-                  <dd className="tabular">{developed > 0 ? `${money2.format(realCpm)} in practice` : 'No developed audience to divide by'}</dd>
+                  <dd className="tabular">{developed > 0 ? `${money2.format(realCpm)} in practice` : 'No real audience to divide by'}</dd>
                 </dl>
               </>
             ) : (

@@ -109,7 +109,7 @@ const CONTENTS = [
   { id: 'ad-1-1', code: 'AD-1.1', title: 'Before you call' },
   { id: 'ad-1-2', code: 'AD-1.2', title: 'GET /api/audit' },
   { id: 'ad-1-3', code: 'AD-1.3', title: 'POST /api/audit' },
-  { id: 'ad-1-4', code: 'AD-1.4', title: 'When nothing develops' },
+  { id: 'ad-1-4', code: 'AD-1.4', title: 'When no numbers come back' },
   { id: 'ad-1-5', code: 'AD-1.5', title: 'The report object' },
   { id: 'ad-1-6', code: 'AD-1.6', title: 'Errors and limits' },
   { id: 'ad-1-7', code: 'AD-1.7', title: 'Keys and higher limits' },
@@ -126,13 +126,13 @@ const REPORT_FIELDS: [string, string, string][] = [
   ['followingCount', 'number', 'Accounts the profile follows.'],
   ['postsCount', 'number', 'Public posts.'],
   ['verdict', 'string', 'Short written verdict. Wording varies for profiles on file.'],
-  ['realPct', 'number', 'Developed share. Computed reports derive it from the score; it is not counted follower by follower. Profiles on file carry their filed value.'],
-  ['fakePct', 'number', 'Ghost share. Always 100 minus realPct.'],
+  ['realPct', 'number', 'Real share. Computed reports derive it from the score; it is not counted follower by follower. Profiles on file carry their filed value.'],
+  ['fakePct', 'number', 'Fake share. Always 100 minus realPct.'],
   ['avatarImage', 'string', 'Avatar URL. A generated initials image when none was available.'],
   ['engagementRate', 'string', 'Measured from likes and comments when you sent them; otherwise the expected rate for the audience tier.'],
   ['suspiciousSpike', 'string', 'One-line note on growth, chosen from the score band.'],
-  ['riskSignals', 'string[]', 'Ghost signals: what counted against the profile.'],
-  ['verifiedSignals', 'string[]', 'Developed signals: what counted for it.'],
+  ['riskSignals', 'string[]', 'Risk signals: what counted against the profile.'],
+  ['verifiedSignals', 'string[]', 'Positive signals: what counted for it.'],
   ['isLive', 'boolean', 'Currently always true. Do not use it to tell fresh reads from cached ones.'],
   ['needsVerification', 'boolean', 'Present and true when nothing could be read. The readings are placeholders.'],
   ['timestamp', 'string', 'ISO 8601 time the report was computed.'],
@@ -246,7 +246,7 @@ export default function ApiDocsPage() {
             <p>Examine a profile by handle. The server works through these sources in order and stops at the first that answers:</p>
             <ol>
               <li>A report computed recently on the same server.</li>
-              <li>The profiles on file (the register on the Top creators page).</li>
+              <li>The profiles on file (the list on the Example reports page).</li>
               <li>A live read of the public profile. Readers exist for Instagram, YouTube and TikTok; any other platform value is read as Instagram.</li>
               <li>If nothing answers, a response flagged <code>needsInput</code>. See AD-1.4.</li>
             </ol>
@@ -386,7 +386,7 @@ export default function ApiDocsPage() {
         <div className="cols">
           <div className="manual-entry__text prose">
             <p className="manual-code">AD-1.4</p>
-            <h2 id="ad-1-4-title">When nothing develops</h2>
+            <h2 id="ad-1-4-title">When no numbers come back</h2>
             <p>
               Platforms often refuse automated reads. When no source answers, the API still returns{' '}
               <code>200</code> with <code>success: true</code>, but adds <code>needsInput: true</code> and marks the
@@ -525,7 +525,7 @@ export default function ApiDocsPage() {
               are building, tell us what it is and roughly how many profiles a day you need.
             </p>
             <Link href="/contact" className="btn btn--safe">
-              Write to the darkroom
+              Contact us
               <Glyph name="arrow-right" size={16} />
             </Link>
           </div>

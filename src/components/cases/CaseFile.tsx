@@ -6,7 +6,6 @@ import { Edge } from '@/components/darkroom/Edge';
 import { Glyph, type GlyphName } from '@/components/darkroom/Glyph';
 import { DevelopTray } from '@/components/darkroom/DevelopTray';
 import { GreaseNote } from '@/components/darkroom/Grease';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { greaseVerdict } from '@/lib/utils';
 import { CaseIntake } from './CaseIntake';
 
@@ -139,7 +138,7 @@ export function CaseFile(props: CaseFileProps) {
                   Case <strong>{code}</strong>
                 </span>
               </span>
-              {gentle ? <ThemeToggle className="case-open__switch" /> : null}
+              {null}
             </div>
           </div>
 
@@ -203,7 +202,7 @@ export function CaseFile(props: CaseFileProps) {
             <div className="case-notes">
               <h3 className="case-notes__title">
                 <Glyph name="ghost" size={18} />
-                Stayed a ghost
+                Looked fake
                 <span className="case-notes__pct tabular">{ghostPct}%</span>
               </h3>
               <ul className="signals signals--ghost" role="list">
@@ -221,7 +220,7 @@ export function CaseFile(props: CaseFileProps) {
             <div className="case-notes">
               <h3 className="case-notes__title case-notes__title--developed">
                 <Glyph name="developed" size={18} />
-                Came through
+                Looked real
                 <span className="case-notes__pct tabular">{developedPct}%</span>
               </h3>
               <ul className="signals signals--developed" role="list">
@@ -284,7 +283,7 @@ export function CaseFile(props: CaseFileProps) {
                 <dt>To</dt>
                 <dd>You</dd>
                 <dt>From</dt>
-                <dd>The darkroom</dd>
+                <dd>How it works</dd>
                 <dt>Re</dt>
                 <dd>{flags.memo.re}</dd>
               </dl>
@@ -378,7 +377,7 @@ export function CaseFile(props: CaseFileProps) {
                       </span>
                       <span className="frame__code">
                         <span>Case {c.code}</span>
-                        <span className="text-cyan">{r.fakePct}% ghost</span>
+                        <span className="text-cyan">{r.fakePct}% fake</span>
                       </span>
                       <span className="frame__title">{c.title}</span>
                       <span className="frame__sub">{c.question}</span>

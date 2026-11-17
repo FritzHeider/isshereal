@@ -91,7 +91,7 @@ export default function BulkPage() {
       for (const row of rows) {
         if (ctrl.signal.aborted) break;
         update(row.id, { kind: 'developing' });
-        setStatus(`Frame ${pad(row.n)} of ${pad(total)} in the tray: @${row.handle}.`);
+        setStatus(`Frame ${pad(row.n)} of ${pad(total)} being checked: @${row.handle}.`);
         try {
           const outcome = await fetchAudit(row.handle, row.platform, ctrl.signal);
           update(row.id, outcome);
@@ -102,9 +102,9 @@ export default function BulkPage() {
       }
       setRunning(false);
       if (ctrl.signal.aborted) {
-        setStatus('Roll stopped. Frames still queued were left unexposed.');
+        setStatus('Stopped. Profiles still in the queue were not checked.');
       } else {
-        setStatus('Roll finished. Every frame has been examined.');
+        setStatus('Done. Every profile has been checked.');
       }
     },
     [update],
@@ -202,24 +202,24 @@ export default function BulkPage() {
       <ToolOpening
         id="bulk-title"
         frame="B0"
-        tool="Contact sheet printer"
+        tool="Bulk fake follower check"
         glyph="contact"
         variant="bulk"
         title={
           <>
-            Contact sheet <span className="safe">printer</span>
+            Bulk fake follower <span className="safe">check</span>
           </>
         }
         lede={
           <>
-            Paste a list of handles. Each one becomes a frame on the sheet and goes into the tray in turn.
-            The frames that come up <em>mostly ghost</em> get a mark in grease pencil.
+            Paste a list of handles. Each one is checked in turn.
+            Profiles that are <em>mostly fake</em> are flagged.
           </>
         }
         specs={[
           ['Takes', 'Handles or profile links, one per line'],
-          ['Holds', `${FRAMES_PER_ROLL} frames per roll`],
-          ['Returns', 'A marked contact sheet and a CSV'],
+          ['Holds', `Up to ${FRAMES_PER_ROLL} handles at a time`],
+          ['Returns', 'Flagged results and a CSV'],
         ]}
       />
 
@@ -228,7 +228,7 @@ export default function BulkPage() {
         <div className="bulk-bench__inner cols">
           <form className="bulk-loader" onSubmit={onSubmit} noValidate>
             <h2 id="bulk-bench-title" className="bulk-loader__title">
-              Load the roll
+              Your handles
             </h2>
             <div className="field">
               <label className="field__label" htmlFor="bulk-handles">
@@ -289,12 +289,12 @@ export default function BulkPage() {
               {running ? (
                 <button type="button" className="btn btn--line" onClick={stop}>
                   <Glyph name="close" size={18} />
-                  Stop the roll
+                  Stop
                 </button>
               ) : (
                 <button type="submit" className="btn btn--safe">
                   <Glyph name="contact" size={18} />
-                  Print the sheet
+                  Check all
                 </button>
               )}
               {!running && counts.queued > 0 && hasSheet ? (
@@ -328,11 +328,11 @@ export default function BulkPage() {
                   </dd>
                 </div>
                 <div className="bulk-sheet__tally--developed">
-                  <dt className="label">Developed</dt>
+                  <dt className="label">Checked</dt>
                   <dd className="tabular">{pad(counts.developed)}</dd>
                 </div>
                 <div className="bulk-sheet__tally--ghost">
-                  <dt className="label">Mostly ghost</dt>
+                  <dt className="label">Mostly fake</dt>
                   <dd className="tabular">{pad(counts.ghost)}</dd>
                 </div>
                 <div>
@@ -358,8 +358,8 @@ export default function BulkPage() {
                       <Glyph name="contact" size={28} />
                     </span>
                     <div className="state__body">
-                      <p className="state__title">Nothing on the sheet yet</p>
-                      <p>Paste handles to the left and print. Frames appear here in the order you listed them.</p>
+                      <p className="state__title">Nothing checked yet</p>
+                      <p>Paste handles to the left and start. Results appear here in the order you listed them.</p>
                     </div>
                   </div>
                   <ol className="contact__frames bulk-frames bulk-frames--blank" role="list" aria-hidden="true">
@@ -394,21 +394,21 @@ export default function BulkPage() {
               Sheet <span className="safe">log</span>
             </h2>
             <p>
-              The same frames as a register, in the order they were printed. The CSV carries exactly these
+              The same results as a table, in the order they were checked. The CSV carries exactly these
               columns, with a blank where nothing was measured.
             </p>
             <ul className="signals bulk-log__key" role="list">
               <li>
                 <Glyph name="developed" size={16} className="text-amber" />
-                <span><strong>Developed.</strong> The profile answered and its audience was read.</span>
+                <span><strong>Checked.</strong> The profile answered and its audience was read.</span>
               </li>
               <li>
                 <Glyph name="ghost" size={16} className="text-cyan" />
-                <span><strong>Not reached.</strong> The platform kept the figures private. Add them by hand on the bench.</span>
+                <span><strong>Not reached.</strong> The platform kept the figures private. Add them by hand on the check page.</span>
               </li>
               <li>
                 <Glyph name="fogged" size={16} className="text-safe" />
-                <span><strong>Fogged.</strong> The request failed. Nothing was developed and nothing was guessed.</span>
+                <span><strong>Fogged.</strong> The request failed. Nothing was checked and nothing was guessed.</span>
               </li>
             </ul>
             <p className="bulk-log__caveat">A score is evidence about an audience, not a verdict on a person.</p>
@@ -417,7 +417,7 @@ export default function BulkPage() {
           <div className="sheet bulk-log__sheet">
             <div className="sheet__head">
               <span className="sheet__code">Roll {hasSheet ? pad(roll) : '––'} · {frames.length} frames</span>
-              <span className="sheet__title">Register</span>
+              <span className="sheet__title">Results</span>
             </div>
             {!hasSheet ? (
               <div className="bulk-log__empty">
@@ -435,8 +435,8 @@ export default function BulkPage() {
                       <th scope="col" className="num">Frame</th>
                       <th scope="col">Handle</th>
                       <th scope="col">Edge</th>
-                      <th scope="col" className="num">Developed</th>
-                      <th scope="col" className="num">Ghost</th>
+                      <th scope="col" className="num">Real</th>
+                      <th scope="col" className="num">Fake</th>
                       <th scope="col" className="num">Score</th>
                       <th scope="col">Status</th>
                     </tr>
@@ -542,7 +542,7 @@ function FrameCell({ f, onRetry, disabled }: { f: FrameRow; onRetry: () => void;
           </span>
           <button type="button" className="btn btn--quiet bulk-frame__retry" onClick={onRetry} disabled={disabled}>
             <Glyph name="refresh" size={16} />
-            Expose again
+            Check again
           </button>
         </div>
       </li>
@@ -560,7 +560,7 @@ function FrameCell({ f, onRetry, disabled }: { f: FrameRow; onRetry: () => void;
           <span>
             {pad(f.n)} · {code}
           </span>
-          <span className="text-2">{developing ? 'In the tray' : 'Queued'}</span>
+          <span className="text-2">{developing ? 'Checking' : 'Queued'}</span>
         </span>
         <span className="frame__title">@{f.handle}</span>
       </div>
@@ -581,25 +581,25 @@ function LogRow({ f }: { f: FrameRow }) {
           <Link href={reportHref(r, f.platform)}>{r.handle}</Link>
         </td>
         <td className="mono" data-label="Edge">{code}</td>
-        <td className="num text-amber" data-label="Developed">{r.realPct}%</td>
-        <td className="num text-cyan" data-label="Ghost">{r.fakePct}%</td>
+        <td className="num text-amber" data-label="Real">{r.realPct}%</td>
+        <td className="num text-cyan" data-label="Fake">{r.fakePct}%</td>
         <td className="num" data-label="Score">{r.score}</td>
         <td data-label="Status">
-          <span className={`tag ${ghost ? 'tag--ghost' : 'tag--developed'}`}>{ghost ? 'Mostly ghost' : 'Developed'}</span>
+          <span className={`tag ${ghost ? 'tag--ghost' : 'tag--developed'}`}>{ghost ? 'Mostly fake' : 'Looks real'}</span>
         </td>
       </tr>
     );
   }
   const label =
-    s.kind === 'unreached' ? 'Not reached' : s.kind === 'fogged' ? 'Fogged' : s.kind === 'developing' ? 'In the tray' : 'Queued';
+    s.kind === 'unreached' ? 'Not reached' : s.kind === 'fogged' ? 'Fogged' : s.kind === 'developing' ? 'Checking' : 'Queued';
   const tagClass = s.kind === 'unreached' ? 'tag tag--ghost' : s.kind === 'fogged' ? 'tag tag--safe' : 'tag';
   return (
     <tr data-state={s.kind}>
       <td className="num" data-label="Frame">{pad(f.n)}</td>
       <td className="mono" data-label="Handle">@{f.handle}</td>
       <td className="mono" data-label="Edge">{code}</td>
-      <td className="num text-2" data-label="Developed">–</td>
-      <td className="num text-2" data-label="Ghost">–</td>
+      <td className="num text-2" data-label="Real">–</td>
+      <td className="num text-2" data-label="Fake">–</td>
       <td className="num text-2" data-label="Score">–</td>
       <td data-label="Status">
         <span className={tagClass}>{label}</span>

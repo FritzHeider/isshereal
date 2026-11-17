@@ -26,7 +26,7 @@ const COLUMNS: { key: SortKey; label: string; num?: boolean; short: string }[] =
   { key: 'handle', label: 'Handle', short: 'Handle' },
   { key: 'platform', label: 'Platform', short: 'Platform' },
   { key: 'followers', label: 'Followers', short: 'Followers', num: true },
-  { key: 'developed', label: 'Developed', short: 'Developed', num: true },
+  { key: 'developed', label: 'Real', short: 'Real', num: true },
   { key: 'score', label: 'Score', short: 'Score', num: true },
 ];
 
@@ -90,7 +90,7 @@ export function CreatorRegister({ entries }: { entries: RegisterEntry[] }) {
         </div>
         <div className="state__body">
           <p className="state__title">The register is empty</p>
-          <p>No prints are on file right now. Nothing was removed from any report.</p>
+          <p>No profiles are on file right now. Nothing was removed from any report.</p>
         </div>
       </div>
     );
@@ -125,7 +125,7 @@ export function CreatorRegister({ entries }: { entries: RegisterEntry[] }) {
       <div className="table-wrap">
         <table className="datatable exhibit-table">
           <caption className="sr-only">
-            Every profile on file with its rank, platform, follower count, developed share and score. Column
+            Every profile on file with its rank, platform, follower count, real share and score. Column
             headers are buttons that sort the table.
           </caption>
           <thead>
@@ -179,7 +179,7 @@ export function CreatorRegister({ entries }: { entries: RegisterEntry[] }) {
                     {formatNumber(r.followers)}
                   </data>
                 </td>
-                <td className="num exhibit-row__developed" data-label="Developed">
+                <td className="num exhibit-row__developed" data-label="Real">
                   <span className="exhibit-row__pct">
                     <span className="text-amber">{r.realPct}%</span>
                     <span className="exhibit-row__ghost text-cyan">

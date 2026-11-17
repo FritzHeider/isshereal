@@ -50,7 +50,7 @@ const CLAUSES: Clause[] = [
       <>
         <p>Public data read during an examination is processed only to:</p>
         <ul>
-          <li>Compute authenticity scores, developed and ghost shares, and engagement figures.</li>
+          <li>Compute authenticity scores, real and fake follower shares, and engagement figures.</li>
           <li>Look for patterns associated with automated engagement and bought followers.</li>
           <li>Produce the report you see on screen.</li>
         </ul>

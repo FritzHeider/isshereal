@@ -5,16 +5,6 @@
    ========================================================================== */
 
 @layer components {
-  /* The homepage brings its own header and footer: hide the darkroom chrome
-     and the darkroom page background whenever .dh is on the page. */
-  body:has(.dh) {
-    background: #ffffff;
-    color: #0f172a;
-  }
-  html:has(.dh) { background: #ffffff; color-scheme: light; }
-  body:has(.dh) .site-header,
-  body:has(.dh) .site-footer { display: none; }
-
   .dh {
     --dh-ink: #0f172a;
     --dh-text: #334155;

@@ -68,7 +68,7 @@ export function PriceCheck({ slug }: { slug: string }) {
       <Edge frame="MK 03B" label="Price check" />
       <div className="case-tool cols">
         <div className="case-tool__head head">
-          <p className="head__kicker label">Test strip · price against the going rate</p>
+          <p className="head__kicker label">Price against the going rate</p>
           <h2 id={`${slug}-price`} className="case-tool__title">
             How cheap is too cheap?
           </h2>

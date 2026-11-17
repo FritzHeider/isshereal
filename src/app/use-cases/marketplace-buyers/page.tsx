@@ -60,7 +60,7 @@ export default function MarketplaceBuyersPage() {
         kicker: 'Worked example · MK-0307 · fictional',
         title: (
           <>
-            QuickDeals <span className="ghost">barely came up.</span>
+            QuickDeals <span className="ghost">scored mostly fake.</span>
           </>
         ),
         body: (
@@ -70,7 +70,7 @@ export default function MarketplaceBuyersPage() {
               expensive electronics at a fraction of the usual price.
             </p>
             <p>
-              Very little about the account developed. The parts that stayed ghost are all about one thing: getting your
+              Very little about the account checks out. The parts that don’t are all about one thing: getting your
               money somewhere it can’t be brought back.
             </p>
           </>
@@ -88,7 +88,7 @@ export default function MarketplaceBuyersPage() {
       flags={{
         title: (
           <>
-            Seven signs the listing <span className="ghost">won’t develop</span>
+            Seven signs of a <span className="ghost">fake listing</span>
           </>
         ),
         lede: (
@@ -160,11 +160,11 @@ export default function MarketplaceBuyersPage() {
         hint: 'Marketplace profiles that need a login can’t be read directly. On the next page you can type in the numbers you can see instead.',
       }}
       limits={{
-        title: 'A good print isn’t a receipt',
+        title: 'A good score isn’t a receipt',
         body: (
           <p>
-            A print describes an account: its audience, its age, its history. It can’t see the item, the parcel or the
-            person holding it. Even a seller who comes through cleanly should be paid in a way you can reverse.
+            A report describes an account: its audience, its age, its history. It can’t see the item, the parcel or the
+            person holding it. Even a seller who scores well should be paid in a way you can reverse.
           </p>
         ),
         questions: [
@@ -173,7 +173,7 @@ export default function MarketplaceBuyersPage() {
             a: (
               <p>
                 No. It means the account looks like a real, established one. Accounts can be borrowed or taken over, so
-                keep the payment protected whatever the print shows.
+                keep the payment protected whatever the report shows.
               </p>
             ),
           },
@@ -182,7 +182,7 @@ export default function MarketplaceBuyersPage() {
             a: (
               <p>
                 Most marketplaces keep seller pages behind a login, and we don’t log in as anyone. Social handles and shop
-                pages are public, so those are what we develop.
+                pages are public, so those are what we check.
               </p>
             ),
           },

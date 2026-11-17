@@ -139,7 +139,7 @@ export default function HistoryPage() {
       const removed = clearArchive();
       setNegatives([]);
       setConfirming(false);
-      setNotice(`Binder emptied. ${removed} ${removed === 1 ? 'entry' : 'entries'} removed from this browser.`);
+      setNotice(`History cleared. ${removed} ${removed === 1 ? 'entry' : 'entries'} removed from this browser.`);
       requestAnimationFrame(() => emptyRef.current?.focus());
     } catch (error) {
       console.error('Error clearing history:', error);
@@ -161,15 +161,15 @@ export default function HistoryPage() {
           <div className="head archive-cover__title">
             <p className="head__kicker label">History · filed in this browser</p>
             <h1 id="archive-title">
-              Negative <span className="text-2">archive</span>
+              Your past <span className="text-2">checks</span>
             </h1>
             <p className="head__lede">
-              Every examination you run is filed here automatically, newest first. The binder lives in this browser
+              Every check you run is saved here automatically, newest first. Your history lives in this browser
               only. Nothing on this page is sent anywhere.
             </p>
           </div>
 
-          <aside className="archive-cover__spine" aria-label="Archive details">
+          <aside className="archive-cover__spine" aria-label="History details">
             <dl className="specs">
               <dt>Filed</dt>
               <dd className="tabular">
@@ -197,7 +197,7 @@ export default function HistoryPage() {
                 onClick={() => setConfirming(true)}
               >
                 <Glyph name="close" size={16} />
-                Empty the binder
+                Clear history
               </button>
             ) : null}
 
@@ -208,7 +208,7 @@ export default function HistoryPage() {
                 </h2>
                 <p>
                   This clears the archive from this browser and can’t be undone. The reports themselves stay online;
-                  you can develop any of them again.
+                  you can check any of them again.
                 </p>
                 <div className="archive-confirm__actions">
                   <button type="button" className="btn btn--safe btn--compact" onClick={confirmClear}>
@@ -279,11 +279,11 @@ export default function HistoryPage() {
               </div>
               <div className="state__body">
                 <p className="state__title" ref={emptyRef} tabIndex={-1}>
-                  No negatives filed yet.
+                  No checks yet.
                 </p>
                 <p>Your first examination is filed here automatically.</p>
                 <Link href="/analyze" className="btn btn--safe">
-                  Develop a profile
+                  Check a profile
                   <Glyph name="arrow-right" size={16} />
                 </Link>
               </div>

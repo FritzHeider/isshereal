@@ -41,10 +41,10 @@ export function ExaminerNote({
 
   const lead =
     score >= 75
-      ? `Most of ${name}’s audience came through. ${realPct}% of the audience developed as genuine accounts; ${fakePct}% stayed as ghosts, which is ordinary for an account of this size.`
+      ? `Most of ${name}’s audience looks real. ${realPct}% of the audience looks like genuine accounts; ${fakePct}% looks fake, which is ordinary for an account of this size.`
       : score >= 50
-        ? `${name}’s print came up partly. ${realPct}% of the audience developed as genuine; ${fakePct}% stayed as ghosts. That is enough to look closer before relying on the numbers.`
-        : `Most of ${name}’s audience never came up. Only ${realPct}% developed as genuine accounts; ${fakePct}% stayed as ghosts. The declared ${followersLabel} should not be taken at face value.`;
+        ? `${name}’s audience is mixed. ${realPct}% of the audience looks genuine; ${fakePct}% looks fake. That is enough to look closer before relying on the numbers.`
+        : `Most of ${name}’s audience looks fake. Only ${realPct}% looks like genuine accounts; ${fakePct}% looks fake. The declared ${followersLabel} should not be taken at face value.`;
 
   const summarize = async () => {
     setBusy(true);
@@ -74,21 +74,21 @@ export function ExaminerNote({
         <p>{lead}</p>
         {riskSignals.length > 0 && (
           <p>
-            What stayed a ghost: {riskSignals.map((s) => s.replace(/\.$/, '')).join('; ')}.
+            What looks fake: {riskSignals.map((s) => s.replace(/\.$/, '')).join('; ')}.
           </p>
         )}
         {verifiedSignals.length > 0 && (
           <p>
-            What came through: {verifiedSignals.map((s) => s.replace(/\.$/, '')).join('; ')}.
+            What looks real: {verifiedSignals.map((s) => s.replace(/\.$/, '')).join('; ')}.
           </p>
         )}
         <p>
-          This print shows an audience, not a person. Ghosts can be bots, bought followers, or real people who simply went quiet.
+          This report describes an audience, not a person. Fake followers can be bots, bought followers, or real people who simply went quiet.
         </p>
         {summary ? <p className="examiner__summary"><strong>Summary:</strong> {summary}</p> : null}
       </div>
       <div className="examiner__foot">
-        <p className="memo__sign">Signed · isshereal darkroom</p>
+        <p className="memo__sign">isshereal.com</p>
         {supported && !summary ? (
           <button type="button" className="btn btn--line btn--compact examiner__ai" onClick={summarize} disabled={busy}>
             <Glyph name="file" size={16} />

@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Light box',
-  description: 'Two profiles side by side on one light box, with developed share, ghost share, score and engagement read down the middle and the gap marked on each.',
+  title: 'Compare profiles',
+  description: 'Two profiles side by side, with real share, fake share, score and engagement read down the middle and the gap marked on each.',
   openGraph: {
-    title: 'Light box · isshereal.com',
-    description: 'Two profiles side by side on one light box, with developed share, ghost share, score and engagement read down the middle and the gap marked on each.',
+    title: 'Compare profiles · isshereal.com',
+    description: 'Two profiles side by side, with real share, fake share, score and engagement read down the middle and the gap marked on each.',
     url: '/tools/compare',
     type: 'website',
   },
